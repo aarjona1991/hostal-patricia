@@ -66,4 +66,46 @@
       setWhatsappFloatVisible(true);
     }
   }
+
+  function initTestimonialsSplide() {
+    var el = document.getElementById("testimonials-splide");
+    if (!el || typeof Splide === "undefined") return;
+
+    var slideCount = el.querySelectorAll(".splide__slide").length;
+    if (slideCount === 0) return;
+
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var perPage = 2;
+    var multi = slideCount > perPage;
+
+    new Splide(el, {
+      type: multi ? "loop" : "slide",
+      perPage: perPage,
+      perMove: 1,
+      gap: "2rem",
+      pagination: multi,
+      arrows: multi,
+      drag: multi,
+      keyboard: multi,
+      speed: reduceMotion ? 0 : 450,
+      easing: "cubic-bezier(0.33, 1, 0.68, 1)",
+      i18n: {
+        prev: "Opinión anterior",
+        next: "Siguiente opinión",
+        first: "Primera opinión",
+        last: "Última opinión",
+        slideX: "Ir a la opinión %s",
+        pageX: "Ir a la página %s",
+        play: "Reproducir",
+        pause: "Pausar",
+      },
+      breakpoints: {
+        480: {
+          gap: "1.35rem",
+        },
+      },
+    }).mount();
+  }
+
+  initTestimonialsSplide();
 })();

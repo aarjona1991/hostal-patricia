@@ -1,0 +1,5 @@
+# Sustituye el dominio del Sitemap por el mismo que uses en index.html (canonical, og:url)
+User-agent: *
+Allow: /
+
+Sitemap: https://www.casatrinidadviva.com/sitemap.xml
