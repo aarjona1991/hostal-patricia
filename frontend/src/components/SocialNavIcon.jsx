@@ -6,7 +6,7 @@ const svgProps = {
   focusable: "false",
 };
 
-/** SVG paths match the static demo in repo root `index.html` for Instagram / Facebook / Airbnb / TikTok. */
+/** Inline paths for Instagram / Facebook / Airbnb / TikTok (currentColor). */
 function Icon({ d }) {
   return (
     <svg {...svgProps} viewBox="0 0 24 24">
