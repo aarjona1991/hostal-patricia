@@ -92,3 +92,28 @@ Con Certbot:
 sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
 ```
 
+### 6) GitHub Actions → despliegue automático (Hostinger VPS)
+
+El workflow [`.github/workflows/deploy-hostinger.yml`](.github/workflows/deploy-hostinger.yml) se ejecuta en **cada push a `main`** — al **fusionar un PR** hacia `main` GitHub hace push del merge (o squash) y también dispara el despliegue. Opcionalmente puedes lanzarlo a mano con *Run workflow*:
+
+1. En GitHub Actions: **build de comprobación** (`npm ci` + `npm run build` en Ubuntu).
+2. Por **SSH** al VPS: entra en `HOSTINGER_DEPLOY_PATH`, ejecuta [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) (`git fetch` + alinear con `origin`, `npm ci`, `npm run build`, `pm2 restart` o primer `pm2 start`).
+
+**Preparación en el VPS (una vez):**
+
+- Clona el repo en la ruta que usarás (ej. `/var/www/hostal-patricia`).
+- Crea `.env` en la **raíz del repo** (no en `backend/`), con `JWT_SECRET`, `ADMIN_*`, `SQLITE_PATH`, SMTP si aplica, etc.
+- Instala **Node 20+**, **npm**, **git**, **PM2** y herramientas para compilar **better-sqlite3** si hace falta (`build-essential`, `python3` en Debian/Ubuntu).
+
+**Secretos en GitHub** (Settings → Secrets and variables → Actions):
+
+| Secreto | Descripción |
+|--------|----------------|
+| `HOSTINGER_HOST` | IP o hostname del VPS |
+| `HOSTINGER_USER` | Usuario SSH |
+| `HOSTINGER_SSH_KEY` | Clave privada completa (PEM) para ese usuario |
+| `HOSTINGER_DEPLOY_PATH` | Ruta absoluta del clone en el servidor |
+| `HOSTINGER_SSH_PORT` | *(Opcional)* Puerto SSH; si no existe, se usa `22` |
+
+La clave SSH debe poder **escribir** en el directorio del proyecto y ejecutar `git`, `npm` y `pm2` (mismo usuario que el del clone).
+
