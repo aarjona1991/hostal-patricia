@@ -1,0 +1,8 @@
+# Sustituye el dominio del Sitemap si publicas en otra URL base.
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://www.casatrinidadviva.com/sitemap.xml
