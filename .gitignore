@@ -6,5 +6,7 @@ backend/dist/
 *.log
 data/*.db
 data/*.db-*
+backend/data/*.db
+backend/data/*.db-*
 data/uploads/*
 !data/uploads/.gitkeep
