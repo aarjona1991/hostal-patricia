@@ -1,0 +1,20 @@
+{
+  "name": "hostal-patricia",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w backend\" \"node scripts/wait-for-api.mjs && npm run dev -w frontend\"",
+    "dev:api": "npm run dev -w backend",
+    "dev:web": "npm run dev -w frontend",
+    "build": "npm run build -w frontend && npm run build -w backend",
+    "start": "npm run start -w backend",
+    "lint": "npm run lint -w frontend && npm run lint -w backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
+
