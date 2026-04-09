@@ -554,20 +554,11 @@ a:hover {
 
 .grid-features {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.75rem;
   max-width: 920px;
   margin-inline: auto;
   margin-top: 0;
-}
-
-@media (min-width: 901px) {
-  .grid-features .feature-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-    justify-self: center;
-    width: 100%;
-    max-width: calc((100% - 1.75rem) / 2);
-  }
 }
 
 .feature-card {
@@ -586,9 +577,12 @@ a:hover {
 .feature-media {
   aspect-ratio: 4 / 3;
   overflow: hidden;
+  position: relative;
 }
 
 .feature-media img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -624,9 +618,13 @@ a:hover {
 
 .split-visual {
   min-height: 320px;
+  position: relative;
+  overflow: hidden;
 }
 
 .split-visual img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -760,19 +758,10 @@ a:hover {
 
 .rooms-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   max-width: 920px;
   margin-inline: auto;
-}
-
-@media (min-width: 901px) {
-  .rooms-grid .room-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-    justify-self: center;
-    width: 100%;
-    max-width: calc((100% - 1.5rem) / 2);
-  }
 }
 
 .room-card {
@@ -791,9 +780,12 @@ a:hover {
 .room-image {
   aspect-ratio: 16 / 11;
   overflow: hidden;
+  position: relative;
 }
 
 .room-image img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1261,7 +1253,7 @@ a:hover {
 
   .feature-media {
     aspect-ratio: 16 / 10;
-    max-height: min(42vw, 270px);
+    width: 100%;
   }
 
   .rooms-grid {
@@ -1271,7 +1263,7 @@ a:hover {
 
   .room-image {
     aspect-ratio: 16 / 11;
-    max-height: min(44vw, 290px);
+    width: 100%;
   }
 }
 
@@ -1308,12 +1300,12 @@ a:hover {
 
   .feature-media {
     aspect-ratio: 16 / 10;
-    max-height: min(54vw, 280px);
+    width: 100%;
   }
 
   .room-image {
     aspect-ratio: 3 / 2;
-    max-height: min(58vw, 300px);
+    width: 100%;
   }
 
   .rooms-grid {
@@ -1535,12 +1527,12 @@ a:hover {
 
   .feature-media {
     aspect-ratio: 16 / 9;
-    max-height: min(50vw, 220px);
+    width: 100%;
   }
 
   .room-image {
     aspect-ratio: 4 / 3;
-    max-height: min(52vw, 230px);
+    width: 100%;
   }
 
   .split-visual {

@@ -76,7 +76,7 @@
 
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var perPage = 2;
-    var multi = slideCount > perPage;
+    var multi = slideCount > 1;
 
     new Splide(el, {
       type: multi ? "loop" : "slide",
@@ -100,6 +100,10 @@
         pause: "Pausar",
       },
       breakpoints: {
+        900: {
+          perPage: 1,
+          gap: "1.5rem",
+        },
         480: {
           gap: "1.35rem",
         },
