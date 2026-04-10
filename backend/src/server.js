@@ -10,7 +10,7 @@ const repoRoot = path.resolve(__dirname, "../..");
 dotenv.config({ path: path.join(repoRoot, ".env") });
 dotenv.config({ path: path.join(repoRoot, "backend", ".env") });
 dotenv.config();
-import { clearAuthCookie, issueAuthCookie, requireAuth, verifyLogin } from "./auth.js";
+import { clearAuthCookie, getOptionalAuthUser, issueAuthCookie, requireAuth, verifyLogin } from "./auth.js";
 import { DEFAULT_SECTIONS } from "./seed.js";
 import { parseContactPayload } from "./contact.js";
 import {
@@ -50,8 +50,10 @@ ensureSchema(db);
   tx();
 }
 
-app.get("/api/auth/me", requireAuth, (req, res) => {
-  res.json({ user: req.user || { role: "admin" } });
+// Siempre 200: { user: null } si no hay cookie o el JWT no vale (evita 401 en consola del navegador).
+app.get("/api/auth/me", (req, res) => {
+  const user = getOptionalAuthUser(req);
+  res.json({ user });
 });
 
 app.post("/api/auth/login", async (req, res) => {
@@ -62,7 +64,7 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const ok = await verifyLogin({ username, password });
     if (!ok) return res.status(401).json({ error: "invalid_credentials" });
-    issueAuthCookie(res, { sub: username, role: "admin" });
+    issueAuthCookie(res, { sub: username, role: "admin" }, req);
     return res.json({ ok: true });
   } catch (e) {
     return res.status(500).json({ error: e.message || "server_error" });

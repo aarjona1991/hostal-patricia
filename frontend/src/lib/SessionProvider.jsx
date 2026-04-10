@@ -9,8 +9,8 @@ export function SessionProvider({ children }) {
   useEffect(() => {
     let mounted = true;
     apiFetch("/api/auth/me")
-      .then(() => {
-        if (mounted) setStatus("authenticated");
+      .then((data) => {
+        if (mounted) setStatus(data?.user ? "authenticated" : "anonymous");
       })
       .catch(() => {
         if (mounted) setStatus("anonymous");

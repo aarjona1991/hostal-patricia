@@ -9,12 +9,16 @@ function getJwtSecret() {
   return s;
 }
 
-export function issueAuthCookie(res, payload) {
+export function issueAuthCookie(res, payload, req) {
   const token = jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
+  const https =
+    process.env.NODE_ENV === "production" ||
+    (req?.secure ?? false) ||
+    (typeof req?.get === "function" && req.get("x-forwarded-proto") === "https");
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: !!https,
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -22,6 +26,20 @@ export function issueAuthCookie(res, payload) {
 
 export function clearAuthCookie(res) {
   res.clearCookie(COOKIE_NAME, { path: "/" });
+}
+
+/** Sesión opcional (sin 401): para GET /api/auth/me desde el navegador. */
+export function getOptionalAuthUser(req) {
+  try {
+    const token = req.cookies?.[COOKIE_NAME];
+    if (!token) return null;
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return null;
+    const payload = jwt.verify(token, secret);
+    return { sub: payload.sub, role: payload.role || "admin" };
+  } catch {
+    return null;
+  }
 }
 
 export function requireAuth(req, res, next) {
