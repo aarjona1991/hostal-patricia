@@ -104,6 +104,31 @@ if [ -n "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
   rsync -a --delete "$ROOT/frontend/dist/" "$DEST/"
 fi
 
+# Hostinger/LiteSpeed: a veces /assets/*.js devuelve index.html (rewrite). Enlace desde
+# public_html/assets → …/frontend/dist/assets evita depender de mod_rewrite para Vite.
+# Omitir: HOSTINGER_SKIP_ASSETS_SYMLINK=1. No borra un directorio "assets" real (solo avisa).
+if [ -z "${HOSTINGER_STATIC_SUBDIR:-}" ] && [ "${HOSTINGER_SKIP_ASSETS_SYMLINK:-}" != "1" ]; then
+  PUB="$(dirname "$ROOT")"
+  REPO="$(basename "$ROOT")"
+  if [ -d "$ROOT/frontend/dist/assets" ] && [ -w "$PUB" ]; then
+    LINK_TARGET="${REPO}/frontend/dist/assets"
+    if [ -L "$PUB/assets" ] || [ ! -e "$PUB/assets" ]; then
+      rm -f "$PUB/assets"
+      ln -sfn "$LINK_TARGET" "$PUB/assets"
+      echo ">>> Symlink $PUB/assets -> $LINK_TARGET (MIME correcto para /assets/*)"
+    elif [ -d "$PUB/assets" ]; then
+      echo ">>> Aviso: $PUB/assets es un directorio, no un enlace. Renómbralo o bórralo para permitir symlink, o usa HOSTINGER_SKIP_ASSETS_SYMLINK=1"
+    fi
+    if [ -f "$ROOT/frontend/dist/favicon.svg" ]; then
+      if [ -L "$PUB/favicon.svg" ] || [ ! -e "$PUB/favicon.svg" ]; then
+        rm -f "$PUB/favicon.svg"
+        ln -sfn "${REPO}/frontend/dist/favicon.svg" "$PUB/favicon.svg"
+        echo ">>> Symlink $PUB/favicon.svg -> ${REPO}/frontend/dist/favicon.svg"
+      fi
+    fi
+  fi
+fi
+
 if pm2 describe hostal-patricia >/dev/null 2>&1; then
   echo ">>> pm2 restart hostal-patricia"
   pm2 restart hostal-patricia || {
