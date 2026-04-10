@@ -3,14 +3,17 @@
 # =============================================================================
 # En .env del monorepo: HOSTINGER_STATIC_SUBDIR=app
 # El deploy copia el build a public_html/app/
+#
+# API: copia hostal-api-proxy.php.example → public_html/hostal-api-proxy.php (sin WebAdmin).
 # =============================================================================
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
 
-RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
-RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
+RewriteRule ^api/(.*)$ hostal-api-proxy.php?__prefix=api&__p=$1 [B,L,QSA]
+RewriteRule ^uploads/(.*)$ hostal-api-proxy.php?__prefix=uploads&__p=$1 [B,L,QSA]
+RewriteRule ^hostal-api-proxy\.php$ - [L]
 
 RewriteRule ^$ /app/ [R=302,L]
 

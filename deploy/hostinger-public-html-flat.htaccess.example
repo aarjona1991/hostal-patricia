@@ -1,0 +1,41 @@
+# =============================================================================
+# public_html/.htaccess — monorepo EN LA RAÍZ de public_html (sin hostal-web/)
+# =============================================================================
+# Estructura:
+#   public_html/package.json
+#   public_html/frontend/dist/
+#   public_html/backend/
+#   public_html/.htaccess  ← este archivo
+#
+# Si el repo vive en public_html/subcarpeta/, usa hostinger-public-html.htaccess.example
+#
+# Monorepo en la raíz de public_html: la raíz del repo (package.json) coincide con este directorio.
+# =============================================================================
+
+<Files ".env">
+  Require all denied
+</Files>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^api/(.*)$ hostal-api-proxy.php?__prefix=api&__p=$1 [B,L,QSA]
+RewriteRule ^uploads/(.*)$ hostal-api-proxy.php?__prefix=uploads&__p=$1 [B,L,QSA]
+RewriteRule ^hostal-api-proxy\.php$ - [L]
+
+RewriteCond %{REQUEST_URI} ^/assets/
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f
+RewriteRule ^ - [L]
+
+RewriteRule ^$ frontend/dist/index.html [L]
+
+RewriteCond %{DOCUMENT_ROOT}/frontend/dist/assets/$1 -f
+RewriteRule ^assets/(.+)$ frontend/dist/assets/$1 [L]
+
+RewriteCond %{DOCUMENT_ROOT}/frontend/dist/$1 -f
+RewriteRule ^(.+)$ frontend/dist/$1 [L]
+
+RewriteRule ^ frontend/dist/index.html [L]
+
+</IfModule>

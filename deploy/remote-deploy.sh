@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Ejecutar en la raíz del monorepo en el VPS: bash deploy/remote-deploy.sh
-# Requiere: Node 20+, npm, pm2. Git solo si no usas DEPLOY_SKIP_GIT=1 (deploy por rsync desde CI).
+# Requiere: Node 20+, npm, pm2. Git solo si no usas DEPLOY_SKIP_GIT=1 (código ya en disco, p. ej. Git Hostinger).
 set -euo pipefail
 
 # SSH/ejecución no interactiva no carga .bashrc: nvm/fnm quedan fuera del PATH.
@@ -71,7 +71,7 @@ echo ">>> Deploy ref: $REF (repo: $ROOT)"
 node -v
 npm -v
 
-# Con DEPLOY_SKIP_GIT=1 el codigo ya llego por rsync desde GitHub Actions (no hace falta git en el VPS).
+# Con DEPLOY_SKIP_GIT=1 el código ya está actualizado en disco (p. ej. deploy Git de Hostinger); no hace falta git en el VPS.
 if [ "${DEPLOY_SKIP_GIT:-}" != "1" ]; then
   command -v git >/dev/null 2>&1 || { echo ">>> Error: git no está en PATH"; exit 1; }
   git fetch origin
@@ -108,10 +108,19 @@ fi
 # public_html/assets → …/frontend/dist/assets evita depender de mod_rewrite para Vite.
 # Omitir: HOSTINGER_SKIP_ASSETS_SYMLINK=1. No borra un directorio "assets" real (solo avisa).
 if [ -z "${HOSTINGER_STATIC_SUBDIR:-}" ] && [ "${HOSTINGER_SKIP_ASSETS_SYMLINK:-}" != "1" ]; then
-  PUB="$(dirname "$ROOT")"
-  REPO="$(basename "$ROOT")"
-  if [ -d "$ROOT/frontend/dist/assets" ] && [ -w "$PUB" ]; then
+  # Monorepo en public_html (plano): enlaces dentro del mismo directorio.
+  # Monorepo en public_html/subcarpeta: enlaces desde public_html hacia subcarpeta/frontend/dist.
+  if [ "$(basename "$ROOT")" = "public_html" ]; then
+    PUB="$ROOT"
+    LINK_TARGET="frontend/dist/assets"
+    FAVICON_TARGET="frontend/dist/favicon.svg"
+  else
+    PUB="$(dirname "$ROOT")"
+    REPO="$(basename "$ROOT")"
     LINK_TARGET="${REPO}/frontend/dist/assets"
+    FAVICON_TARGET="${REPO}/frontend/dist/favicon.svg"
+  fi
+  if [ -d "$ROOT/frontend/dist/assets" ] && [ -w "$PUB" ]; then
     if [ -L "$PUB/assets" ] || [ ! -e "$PUB/assets" ]; then
       rm -f "$PUB/assets"
       ln -sfn "$LINK_TARGET" "$PUB/assets"
@@ -122,10 +131,26 @@ if [ -z "${HOSTINGER_STATIC_SUBDIR:-}" ] && [ "${HOSTINGER_SKIP_ASSETS_SYMLINK:-
     if [ -f "$ROOT/frontend/dist/favicon.svg" ]; then
       if [ -L "$PUB/favicon.svg" ] || [ ! -e "$PUB/favicon.svg" ]; then
         rm -f "$PUB/favicon.svg"
-        ln -sfn "${REPO}/frontend/dist/favicon.svg" "$PUB/favicon.svg"
-        echo ">>> Symlink $PUB/favicon.svg -> ${REPO}/frontend/dist/favicon.svg"
+        ln -sfn "$FAVICON_TARGET" "$PUB/favicon.svg"
+        echo ">>> Symlink $PUB/favicon.svg -> $FAVICON_TARGET"
       fi
     fi
+  fi
+fi
+
+# Puente PHP → Node si no hay mod_proxy (503). Solo si aún no existe en public_html.
+if [ -z "${HOSTINGER_STATIC_SUBDIR:-}" ] && [ "${HOSTINGER_SKIP_PHP_API_PROXY:-}" != "1" ]; then
+  PROXY_SRC="$ROOT/deploy/hostal-api-proxy.php.example"
+  if [ "$(basename "$ROOT")" = "public_html" ]; then
+    PROXY_DST="$ROOT/hostal-api-proxy.php"
+    PROXY_WRITE_DIR="$ROOT"
+  else
+    PROXY_WRITE_DIR="$(dirname "$ROOT")"
+    PROXY_DST="$PROXY_WRITE_DIR/hostal-api-proxy.php"
+  fi
+  if [ -f "$PROXY_SRC" ] && [ -w "$PROXY_WRITE_DIR" ] && [ ! -f "$PROXY_DST" ]; then
+    cp "$PROXY_SRC" "$PROXY_DST"
+    echo ">>> Instalado $PROXY_DST (puente /api sin [P]). .htaccess: flat o hostal-web según tu layout"
   fi
 fi
 

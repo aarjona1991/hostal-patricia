@@ -3,6 +3,8 @@
 # =============================================================================
 # Modo: SPA en la RAÍZ del dominio (/). Los estáticos salen de:
 #   public_html/hostal-web/frontend/dist/
+# Si el monorepo está directamente en public_html (package.json ahí), usa en su lugar:
+#   deploy/hostinger-public-html-flat.htaccess.example
 # (no hay carpeta public_html/app/ ni URL /app/ con ESTE archivo.)
 #
 # Otra modalidad (solo si quieres todo bajo /app/): usa
@@ -18,6 +20,14 @@
 #
 # Error 500: comenta las dos RewriteRule con [P] (proxy) si mod_proxy no está permitido.
 #
+# --- API: sin LiteSpeed Web Admin / External App (503 con [P]) ---
+# Copia deploy/hostal-api-proxy.php.example → public_html/hostal-api-proxy.php
+# Usa las dos RewriteRule que apuntan a ese PHP (bloque de abajo). NO uses a la vez [P].
+#
+# Opcional si tienes Web Admin: External App "hp_node_api" → 127.0.0.1:8787 y entonces:
+#   RewriteRule ^api/(.*)$ http://hp_node_api/api/$1 [P,L]
+#   RewriteRule ^uploads/(.*)$ http://hp_node_api/uploads/$1 [P,L]
+#
 # deploy/remote-deploy.sh crea solo (SPA en raíz, sin HOSTINGER_STATIC_SUBDIR) el enlace
 #   public_html/assets → hostal-web/frontend/dist/assets
 # para que /assets/*.js tenga MIME correcto en Hostinger/LiteSpeed. Omitir con
@@ -32,8 +42,13 @@
 RewriteEngine On
 RewriteBase /
 
-RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
-RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
+# Proxy vía PHP (recomendado si [P] da 503). Requiere hostal-api-proxy.php en este directorio.
+RewriteRule ^api/(.*)$ hostal-api-proxy.php?__prefix=api&__p=$1 [B,L,QSA]
+RewriteRule ^uploads/(.*)$ hostal-api-proxy.php?__prefix=uploads&__p=$1 [B,L,QSA]
+RewriteRule ^hostal-api-proxy\.php$ - [L]
+# Si tu plan soporta mod_proxy bien, comenta las dos líneas anteriores y usa:
+# RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
+# RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
 
 # Servir ficheros reales bajo public_html ANTES del fallback SPA (imprescindible con
 # symlink assets → dist: sin esto LiteSpeed suele devolver index.html para /assets/*.js).
