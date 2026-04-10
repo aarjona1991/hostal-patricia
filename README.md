@@ -94,13 +94,25 @@ sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
 
 ### Hostinger sin poder cambiar el “document root”
 
-Si el dominio apunta a `public_html` y el monorepo está en `public_html/hostal-web/`:
+**Si ya tienes `public_html/app/`** con el frontend (deploy con `HOSTINGER_STATIC_SUBDIR=app`):
 
-1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (así el build queda con `VITE_BASE=/` y los ficheros en `hostal-web/frontend/dist`).
-2. Copia [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) a **`public_html/.htaccess`** (proxy `/api` + reescritura a `hostal-web/frontend/dist`).
-3. Abre **`https://tu-dominio.com/`**. Si el proxy `[P]` falla, configura `/api` y `/uploads` en el panel o con soporte Hostinger.
+1. Pon en `public_html/.htaccess` el contenido de [`deploy/htaccess-opcion-b-subcarpeta-app.example`](deploy/htaccess-opcion-b-subcarpeta-app.example) (no el de `hostinger-public-html.htaccess.example`).
+2. En el `.env` del monorepo en el VPS: **`HOSTINGER_STATIC_SUBDIR=app`** (cada deploy copia el build a `public_html/app/`).
+3. Abre **`https://tu-dominio.com/app/`** (desde `/` el `.htaccess` redirige a `/app/`).
 
-*Alternativa (URLs bajo `/app/`):* `.env` con `HOSTINGER_STATIC_SUBDIR=app` y [`deploy/htaccess-opcion-b-subcarpeta-app.example`](deploy/htaccess-opcion-b-subcarpeta-app.example) como `.htaccess`.
+---
+
+**SPA en la raíz del dominio** (`/`): Apache solo puede reescribir a rutas **bajo** `public_html`. El **`HOSTINGER_DEPLOY_PATH`** del workflow debe ser esa carpeta, por ejemplo:
+
+`.../domains/tudominio.com/public_html/hostal-web`
+
+(no un path tipo `/var/www/...` distinto del dominio, salvo que enlaces con un symlink dentro de `public_html`).
+
+1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (`VITE_BASE=/`, build en `frontend/dist`).
+2. Copia [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) a **`public_html/.htaccess`** (ya apunta a `hostal-web/frontend/dist`; si tu carpeta tiene otro nombre, cámbialo en las tres reglas).
+3. Si Hostinger dejó un `index.html` por defecto en `public_html`, renómbralo o bórralo para que no compita con la SPA.
+4. Comprueba en SSH que exista el build: `ls public_html/hostal-web/frontend/dist/index.html`.
+5. Abre **`https://tu-dominio.com/`**. Si ves **500**, comenta en `.htaccess` las reglas `[P]` de `/api` y `/uploads` (a veces `mod_proxy` no está permitido) y configura el proxy con soporte Hostinger si hace falta.
 
 ### 6) GitHub Actions → despliegue automático (Hostinger VPS)
 
@@ -112,7 +124,7 @@ El workflow [`.github/workflows/deploy-hostinger.yml`](.github/workflows/deploy-
 
 **Preparación en el VPS (una vez):**
 
-- Una carpeta destino (ej. `/var/www/hostal-patricia`); el workflow crea la ruta con `mkdir -p` si el usuario SSH puede escribir ahí.
+- Una carpeta destino (en Hostinger con Apache en `public_html`, suele ser `.../public_html/hostal-web`; en otro VPS puede ser ej. `/var/www/hostal-patricia`). El workflow crea la ruta con `mkdir -p` si el usuario SSH puede escribir ahí.
 - Crea **`.env`** en esa carpeta (raíz del monorepo **después del primer deploy**, o créalo antes: no se sobrescribe porque no está en el repo), con `JWT_SECRET`, `ADMIN_*`, `SQLITE_PATH`, SMTP si aplica, etc.
 - Instala **Node 20+**, **npm**, **PM2** y herramientas para compilar **better-sqlite3** si hace falta (`build-essential`, `python3` en Debian/Ubuntu). **Git** solo si despliegas a mano sin `DEPLOY_SKIP_GIT`.
 - Si usas **nvm**, el deploy por SSH no carga `.bashrc`: añade la carga de nvm en **`~/.profile`** (el script `deploy/remote-deploy.sh` también intenta cargar nvm y `.profile`).
