@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import express from "express";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -127,11 +128,23 @@ mountFileUploads(app, { repoRoot, requireAuth });
 
 // Serve React build in production
 if (process.env.SERVE_FRONTEND === "1") {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
   const webRoot = path.resolve(__dirname, "../../frontend/dist");
+  if (!fs.existsSync(path.join(webRoot, "index.html"))) {
+    console.warn(
+      "[SERVE_FRONTEND] Falta frontend/dist (index.html). En el servidor ejecuta en la raíz del monorepo: npm ci && npm run build"
+    );
+  }
+  // Si falta un .js/.css, express.static hace next() y el catch-all no debe devolver index.html
+  // (el navegador vería MIME text/html en <script type="module">).
+  const staticLike = /\.(?:js|mjs|cjs|css|map|json|ico|png|jpg|jpeg|gif|webp|svg|avif|woff2?|ttf|eot|webmanifest)$/i;
   app.use(express.static(webRoot));
-  app.get("*", (_req, res) => res.sendFile(path.join(webRoot, "index.html")));
+  app.get("*", (req, res) => {
+    const p = req.path;
+    if (p.startsWith("/assets/") || staticLike.test(path.basename(p))) {
+      return res.status(404).type("text/plain").send("Not found");
+    }
+    res.sendFile(path.join(webRoot, "index.html"));
+  });
 }
 
 const port = Number(process.env.PORT || 8787);
