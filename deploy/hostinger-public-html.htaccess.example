@@ -26,11 +26,20 @@
 # =============================================================================
 
 <IfModule mod_rewrite.c>
+# Si el symlink public_html/assets existe pero sigues viendo text/html en .js, el servidor
+# puede no seguir enlaces: prueba descomentar la siguiente línea (si da 500, déjala comentada).
+# Options +FollowSymLinks
 RewriteEngine On
 RewriteBase /
 
 RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
 RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
+
+# Servir ficheros reales bajo public_html ANTES del fallback SPA (imprescindible con
+# symlink assets → dist: sin esto LiteSpeed suele devolver index.html para /assets/*.js).
+RewriteCond %{REQUEST_URI} ^/assets/
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f
+RewriteRule ^ - [L]
 
 RewriteRule ^$ hostal-web/frontend/dist/index.html [L]
 
