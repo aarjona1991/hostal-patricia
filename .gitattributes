@@ -1,0 +1,3 @@
+# Scripts de deploy en Linux: evita CRLF (bash falla con "\r" en el shebang o líneas).
+*.sh text eol=lf
+deploy/** text eol=lf

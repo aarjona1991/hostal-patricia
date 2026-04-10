@@ -33,6 +33,8 @@ load_node_env() {
 
 load_node_env
 
+echo ">>> Binarios: node=$(command -v node 2>/dev/null || echo MISSING) npm=$(command -v npm 2>/dev/null || echo MISSING) pm2=$(command -v pm2 2>/dev/null || echo MISSING)"
+
 command -v npm >/dev/null 2>&1 || {
   echo ">>> Error: npm no está en PATH."
   echo "    Las sesiones SSH del deploy no son 'login shell': no se lee .bashrc (donde suele estar nvm)."
@@ -56,7 +58,8 @@ cd "$ROOT"
 read_env_var() {
   local key="$1"
   [ -f .env ] || return 0
-  grep -E "^${key}=" .env 2>/dev/null | tail -n1 | cut -d= -f2- | tr -d '\r' | sed 's/^"\(.*\)"$/\1/'
+  # grep sin match devuelve 1: con set -o pipefail no debe tumbar el deploy
+  grep -E "^${key}=" .env 2>/dev/null | tail -n1 | cut -d= -f2- | tr -d '\r' | sed 's/^"\(.*\)"$/\1/' || true
 }
 if [ -z "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
   HOSTINGER_STATIC_SUBDIR="$(read_env_var HOSTINGER_STATIC_SUBDIR)"
@@ -76,8 +79,11 @@ if [ "${DEPLOY_SKIP_GIT:-}" != "1" ]; then
   git reset --hard "origin/$REF"
 fi
 
-echo ">>> npm ci"
-npm ci
+echo ">>> npm ci (workspaces: frontend + backend)"
+npm ci || {
+  echo ">>> ERROR: npm ci falló (lockfile, red, disco, memoria o better-sqlite3 sin toolchain)."
+  exit 1
+}
 
 if [ -n "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
   export VITE_BASE="/${HOSTINGER_STATIC_SUBDIR}/"
@@ -85,7 +91,10 @@ if [ -n "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
 fi
 
 echo ">>> npm run build"
-npm run build
+npm run build || {
+  echo ">>> ERROR: npm run build falló."
+  exit 1
+}
 
 if [ -n "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
   PARENT="$(dirname "$ROOT")"
@@ -97,11 +106,21 @@ fi
 
 if pm2 describe hostal-patricia >/dev/null 2>&1; then
   echo ">>> pm2 restart hostal-patricia"
-  pm2 restart hostal-patricia
+  pm2 restart hostal-patricia || {
+    echo ">>> ERROR: pm2 restart falló"
+    exit 1
+  }
 else
   echo ">>> pm2 start (primera vez)"
-  pm2 start backend/dist/server.js --name hostal-patricia
+  pm2 start backend/dist/server.js --name hostal-patricia || {
+    echo ">>> ERROR: pm2 start falló (¿puerto 8787 ocupado?)"
+    exit 1
+  }
 fi
 
-pm2 save
+# pm2 save a veces falla por permisos en ~/.pm2 sin tumbar el proceso ya arrancado
+if ! pm2 save; then
+  echo ">>> Aviso: pm2 save falló (persistencia tras reinicio puede fallar); el deploy del código sí terminó."
+fi
+
 echo ">>> Listo. Comprueba: curl -sS http://127.0.0.1:8787/api/health"
