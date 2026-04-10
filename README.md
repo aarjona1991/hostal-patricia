@@ -112,8 +112,9 @@ El workflow [`.github/workflows/deploy-hostinger.yml`](.github/workflows/deploy-
 | `HOSTINGER_HOST` | IP o hostname del VPS |
 | `HOSTINGER_USER` | Usuario SSH |
 | `HOSTINGER_SSH_KEY` | Clave privada completa (PEM) para ese usuario |
-| `HOSTINGER_DEPLOY_PATH` | Ruta absoluta del clone en el servidor |
+| `HOSTINGER_DEPLOY_PATH` | Ruta absoluta del **clone git** del monorepo en el servidor (raíz con `package.json`, no solo `public_html`) |
 | `HOSTINGER_SSH_PORT` | *(Opcional)* Puerto SSH; si no existe, se usa `22` |
+| `HOSTINGER_REPO_CLONE_URL` | *(Opcional)* URL `git clone` si la ruta existe **vacía** y sin `.git`; primer deploy la rellena (repo privado: token en la URL o deploy key) |
 
 La clave SSH debe poder **escribir** en el directorio del proyecto y ejecutar `git`, `npm` y `pm2` (mismo usuario que el del clone).
 
