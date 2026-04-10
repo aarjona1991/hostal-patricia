@@ -51,6 +51,18 @@ command -v pm2 >/dev/null 2>&1 || {
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# Hostinger: por defecto no definas HOSTINGER_STATIC_SUBDIR (SPA en / vía .htaccess → hostal-web/frontend/dist).
+# Si defines HOSTINGER_STATIC_SUBDIR=app en .env, VITE_BASE=/app/ y se copia dist a ../app (ver deploy/htaccess-opcion-b-subcarpeta-app.example).
+read_env_var() {
+  local key="$1"
+  [ -f .env ] || return 0
+  grep -E "^${key}=" .env 2>/dev/null | tail -n1 | cut -d= -f2- | tr -d '\r' | sed 's/^"\(.*\)"$/\1/'
+}
+if [ -z "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
+  HOSTINGER_STATIC_SUBDIR="$(read_env_var HOSTINGER_STATIC_SUBDIR)"
+  export HOSTINGER_STATIC_SUBDIR
+fi
+
 REF="${GIT_REF:-main}"
 echo ">>> Deploy ref: $REF (repo: $ROOT)"
 node -v
@@ -67,8 +79,21 @@ fi
 echo ">>> npm ci"
 npm ci
 
+if [ -n "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
+  export VITE_BASE="/${HOSTINGER_STATIC_SUBDIR}/"
+  echo ">>> Hostinger subcarpeta: VITE_BASE=$VITE_BASE -> ../${HOSTINGER_STATIC_SUBDIR}/"
+fi
+
 echo ">>> npm run build"
 npm run build
+
+if [ -n "${HOSTINGER_STATIC_SUBDIR:-}" ]; then
+  PARENT="$(dirname "$ROOT")"
+  DEST="$PARENT/${HOSTINGER_STATIC_SUBDIR}"
+  mkdir -p "$DEST"
+  echo ">>> Copiando SPA a $DEST"
+  rsync -a --delete "$ROOT/frontend/dist/" "$DEST/"
+fi
 
 if pm2 describe hostal-patricia >/dev/null 2>&1; then
   echo ">>> pm2 restart hostal-patricia"

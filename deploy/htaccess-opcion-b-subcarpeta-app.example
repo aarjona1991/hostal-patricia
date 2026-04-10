@@ -1,0 +1,27 @@
+# =============================================================================
+# SOLO si quieres la SPA en https://tudominio.com/app/ (no en la raíz)
+# =============================================================================
+# En .env del monorepo: HOSTINGER_STATIC_SUBDIR=app
+# Usa este contenido como public_html/.htaccess en lugar de
+# hostinger-public-html.htaccess.example
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
+RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
+
+RewriteRule ^$ /app/ [R=302,L]
+
+RewriteCond %{REQUEST_URI} ^/app/
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_URI} ^/app/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^app/ app/index.html [L]
+
+</IfModule>
