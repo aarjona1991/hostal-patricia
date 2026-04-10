@@ -59,7 +59,7 @@ Si despliegas con **Websites → Añadir sitio → Aplicación Node.js** / **Nod
 - **`PORT`** — en Aplicación Node **no** la pongas en `.env`: la inyecta el panel. El código usa `process.env.PORT` (localmente puedes usar `8787` u otro).
 - **`BIND_HOST=0.0.0.0`** — si el sitio no responde tras el deploy, suele ser el proxy que no alcanza `127.0.0.1`.
 - **`MONOREPO_ROOT`** — solo si hace falta: **ruta absoluta** Linux (`/home/usuario/.../nodejs/app`), la carpeta donde está el `package.json` raíz con workspaces. Valores relativos tipo `domains/...` se ignoran y rompen el arranque. Ver ejemplo en `.env.example`.
-- Resto como en local: `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `SQLITE_PATH`, SMTP si aplica, etc.
+- Resto como en local: `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `DATA_DIR` o `SQLITE_PATH` / `UPLOAD_DIR`, SMTP si aplica, etc.
 
 Al arrancar, el log incluye `listening <host> <puerto> (repoRoot=...)`: comprueba que `repoRoot` sea la raíz real del monorepo. Si falla, revisa **Runtime logs** / `stderr.log` del deploy en hPanel.
 
@@ -73,10 +73,10 @@ Si usas `SQLITE_PATH=./data/app.db` **dentro del repo**, un deploy que **reempla
 
 1. Crea un directorio **fuera** del proyecto que se despliega, por ejemplo en tu home o en `/var/lib`:
    - `mkdir -p ~/persistent/hostal-patricia && chmod 700 ~/persistent/hostal-patricia`
-2. En **variables de entorno del panel** (Hostinger Node, PM2, systemd…) define rutas **absolutas**:
-   - `SQLITE_PATH=/home/TU_USUARIO/persistent/hostal-patricia/app.db`
-   - Opcional (fotos subidas desde el admin): `UPLOAD_DIR=/home/TU_USUARIO/persistent/hostal-patricia/uploads`
-3. No hace falta tocar nada en cada deploy: el proceso Node crea el fichero SQLite si no existe; las subidas van a `UPLOAD_DIR` si la defines.
+2. En **variables de entorno del panel** (Hostinger Node, PM2, systemd…), por ejemplo:
+   - **Recomendado:** `DATA_DIR=/home/TU_USUARIO/persistent/hostal-patricia` — la BD queda en `DATA_DIR/app.db` y las imágenes subidas en `DATA_DIR/uploads`. En la base de datos y en el HTML las URLs siguen siendo **`/uploads/nombre.jpg`**: solo cambia la carpeta en disco, no las referencias guardadas.
+   - **Alternativa:** `SQLITE_PATH=…/app.db` y `UPLOAD_DIR=…/uploads` por separado (si defines `SQLITE_PATH` en `.env`, quita la línea por defecto `./data/app.db` o `DATA_DIR` no aplicará a la BD).
+3. No hace falta tocar nada en cada deploy: Node crea directorios si faltan. En el arranque verás en log `[uploads] serving /uploads from …` con la ruta real.
 
 Prefiere **variables del panel** a un `.env` dentro del repo si el deploy también sobrescribe el `.env`.
 
@@ -99,13 +99,14 @@ npm ci
 npm run build
 ```
 
-### 2) Ubicación de SQLite
+### 2) Datos persistentes (SQLite + subidas)
 
-Recomendado: fuera del build, por ejemplo:
-- `/var/lib/hostal-patricia/app.db`
+Recomendado: una carpeta fuera del build, por ejemplo:
+- `DATA_DIR=/var/lib/hostal-patricia` → `app.db` y `uploads/` ahí dentro.
 
-Configura:
+O por separado:
 - `SQLITE_PATH=/var/lib/hostal-patricia/app.db`
+- `UPLOAD_DIR=/var/lib/hostal-patricia/uploads`
 
 ### 3) PM2 (backend)
 

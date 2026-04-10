@@ -88,7 +88,7 @@ app.use(cookieParser());
 // Dev helper
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
-const db = openDb();
+const db = openDb(repoRoot);
 ensureSchema(db);
 
 // Inserta secciones por defecto si faltan (BD vacía o nuevas claves como `map`).
