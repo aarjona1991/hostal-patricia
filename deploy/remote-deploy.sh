@@ -3,11 +3,18 @@
 # Requiere: GIT_REF (rama, p. ej. main), Node 20+, npm, git, pm2 en PATH.
 set -euo pipefail
 
+command -v git >/dev/null 2>&1 || { echo ">>> Error: git no está en PATH"; exit 1; }
+command -v npm >/dev/null 2>&1 || { echo ">>> Error: npm no está en PATH"; exit 1; }
+command -v node >/dev/null 2>&1 || { echo ">>> Error: node no está en PATH"; exit 1; }
+command -v pm2 >/dev/null 2>&1 || { echo ">>> Error: pm2 no está en PATH"; exit 1; }
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 REF="${GIT_REF:-main}"
 echo ">>> Deploy ref: $REF (repo: $ROOT)"
+node -v
+npm -v
 
 git fetch origin
 git checkout "$REF"

@@ -1,16 +1,11 @@
 # Despliegue por SSH al VPS Hostinger: build en el servidor tras alinear con origin.
 #
-# Secretos del repositorio (Settings → Secrets and variables → Actions):
-#   HOSTINGER_HOST          — IP o dominio del VPS
-#   HOSTINGER_USER          — usuario SSH (p. ej. root o ubuntu)
-#   HOSTINGER_SSH_KEY       — clave privada OpenSSH (PEM), línea completa desde -----BEGIN
-#   HOSTINGER_DEPLOY_PATH   — ruta absoluta del clone en el VPS (p. ej. /var/www/hostal-patricia)
-# Opcionales:
-#   HOSTINGER_SSH_PORT      — puerto SSH (por defecto 22 si no existe el secreto)
+# Secretos (Settings - Secrets and variables - Actions):
+#   HOSTINGER_HOST, HOSTINGER_USER, HOSTINGER_SSH_KEY, HOSTINGER_DEPLOY_PATH
+# Opcional: HOSTINGER_SSH_PORT (por defecto 22)
 
 name: Deploy to Hostinger
 
-# Cada push a main despliega (incluye merge de PR, squash o merge commit: todos hacen push a main).
 on:
   push:
     branches: [main]
@@ -19,11 +14,14 @@ on:
       git_ref:
         description: Rama en origin a desplegar
         required: false
-        default: main
+        default: "main"
 
 concurrency:
   group: deploy-hostinger
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   verify-build:
@@ -51,7 +49,20 @@ jobs:
     env:
       GIT_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.git_ref || github.ref_name }}
     steps:
-      - name: SSH deploy
+      - name: Comprobar secretos obligatorios
+        run: |
+          set -e
+          missing=""
+          [ -n "${{ secrets.HOSTINGER_HOST }}" ] || missing="$missing HOSTINGER_HOST"
+          [ -n "${{ secrets.HOSTINGER_USER }}" ] || missing="$missing HOSTINGER_USER"
+          [ -n "${{ secrets.HOSTINGER_SSH_KEY }}" ] || missing="$missing HOSTINGER_SSH_KEY"
+          [ -n "${{ secrets.HOSTINGER_DEPLOY_PATH }}" ] || missing="$missing HOSTINGER_DEPLOY_PATH"
+          if [ -n "$missing" ]; then
+            echo "::error::Faltan secretos en el repositorio:$missing"
+            exit 1
+          fi
+
+      - name: SSH - desplegar en el VPS
         uses: appleboy/ssh-action@v1.2.5
         env:
           GIT_REF: ${{ env.GIT_REF }}
@@ -59,11 +70,19 @@ jobs:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT || '22' }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT != '' && secrets.HOSTINGER_SSH_PORT || '22' }}
           envs: GIT_REF
           command_timeout: 25m
-          script_stop: true
           script: |
             set -euo pipefail
-            cd "${{ secrets.HOSTINGER_DEPLOY_PATH }}"
+            DEPLOY_PATH="${{ secrets.HOSTINGER_DEPLOY_PATH }}"
+            if [ -z "$DEPLOY_PATH" ] || [ ! -d "$DEPLOY_PATH" ]; then
+              echo "ERROR: HOSTINGER_DEPLOY_PATH no existe o no es un directorio en el VPS: ${DEPLOY_PATH:-<vacío>}"
+              exit 1
+            fi
+            cd "$DEPLOY_PATH"
+            if [ ! -f deploy/remote-deploy.sh ]; then
+              echo "ERROR: No se encuentra deploy/remote-deploy.sh (¿git clone del repo en $DEPLOY_PATH?)"
+              exit 1
+            fi
             bash deploy/remote-deploy.sh
