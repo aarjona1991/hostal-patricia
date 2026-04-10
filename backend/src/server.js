@@ -194,7 +194,7 @@ if (process.env.SERVE_FRONTEND !== "0") {
   app.use("/assets", express.static(path.join(webDist, "assets")));
   app.use(express.static(webDist));
   console.log("[SERVE_FRONTEND] repoRoot=%s webDist=%s", repoRoot, webDist);
-  app.get("/*", (req, res) => {
+  app.get("/*path", (req, res) => {
     const p = req.path;
     if (p === "/assets" || p.startsWith("/assets/") || staticLike.test(path.basename(p))) {
       return res.status(404).type("text/plain").send("Not found");
