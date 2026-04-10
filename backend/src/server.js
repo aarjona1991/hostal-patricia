@@ -179,7 +179,8 @@ app.get("/api/contact", requireAuth, (req, res) => {
 mountFileUploads(app, { repoRoot, requireAuth });
 
 // Serve React build in production (repoRoot ya resuelve bien desde backend/dist en Hostinger).
-if (process.env.SERVE_FRONTEND === "1") {
+// Activo por defecto; deshabilitar con SERVE_FRONTEND=0 (p. ej. dev con Vite separado).
+if (process.env.SERVE_FRONTEND !== "0") {
   const webDist = path.join(repoRoot, "frontend", "dist");
   if (!fs.existsSync(path.join(webDist, "index.html"))) {
     console.warn(
@@ -203,9 +204,9 @@ if (process.env.SERVE_FRONTEND === "1") {
 }
 
 const port = Number(process.env.PORT || 8787);
-// Por defecto solo loopback IPv4: encaja con .htaccess → 127.0.0.1 y no expone el API a la red.
-// En Docker o acceso LAN: BIND_HOST=0.0.0.0
-const bindHost = process.env.BIND_HOST || "127.0.0.1";
+// Por defecto 0.0.0.0 para Hostinger hPanel (Node expuesto directamente sin proxy Nginx).
+// En dev local con proxy: BIND_HOST=127.0.0.1
+const bindHost = process.env.BIND_HOST || "0.0.0.0";
 app.listen(port, bindHost, () => {
   console.log(`listening ${bindHost} ${port} (repoRoot=${repoRoot})`);
   logContactMailStatus();
