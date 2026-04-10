@@ -840,7 +840,10 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
             />
           </div>
           <p className="adm-text-muted" style={{ marginTop: 8 }}>
-            El bloque aparece justo después de reservas/contacto y antes del pie. Crea una unidad <strong>Display</strong> responsive en AdSense y copia cliente y slot.
+            El bloque va justo después de reservas/contacto y antes del pie. En AdSense, el snippet que te dan solo incluye la etiqueta{" "}
+            <code style={{ fontSize: "0.85em" }}>{"<script async … adsbygoogle.js?client=ca-pub-…>"}</code>: esa carga la hace la web
+            automáticamente cuando guardas el <strong>ID de cliente</strong> de abajo. Además crea una unidad <strong>Display</strong> en pantalla
+            (responsive) y pega aquí también el <strong>ID del anuncio</strong> (<code style={{ fontSize: "0.85em" }}>data-ad-slot</code>).
           </p>
         </>
       );

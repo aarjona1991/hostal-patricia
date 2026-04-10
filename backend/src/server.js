@@ -188,9 +188,26 @@ if (process.env.SERVE_FRONTEND !== "0") {
       repoRoot
     );
   }
+
+  const publicDir = path.join(repoRoot, "frontend", "public");
+  function sendPublicOrDist(name, contentType) {
+    return (_req, res) => {
+      const fromDist = path.join(webDist, name);
+      const fromPublic = path.join(publicDir, name);
+      const file = fs.existsSync(fromDist) ? fromDist : fs.existsSync(fromPublic) ? fromPublic : null;
+      if (!file) return res.status(404).type("text/plain").send("Not found");
+      res.type(contentType).send(fs.readFileSync(file, "utf8"));
+    };
+  }
+  // Antes del fallback SPA: ads.txt / robots / sitemap deben ser texto/XML, no index.html.
+  app.get("/ads.txt", sendPublicOrDist("ads.txt", "text/plain; charset=utf-8"));
+  app.get("/robots.txt", sendPublicOrDist("robots.txt", "text/plain; charset=utf-8"));
+  app.get("/sitemap.xml", sendPublicOrDist("sitemap.xml", "application/xml; charset=utf-8"));
+
   // Si falta un .js/.css, express.static hace next() y el catch-all no debe devolver index.html
-  // (MIME text/html en <script type="module">).
-  const staticLike = /\.(?:js|mjs|cjs|css|map|json|ico|png|jpg|jpeg|gif|webp|svg|avif|woff2?|ttf|eot|webmanifest)$/i;
+  // (MIME text/html en <script type="module">). Incluye txt/xml (ads.txt, etc.).
+  const staticLike =
+    /\.(?:js|mjs|cjs|css|map|json|ico|png|jpg|jpeg|gif|webp|svg|avif|woff2?|ttf|eot|webmanifest|txt|xml)$/i;
   app.use("/assets", express.static(path.join(webDist, "assets")));
   app.use(express.static(webDist));
   console.log("[SERVE_FRONTEND] repoRoot=%s webDist=%s", repoRoot, webDist);
