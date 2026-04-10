@@ -7,7 +7,35 @@ import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, "../..");
+
+/** Raíz del monorepo (package.json + workspaces + frontend/), aunque __dirname sea backend/dist o más anidado (p. ej. Hostinger). */
+function resolveMonorepoRoot(entryDir) {
+  if (process.env.MONOREPO_ROOT?.trim()) {
+    return path.resolve(process.env.MONOREPO_ROOT.trim());
+  }
+  let dir = path.resolve(entryDir);
+  for (let i = 0; i < 12; i++) {
+    const pkgPath = path.join(dir, "package.json");
+    const frontendDir = path.join(dir, "frontend");
+    if (fs.existsSync(pkgPath) && fs.existsSync(frontendDir)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+        const ws = pkg.workspaces;
+        if (Array.isArray(ws) && ws.some((w) => String(w).includes("frontend"))) {
+          return dir;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return path.resolve(entryDir, "../..");
+}
+
+const repoRoot = resolveMonorepoRoot(__dirname);
 dotenv.config({ path: path.join(repoRoot, ".env") });
 dotenv.config({ path: path.join(repoRoot, "backend", ".env") });
 dotenv.config();
@@ -126,24 +154,27 @@ app.get("/api/contact", requireAuth, (req, res) => {
 
 mountFileUploads(app, { repoRoot, requireAuth });
 
-// Serve React build in production
+// Serve React build in production (repoRoot ya resuelve bien desde backend/dist en Hostinger).
 if (process.env.SERVE_FRONTEND === "1") {
-  const webRoot = path.resolve(__dirname, "../../frontend/dist");
-  if (!fs.existsSync(path.join(webRoot, "index.html"))) {
+  const webDist = path.join(repoRoot, "frontend", "dist");
+  if (!fs.existsSync(path.join(webDist, "index.html"))) {
     console.warn(
-      "[SERVE_FRONTEND] Falta frontend/dist (index.html). En el servidor ejecuta en la raíz del monorepo: npm ci && npm run build"
+      "[SERVE_FRONTEND] Falta frontend/dist (index.html). repoRoot=%s — ejecuta en el monorepo: npm ci && npm run build",
+      repoRoot
     );
   }
   // Si falta un .js/.css, express.static hace next() y el catch-all no debe devolver index.html
-  // (el navegador vería MIME text/html en <script type="module">).
+  // (MIME text/html en <script type="module">).
   const staticLike = /\.(?:js|mjs|cjs|css|map|json|ico|png|jpg|jpeg|gif|webp|svg|avif|woff2?|ttf|eot|webmanifest)$/i;
-  app.use(express.static(webRoot));
+  app.use("/assets", express.static(path.join(webDist, "assets")));
+  app.use(express.static(webDist));
+  console.log("[SERVE_FRONTEND] repoRoot=%s webDist=%s", repoRoot, webDist);
   app.get("*", (req, res) => {
     const p = req.path;
-    if (p.startsWith("/assets/") || staticLike.test(path.basename(p))) {
+    if (p === "/assets" || p.startsWith("/assets/") || staticLike.test(path.basename(p))) {
       return res.status(404).type("text/plain").send("Not found");
     }
-    res.sendFile(path.join(webRoot, "index.html"));
+    res.sendFile(path.join(webDist, "index.html"));
   });
 }
 
