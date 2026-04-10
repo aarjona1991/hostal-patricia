@@ -105,6 +105,7 @@ El workflow [`.github/workflows/deploy-hostinger.yml`](.github/workflows/deploy-
 - Una carpeta destino (ej. `/var/www/hostal-patricia`); el workflow crea la ruta con `mkdir -p` si el usuario SSH puede escribir ahí.
 - Crea **`.env`** en esa carpeta (raíz del monorepo **después del primer deploy**, o créalo antes: no se sobrescribe porque no está en el repo), con `JWT_SECRET`, `ADMIN_*`, `SQLITE_PATH`, SMTP si aplica, etc.
 - Instala **Node 20+**, **npm**, **PM2** y herramientas para compilar **better-sqlite3** si hace falta (`build-essential`, `python3` en Debian/Ubuntu). **Git** solo si despliegas a mano sin `DEPLOY_SKIP_GIT`.
+- Si usas **nvm**, el deploy por SSH no carga `.bashrc`: añade la carga de nvm en **`~/.profile`** (el script `deploy/remote-deploy.sh` también intenta cargar nvm y `.profile`).
 
 **Secretos en GitHub** (Settings → Secrets and variables → Actions):
 
