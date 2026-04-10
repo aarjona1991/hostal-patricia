@@ -8,30 +8,54 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/** Raíz del monorepo (package.json + workspaces + frontend/), aunque __dirname sea backend/dist o más anidado (p. ej. Hostinger). */
-function resolveMonorepoRoot(entryDir) {
-  if (process.env.MONOREPO_ROOT?.trim()) {
-    return path.resolve(process.env.MONOREPO_ROOT.trim());
+function isMonorepoRoot(dir) {
+  const pkgPath = path.join(dir, "package.json");
+  const frontendDir = path.join(dir, "frontend");
+  if (!fs.existsSync(pkgPath) || !fs.existsSync(frontendDir)) return false;
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    const ws = pkg.workspaces;
+    return Array.isArray(ws) && ws.some((w) => String(w).includes("frontend"));
+  } catch {
+    return false;
   }
+}
+
+/**
+ * Raíz del monorepo: backend/dist → ../.. (típico); Hostinger a veces añade un nivel → ../../..
+ * MONOREPO_ROOT solo si es ruta absoluta (p. ej. /home/.../nodejs/app). Valores tipo domains/... se ignoran.
+ */
+function resolveMonorepoRoot(entryDir) {
+  const raw = process.env.MONOREPO_ROOT?.trim();
+  if (raw) {
+    if (!path.isAbsolute(raw)) {
+      console.warn(
+        "[MONOREPO_ROOT] Valor ignorado (debe ser absoluta, p. ej. /home/usuario/.../nodejs/app): %s",
+        raw
+      );
+    } else {
+      const abs = path.normalize(raw);
+      if (isMonorepoRoot(abs)) return abs;
+      console.warn(
+        "[MONOREPO_ROOT] %s no tiene package.json+workspaces+frontend/; se intenta autodetectar desde __dirname.",
+        abs
+      );
+    }
+  }
+
+  const hops = [path.resolve(entryDir, "../.."), path.resolve(entryDir, "../../..")];
+  for (const c of hops) {
+    if (isMonorepoRoot(c)) return c;
+  }
+
   let dir = path.resolve(entryDir);
   for (let i = 0; i < 12; i++) {
-    const pkgPath = path.join(dir, "package.json");
-    const frontendDir = path.join(dir, "frontend");
-    if (fs.existsSync(pkgPath) && fs.existsSync(frontendDir)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-        const ws = pkg.workspaces;
-        if (Array.isArray(ws) && ws.some((w) => String(w).includes("frontend"))) {
-          return dir;
-        }
-      } catch {
-        /* ignore */
-      }
-    }
+    if (isMonorepoRoot(dir)) return dir;
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
+
   return path.resolve(entryDir, "../..");
 }
 
@@ -183,7 +207,7 @@ const port = Number(process.env.PORT || 8787);
 // En Docker o acceso LAN: BIND_HOST=0.0.0.0
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
 app.listen(port, bindHost, () => {
-  console.log(`API listening on http://${bindHost}:${port}`);
+  console.log(`listening ${bindHost} ${port} (repoRoot=${repoRoot})`);
   logContactMailStatus();
 });
 
