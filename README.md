@@ -65,6 +65,21 @@ Al arrancar, el log incluye `listening <host> <puerto> (repoRoot=...)`: comprueb
 
 **SQLite:** elige una ruta **persistente** (que no se pierda al redeploy). En hosting gestionado a veces conviene un directorio fuera del árbol que se reescribe en cada build; en VPS, por ejemplo `/var/lib/hostal-patricia/app.db`.
 
+#### Que la BD no se borre en cada despliegue (sin copias manuales)
+
+Si usas `SQLITE_PATH=./data/app.db` **dentro del repo**, un deploy que **reemplaza toda la carpeta** (ZIP, artifact nuevo, `git clean`, etc.) puede borrar `data/` y perderás secciones y mensajes de contacto.
+
+**Qué hacer una sola vez en el servidor:**
+
+1. Crea un directorio **fuera** del proyecto que se despliega, por ejemplo en tu home o en `/var/lib`:
+   - `mkdir -p ~/persistent/hostal-patricia && chmod 700 ~/persistent/hostal-patricia`
+2. En **variables de entorno del panel** (Hostinger Node, PM2, systemd…) define rutas **absolutas**:
+   - `SQLITE_PATH=/home/TU_USUARIO/persistent/hostal-patricia/app.db`
+   - Opcional (fotos subidas desde el admin): `UPLOAD_DIR=/home/TU_USUARIO/persistent/hostal-patricia/uploads`
+3. No hace falta tocar nada en cada deploy: el proceso Node crea el fichero SQLite si no existe; las subidas van a `UPLOAD_DIR` si la defines.
+
+Prefiere **variables del panel** a un `.env` dentro del repo si el deploy también sobrescribe el `.env`.
+
 Si el asistente pide **directorio de salida** o **archivo de entrada** pensando en un front estático, aquí el proceso que atiende HTTP es el **Node del backend** tras el build; el arranque correcto sigue siendo **`npm start`** en la raíz del monorepo, no solo abrir `frontend/dist` en un servidor de ficheros.
 
 **Consola: “Failed to load module script… MIME type text/html”:** casi siempre el navegador pide un `.js` y recibe HTML (404 disfrazado o `index.html`). Comprueba que el **build del monorepo** se ejecute en deploy (`npm run build` en la raíz) y exista `frontend/dist/assets/` en el servidor. Si la SPA está en una **subruta** (`/app/`), el build debe usar esa base (`VITE_BASE` o `HOSTINGER_STATIC_SUBDIR` en `.env` al construir) y la URL debe coincidir.

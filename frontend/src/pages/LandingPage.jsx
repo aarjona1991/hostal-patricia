@@ -565,7 +565,11 @@ export default function LandingPage() {
             <div className="container section-ads-inner">
               <p className="section-ads-eyebrow">{ads.label || "Publicidad"}</p>
               <div className="section-ads-slot">
-                <GoogleAdSlot adClient={ads.adClient} adSlot={ads.adSlot} />
+                <GoogleAdSlot
+                  key={`${String(ads.adClient || "").trim()}-${String(ads.adSlot || "").trim()}`}
+                  adClient={ads.adClient}
+                  adSlot={ads.adSlot}
+                />
               </div>
             </div>
           </aside>
