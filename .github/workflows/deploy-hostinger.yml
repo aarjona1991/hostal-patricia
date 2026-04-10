@@ -2,7 +2,10 @@
 #
 # Secretos (Settings - Secrets and variables - Actions):
 #   HOSTINGER_HOST, HOSTINGER_USER, HOSTINGER_SSH_KEY, HOSTINGER_DEPLOY_PATH
-# Opcional: HOSTINGER_SSH_PORT (por defecto 22)
+# Opcionales:
+#   HOSTINGER_SSH_PORT (por defecto 22)
+#   HOSTINGER_REPO_CLONE_URL — si DEPLOY_PATH existe vacio y no hay .git, git clone <url> .
+#     Ej. https://github.com/ORG/REPO.git o con token para repo privado.
 
 name: Deploy to Hostinger
 
@@ -81,10 +84,25 @@ jobs:
               exit 1
             fi
             cd "$DEPLOY_PATH"
+            REPO_CLONE_URL="${{ secrets.HOSTINGER_REPO_CLONE_URL }}"
             if [ ! -d .git ]; then
-              echo "ERROR: $DEPLOY_PATH no es un clone git. Clona el repo alli, por ejemplo:"
-              echo "  git clone https://github.com/ORG/REPO.git $DEPLOY_PATH"
-              exit 1
+              if [ -z "$(ls -A 2>/dev/null || true)" ] && [ -n "$REPO_CLONE_URL" ]; then
+                echo ">>> Directorio vacio: clonando repositorio (HOSTINGER_REPO_CLONE_URL)..."
+                git clone "$REPO_CLONE_URL" .
+              else
+                echo "ERROR: $DEPLOY_PATH no es un repositorio git (falta .git)."
+                echo "HOSTINGER_DEPLOY_PATH debe ser la RAIZ del monorepo (donde estan package.json, frontend/, backend/, deploy/),"
+                echo "no la carpeta que solo sirve Nginx (public_html, htdocs, etc.) ni una copia sin .git."
+                echo ""
+                echo "Opciones:"
+                echo "  A) En el VPS: sudo mkdir -p RUTA && sudo chown USUARIO:USUARIO RUTA && cd RUTA && git clone https://github.com/TU_ORG/TU_REPO.git ."
+                echo "  B) Carpeta vacia en esa ruta + secreto HOSTINGER_REPO_CLONE_URL (URL del repo; token en la URL si es privado)."
+                if [ -n "$(ls -A 2>/dev/null || true)" ] && [ -z "$REPO_CLONE_URL" ]; then
+                  echo ""
+                  echo "Este directorio tiene archivos pero no .git: vacialo o elige otra HOSTINGER_DEPLOY_PATH."
+                fi
+                exit 1
+              fi
             fi
             REF="${GIT_REF:-main}"
             echo ">>> Sincronizando con origin/$REF antes del script de deploy..."
