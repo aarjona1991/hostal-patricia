@@ -1,11 +1,10 @@
-# Despliegue por SSH al VPS Hostinger: build en el servidor tras alinear con origin.
+# Despliegue a Hostinger VPS: copia el repo por rsync + build remoto (npm ci / build / pm2).
+# NO hace falta git clone en el servidor: basta SSH y HOSTINGER_DEPLOY_PATH (carpeta destino).
+# El .env del VPS no se toca (no va en el repo; rsync sin --delete).
 #
 # Secretos (Settings - Secrets and variables - Actions):
 #   HOSTINGER_HOST, HOSTINGER_USER, HOSTINGER_SSH_KEY, HOSTINGER_DEPLOY_PATH
-# Opcionales:
-#   HOSTINGER_SSH_PORT (por defecto 22)
-#   HOSTINGER_REPO_CLONE_URL — si DEPLOY_PATH existe vacio y no hay .git, git clone <url> .
-#     Ej. https://github.com/ORG/REPO.git o con token para repo privado.
+# Opcional: HOSTINGER_SSH_PORT (por defecto 22)
 
 name: Deploy to Hostinger
 
@@ -15,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       git_ref:
-        description: Rama en origin a desplegar
+        description: Rama o SHA a desplegar (solo al disparar manual)
         required: false
         default: "main"
 
@@ -46,11 +45,9 @@ jobs:
         run: npm run build
 
   deploy:
-    name: Desplegar por SSH
+    name: Rsync + build en VPS
     needs: verify-build
     runs-on: ubuntu-latest
-    env:
-      GIT_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.git_ref || github.ref_name }}
     steps:
       - name: Comprobar secretos obligatorios
         run: |
@@ -65,53 +62,48 @@ jobs:
             exit 1
           fi
 
-      - name: SSH - desplegar en el VPS
-        uses: appleboy/ssh-action@v1.2.5
+      - name: Checkout (mismo codigo que se sube al VPS)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.git_ref || github.sha }}
+
+      - name: Preparar SSH y rsync al VPS
         env:
-          GIT_REF: ${{ env.GIT_REF }}
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+          SSH_PATH: ${{ secrets.HOSTINGER_DEPLOY_PATH }}
+          SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT != '' && secrets.HOSTINGER_SSH_PORT || '22' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/hostinger_deploy_key
+          chmod 600 ~/.ssh/hostinger_deploy_key
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          QPATH=$(printf '%q' "$SSH_PATH")
+          ssh -i "$HOME/.ssh/hostinger_deploy_key" -p "$SSH_PORT" \
+            -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+            "${SSH_USER}@${SSH_HOST}" "mkdir -p $QPATH"
+          RSYNC_RSH="ssh -i $HOME/.ssh/hostinger_deploy_key -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
+          rsync -az \
+            --exclude node_modules \
+            --exclude '.git' \
+            --exclude frontend/dist \
+            --exclude backend/dist \
+            -e "$RSYNC_RSH" \
+            ./ "${SSH_USER}@${SSH_HOST}:${SSH_PATH}/"
+          echo ">>> Rsync terminado."
+
+      - name: SSH - npm ci, build y pm2
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT != '' && secrets.HOSTINGER_SSH_PORT || '22' }}
-          envs: GIT_REF
           command_timeout: 25m
           script: |
             set -euo pipefail
-            DEPLOY_PATH="${{ secrets.HOSTINGER_DEPLOY_PATH }}"
-            if [ -z "$DEPLOY_PATH" ] || [ ! -d "$DEPLOY_PATH" ]; then
-              echo "ERROR: HOSTINGER_DEPLOY_PATH no existe o no es un directorio en el VPS: ${DEPLOY_PATH:-empty}"
-              exit 1
-            fi
-            cd "$DEPLOY_PATH"
-            REPO_CLONE_URL="${{ secrets.HOSTINGER_REPO_CLONE_URL }}"
-            if [ ! -d .git ]; then
-              if [ -z "$(ls -A 2>/dev/null || true)" ] && [ -n "$REPO_CLONE_URL" ]; then
-                echo ">>> Directorio vacio: clonando repositorio (HOSTINGER_REPO_CLONE_URL)..."
-                git clone "$REPO_CLONE_URL" .
-              else
-                echo "ERROR: $DEPLOY_PATH no es un repositorio git (falta .git)."
-                echo "HOSTINGER_DEPLOY_PATH debe ser la RAIZ del monorepo (donde estan package.json, frontend/, backend/, deploy/),"
-                echo "no la carpeta que solo sirve Nginx (public_html, htdocs, etc.) ni una copia sin .git."
-                echo ""
-                echo "Opciones:"
-                echo "  A) En el VPS: sudo mkdir -p RUTA && sudo chown USUARIO:USUARIO RUTA && cd RUTA && git clone https://github.com/TU_ORG/TU_REPO.git ."
-                echo "  B) Carpeta vacia en esa ruta + secreto HOSTINGER_REPO_CLONE_URL (URL del repo; token en la URL si es privado)."
-                if [ -n "$(ls -A 2>/dev/null || true)" ] && [ -z "$REPO_CLONE_URL" ]; then
-                  echo ""
-                  echo "Este directorio tiene archivos pero no .git: vacialo o elige otra HOSTINGER_DEPLOY_PATH."
-                fi
-                exit 1
-              fi
-            fi
-            REF="${GIT_REF:-main}"
-            echo ">>> Sincronizando con origin/$REF antes del script de deploy..."
-            git fetch origin
-            git checkout "$REF"
-            git reset --hard "origin/$REF"
-            if [ ! -f deploy/remote-deploy.sh ]; then
-              echo "ERROR: Tras actualizar, no existe deploy/remote-deploy.sh. Comprueba rama/ref y que el repo sea la raiz del monorepo (no frontend/ ni backend/)."
-              exit 1
-            fi
+            cd "${{ secrets.HOSTINGER_DEPLOY_PATH }}"
             export DEPLOY_SKIP_GIT=1
             bash deploy/remote-deploy.sh
