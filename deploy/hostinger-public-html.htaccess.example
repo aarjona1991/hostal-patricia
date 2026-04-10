@@ -1,14 +1,22 @@
 # =============================================================================
 # public_html/.htaccess — Hostinger (document root = public_html)
 # =============================================================================
-# Por defecto: SPA en la RAÍZ del dominio (/), sirviendo el build que está en
-#   hostal-web/frontend/dist
-# No uses HOSTINGER_STATIC_SUBDIR en .env del VPS (déjalo sin definir).
+# Modo: SPA en la RAÍZ del dominio (/). Los estáticos salen de:
+#   public_html/hostal-web/frontend/dist/
+# (no hay carpeta public_html/app/ ni URL /app/ con ESTE archivo.)
 #
-# Si [P] en api/uploads da error 500, mod_proxy no está permitido — quita esas
-# líneas o configura el proxy en el panel Hostinger.
+# Otra modalidad (solo si quieres todo bajo /app/): usa
+#   deploy/htaccess-opcion-b-subcarpeta-app.example + HOSTINGER_STATIC_SUBDIR=app.
 #
-# Alternativa con URLs bajo /app/: ver deploy/htaccess-opcion-b-subcarpeta-app.example
+# Requisitos:
+#   • Monorepo dentro de public_html, ej. public_html/hostal-web/
+#   • En .env del VPS: sin HOSTINGER_STATIC_SUBDIR — el build de Vite debe usar
+#     base "/" (scripts en /assets/…). Si en .env quedó HOSTINGER_STATIC_SUBDIR=app,
+#     el HTML pedirá /app/assets/… y aquí no existen esos ficheros → el servidor
+#     devuelve index.html y el navegador marca error MIME en los .js.
+#   • Si la carpeta no se llama hostal-web, cámbiala en las 3 reglas …/frontend/dist/
+#
+# Error 500: comenta las dos RewriteRule con [P] (proxy) si mod_proxy no está permitido.
 # =============================================================================
 
 <IfModule mod_rewrite.c>
@@ -18,11 +26,13 @@ RewriteBase /
 RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
 RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
 
-RewriteCond %{DOCUMENT_ROOT}/hostal-web/frontend/dist/$1 -f
-RewriteRule ^(.*)$ hostal-web/frontend/dist/$1 [L]
+# Raíz "/" — sin esto, %{REQUEST_FILENAME} es el directorio public_html y !-d
+# impide el fallback típico de SPA.
+RewriteRule ^$ hostal-web/frontend/dist/index.html [L]
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/hostal-web/frontend/dist/$1 -f
+RewriteRule ^(.+)$ hostal-web/frontend/dist/$1 [L]
+
 RewriteRule ^ hostal-web/frontend/dist/index.html [L]
 
 </IfModule>
