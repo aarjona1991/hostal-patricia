@@ -1,15 +1,14 @@
 import multer from "multer";
-import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
 import express from "express";
+import { resolveUploadDir } from "./dataPaths.js";
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const ALLOWED_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
 export function getUploadDir(repoRoot) {
-  if (process.env.UPLOAD_DIR) return path.resolve(process.env.UPLOAD_DIR);
-  return path.join(repoRoot, "data", "uploads");
+  return resolveUploadDir(repoRoot);
 }
 
 /**
@@ -19,6 +18,7 @@ export function getUploadDir(repoRoot) {
 export function mountFileUploads(app, { repoRoot, requireAuth }) {
   const uploadDir = getUploadDir(repoRoot);
   fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("[uploads] serving /uploads from %s", uploadDir);
 
   const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadDir),

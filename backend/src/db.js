@@ -1,15 +1,16 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
-import path from "node:path";
+import { resolveDbPath } from "./dataPaths.js";
 
-export function getDbPath() {
-  const p = process.env.SQLITE_PATH || path.join(process.cwd(), "data", "app.db");
-  return p;
+export function getDbPath(repoRoot) {
+  return resolveDbPath(repoRoot);
 }
 
-export function openDb() {
-  const dbPath = getDbPath();
+/** @param {string} repoRoot — raíz del monorepo (misma que usa uploads). */
+export function openDb(repoRoot) {
+  const dbPath = resolveDbPath(repoRoot);
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  console.log("[db] %s", dbPath);
   const db = new Database(dbPath);
   db.pragma("journal_mode = WAL");
   return db;
