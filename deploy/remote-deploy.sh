@@ -16,9 +16,12 @@ echo ">>> Deploy ref: $REF (repo: $ROOT)"
 node -v
 npm -v
 
-git fetch origin
-git checkout "$REF"
-git reset --hard "origin/$REF"
+# El workflow de GitHub Actions ya hizo fetch/checkout antes de llamar a este script (DEPLOY_SKIP_GIT=1).
+if [ "${DEPLOY_SKIP_GIT:-}" != "1" ]; then
+  git fetch origin
+  git checkout "$REF"
+  git reset --hard "origin/$REF"
+fi
 
 echo ">>> npm ci"
 npm ci

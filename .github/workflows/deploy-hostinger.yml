@@ -77,12 +77,23 @@ jobs:
             set -euo pipefail
             DEPLOY_PATH="${{ secrets.HOSTINGER_DEPLOY_PATH }}"
             if [ -z "$DEPLOY_PATH" ] || [ ! -d "$DEPLOY_PATH" ]; then
-              echo "ERROR: HOSTINGER_DEPLOY_PATH no existe o no es un directorio en el VPS: ${DEPLOY_PATH:-<vacío>}"
+              echo "ERROR: HOSTINGER_DEPLOY_PATH no existe o no es un directorio en el VPS: ${DEPLOY_PATH:-empty}"
               exit 1
             fi
             cd "$DEPLOY_PATH"
-            if [ ! -f deploy/remote-deploy.sh ]; then
-              echo "ERROR: No se encuentra deploy/remote-deploy.sh (¿git clone del repo en $DEPLOY_PATH?)"
+            if [ ! -d .git ]; then
+              echo "ERROR: $DEPLOY_PATH no es un clone git. Clona el repo alli, por ejemplo:"
+              echo "  git clone https://github.com/ORG/REPO.git $DEPLOY_PATH"
               exit 1
             fi
+            REF="${GIT_REF:-main}"
+            echo ">>> Sincronizando con origin/$REF antes del script de deploy..."
+            git fetch origin
+            git checkout "$REF"
+            git reset --hard "origin/$REF"
+            if [ ! -f deploy/remote-deploy.sh ]; then
+              echo "ERROR: Tras actualizar, no existe deploy/remote-deploy.sh. Comprueba rama/ref y que el repo sea la raiz del monorepo (no frontend/ ni backend/)."
+              exit 1
+            fi
+            export DEPLOY_SKIP_GIT=1
             bash deploy/remote-deploy.sh
