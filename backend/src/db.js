@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
+import path from "node:path";
 import { resolveDbPath } from "./dataPaths.js";
 
 export function getDbPath(repoRoot) {
