@@ -44,7 +44,7 @@ El backend guarda cada sección como JSON en SQLite (`sections.key` + `sections.
 
 ### Aplicación Node.js en hPanel (Node.js Web App)
 
-Si despliegas con **Websites → Añadir sitio → Aplicación Node.js** / **Node.js Apps** (GitHub o ZIP), Hostinger ejecuta instalación, build y arranque por ti. Este repo es un **monorepo**: la raíz debe ser donde está el `package.json` con workspaces (`frontend/`, `backend/`).
+Si despliegas con **Websites → Añadir sitio → Aplicación Node.js** / **Node.js Apps** (GitHub o ZIP), Hostinger ejecuta instalación, build y arranque por ti. Este repo es un **monorepo**: la raíz debe ser donde está el `package.json` con workspaces (`frontend/`, `backend/`). Si el código vive en la **raíz de `public_html`**, esa carpeta es la raíz del monorepo (mismo criterio que el layout plano con Apache).
 
 | Campo (según el asistente) | Valor típico |
 |----------------------------|----------------|
@@ -63,6 +63,8 @@ Si despliegas con **Websites → Añadir sitio → Aplicación Node.js** / **Nod
 **SQLite:** elige una ruta **persistente** (que no se pierda al redeploy). En hosting gestionado a veces conviene un directorio fuera del árbol que se reescribe en cada build; en VPS, por ejemplo `/var/lib/hostal-patricia/app.db`.
 
 Si el asistente pide **directorio de salida** o **archivo de entrada** pensando en un front estático, aquí el proceso que atiende HTTP es el **Node del backend** tras el build; el arranque correcto sigue siendo **`npm start`** en la raíz del monorepo, no solo abrir `frontend/dist` en un servidor de ficheros.
+
+**Consola: “Failed to load module script… MIME type text/html”:** casi siempre el navegador pide un `.js` y recibe HTML (404 disfrazado o `index.html`). Comprueba que el **build del monorepo** se ejecute en deploy (`npm run build` en la raíz) y exista `frontend/dist/assets/` en el servidor. Si la SPA está en una **subruta** (`/app/`), el build debe usar esa base (`VITE_BASE` o `HOSTINGER_STATIC_SUBDIR` en `.env` al construir) y la URL debe coincidir.
 
 Las secciones siguientes (**Nginx + PM2**, **Apache / `public_html`**, script **`remote-deploy.sh`**) aplican sobre todo a **VPS** o a sitios donde el document root es Apache y la API va aparte; con la **Aplicación Node** y `SERVE_FRONTEND=1` suele bastar el dominio que asigne el panel sin montar la SPA con `.htaccess`.
 
@@ -122,30 +124,24 @@ sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
 
 ### Hostinger sin poder cambiar el “document root”
 
-**Si ya tienes `public_html/app/`** con el frontend (deploy con `HOSTINGER_STATIC_SUBDIR=app`):
+**Layout plano — monorepo en la raíz de `public_html`** (tu caso: `package.json` y `.htaccess` junto a `frontend/` y `backend/`):
 
-1. Pon en `public_html/.htaccess` el contenido de [`deploy/htaccess-opcion-b-subcarpeta-app.example`](deploy/htaccess-opcion-b-subcarpeta-app.example) (no el de `hostinger-public-html.htaccess.example`).
-2. En el `.env` del monorepo en el VPS: **`HOSTINGER_STATIC_SUBDIR=app`** (cada deploy copia el build a `public_html/app/`).
-3. Abre **`https://tu-dominio.com/app/`** (desde `/` el `.htaccess` redirige a `/app/`).
+Ruta típica: `.../domains/tudominio.com/public_html`
 
----
+1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (`VITE_BASE=/`, build en `frontend/dist/`).
+2. Copia a `public_html/.htaccess` [`deploy/hostinger-public-html-flat.htaccess.example`](deploy/hostinger-public-html-flat.htaccess.example).
+3. Tras cada deploy, [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) detecta `basename` = `public_html` y crea **`public_html/assets`** → `frontend/dist/assets` (evita MIME `text/html` en `.js` en algunos planes). Si ya existe una carpeta real `assets`, renómbrala o define `HOSTINGER_SKIP_ASSETS_SYMLINK=1`.
+4. Si Hostinger dejó un `index.html` por defecto en `public_html`, renómbralo o bórralo.
+5. Comprueba en SSH: `ls public_html/frontend/dist/index.html` y `ls public_html/frontend/dist/assets/`.
+6. Abre **`https://tu-dominio.com/`**. Si la API falla con **500/503**, el `.htaccess` plano ya enruta a `hostal-api-proxy.php`; asegúrate de tener [`deploy/hostal-api-proxy.php.example`](deploy/hostal-api-proxy.php.example) como `public_html/hostal-api-proxy.php`.
 
-**SPA en la raíz del dominio** (`/`): Apache solo puede reescribir a rutas **bajo** `public_html`. La **raíz del monorepo en el VPS** (donde está `package.json`) suele ser, por ejemplo:
+**Monorepo en subcarpeta** (p. ej. `public_html/hostal-web/`): [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) y ajusta el nombre de carpeta en las reglas si no es `hostal-web`.
 
-`.../domains/tudominio.com/public_html/hostal-web`
+**Solo si el front va en `public_html/app/`** (`HOSTINGER_STATIC_SUBDIR=app`): [`deploy/htaccess-opcion-b-subcarpeta-app.example`](deploy/htaccess-opcion-b-subcarpeta-app.example) en `public_html/.htaccess` y abre **`https://tu-dominio.com/app/`**.
 
-**O bien** despliegas el repo **entero dentro de `public_html`** (sin subcarpeta `hostal-web`): entonces la raíz del monorepo es `.../domains/tudominio.com/public_html` y el `.htaccess` debe ser [`deploy/hostinger-public-html-flat.htaccess.example`](deploy/hostinger-public-html-flat.htaccess.example) (rutas `frontend/dist/...`). El script `remote-deploy.sh` detecta `basename` = `public_html` y crea `assets` → `frontend/dist/assets` y el proxy PHP en el sitio correcto.
+(no uses un path fuera del dominio salvo que enlaces con un symlink dentro de `public_html`).
 
-(no un path tipo `/var/www/...` distinto del dominio, salvo que enlaces con un symlink dentro de `public_html`).
-
-1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (`VITE_BASE=/`, build en `frontend/dist`).
-2. Copia el `.htaccess` que corresponda: [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) si el monorepo está en `public_html/hostal-web/` (o otra subcarpeta; ajusta el nombre en las reglas), **o** [`deploy/hostinger-public-html-flat.htaccess.example`](deploy/hostinger-public-html-flat.htaccess.example) si el monorepo **es** la raíz de `public_html`.
-3. Tras cada deploy (pull Git en el servidor, rsync, etc.), [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) crea **`public_html/assets`** como enlace simbólico a `…/frontend/dist/assets` (evita error MIME `text/html` en los `.js` en algunos planes). Si ya tienes una carpeta real `public_html/assets`, renómbrala o define `HOSTINGER_SKIP_ASSETS_SYMLINK=1`.
-4. Si Hostinger dejó un `index.html` por defecto en `public_html`, renómbralo o bórralo para que no compita con la SPA.
-5. Comprueba en SSH el build: `ls public_html/hostal-web/frontend/dist/index.html` o, si es layout plano, `ls public_html/frontend/dist/index.html`.
-6. Abre **`https://tu-dominio.com/`**. Si ves **500**, comenta en `.htaccess` las reglas `[P]` de `/api` y `/uploads` (a veces `mod_proxy` no está permitido) y configura el proxy con soporte Hostinger si hace falta.
-
-**`/api/*` en 503** con Node OK en `curl http://127.0.0.1:8787/...`: muchos planes **no** dan LiteSpeed Web Admin. Usa el **puente PHP**: [`deploy/hostal-api-proxy.php.example`](deploy/hostal-api-proxy.php.example) → `public_html/hostal-api-proxy.php` y el `.htaccess` del repo (reglas a ese script, no `[P]`). El deploy lo copia la primera vez si falta. Alternativa con panel: *External App* — ver comentarios en [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example).
+**`/api/*` en 503** con Node OK en `curl http://127.0.0.1:8787/...`: muchos planes **no** dan LiteSpeed Web Admin. Usa el **puente PHP**: [`deploy/hostal-api-proxy.php.example`](deploy/hostal-api-proxy.php.example) → `public_html/hostal-api-proxy.php` y el `.htaccess` que corresponda a tu layout ([`hostinger-public-html-flat.htaccess.example`](deploy/hostinger-public-html-flat.htaccess.example) o [`hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example)). El deploy lo copia la primera vez si falta. Alternativa: *External App* en el panel.
 
 ### 6) Git en el VPS + Apache / PM2 (sin usar Aplicación Node del panel)
 
