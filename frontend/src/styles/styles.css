@@ -1014,7 +1014,7 @@ a:hover {
 .location-copy .location-attractions {
   margin: 0 0 1.75rem;
   width: 100%;
-  max-width: min(28rem, 100%);
+  max-width: min(42rem, 100%);
   text-align: left;
 }
 
@@ -1140,8 +1140,14 @@ a:hover {
   list-style: none;
   margin: 0 0 1.75rem;
   padding: 0;
-  max-width: 28rem;
+  max-width: none;
+  width: 100%;
   text-align: left;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
+  column-gap: clamp(0.85rem, 2.2vw, 1.5rem);
+  row-gap: 0;
+  align-items: stretch;
 }
 
 .location-attractions li.location-attraction {
@@ -1154,6 +1160,7 @@ a:hover {
   font-size: 1.0625rem;
   font-weight: 600;
   color: #faf6f0;
+  min-width: 0;
 }
 
 .location-attractions li.location-attraction:last-child {
@@ -1779,6 +1786,15 @@ a:hover {
     min-height: min(420px, 52vh);
     border-radius: var(--radius-lg);
     overflow: hidden;
+  }
+
+  /* Lista ubicación: una columna al apilar texto + mapa */
+  .location-copy .location-attractions {
+    max-width: min(28rem, 100%);
+  }
+
+  .location-attractions {
+    grid-template-columns: 1fr;
   }
 
   .section-split {
