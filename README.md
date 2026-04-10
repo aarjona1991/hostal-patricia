@@ -109,10 +109,11 @@ sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
 (no un path tipo `/var/www/...` distinto del dominio, salvo que enlaces con un symlink dentro de `public_html`).
 
 1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (`VITE_BASE=/`, build en `frontend/dist`).
-2. Copia [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) a **`public_html/.htaccess`** (ya apunta a `hostal-web/frontend/dist`; si tu carpeta tiene otro nombre, cámbialo en las tres reglas).
-3. Si Hostinger dejó un `index.html` por defecto en `public_html`, renómbralo o bórralo para que no compita con la SPA.
-4. Comprueba en SSH que exista el build: `ls public_html/hostal-web/frontend/dist/index.html`.
-5. Abre **`https://tu-dominio.com/`**. Si ves **500**, comenta en `.htaccess` las reglas `[P]` de `/api` y `/uploads` (a veces `mod_proxy` no está permitido) y configura el proxy con soporte Hostinger si hace falta.
+2. Copia [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) a **`public_html/.htaccess`** (ya apunta a `hostal-web/frontend/dist`; si tu carpeta tiene otro nombre, cámbialo en las reglas).
+3. Tras cada deploy, [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) crea **`public_html/assets`** como enlace simbólico a `…/frontend/dist/assets` (evita error MIME `text/html` en los `.js` en algunos planes). Si ya tienes una carpeta real `public_html/assets`, renómbrala o define `HOSTINGER_SKIP_ASSETS_SYMLINK=1`.
+4. Si Hostinger dejó un `index.html` por defecto en `public_html`, renómbralo o bórralo para que no compita con la SPA.
+5. Comprueba en SSH que exista el build: `ls public_html/hostal-web/frontend/dist/index.html`.
+6. Abre **`https://tu-dominio.com/`**. Si ves **500**, comenta en `.htaccess` las reglas `[P]` de `/api` y `/uploads` (a veces `mod_proxy` no está permitido) y configura el proxy con soporte Hostinger si hace falta.
 
 ### 6) GitHub Actions → despliegue automático (Hostinger VPS)
 

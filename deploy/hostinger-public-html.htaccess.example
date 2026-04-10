@@ -17,6 +17,12 @@
 #   • Si la carpeta no se llama hostal-web, cámbiala en las 3 reglas …/frontend/dist/
 #
 # Error 500: comenta las dos RewriteRule con [P] (proxy) si mod_proxy no está permitido.
+#
+# deploy/remote-deploy.sh crea solo (SPA en raíz, sin HOSTINGER_STATIC_SUBDIR) el enlace
+#   public_html/assets → hostal-web/frontend/dist/assets
+# para que /assets/*.js tenga MIME correcto en Hostinger/LiteSpeed. Omitir con
+# HOSTINGER_SKIP_ASSETS_SYMLINK=1. A mano, desde public_html:
+#   ln -sfn hostal-web/frontend/dist/assets assets
 # =============================================================================
 
 <IfModule mod_rewrite.c>
@@ -26,10 +32,13 @@ RewriteBase /
 RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
 RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
 
-# Raíz "/" — sin esto, %{REQUEST_FILENAME} es el directorio public_html y !-d
-# impide el fallback típico de SPA.
 RewriteRule ^$ hostal-web/frontend/dist/index.html [L]
 
+# Vite: /assets/* (más compatible que %{REQUEST_URI} en sustitución en algunos LiteSpeed)
+RewriteCond %{DOCUMENT_ROOT}/hostal-web/frontend/dist/assets/$1 -f
+RewriteRule ^assets/(.+)$ hostal-web/frontend/dist/assets/$1 [L]
+
+# Raíz del dist: favicon.svg, etc.
 RewriteCond %{DOCUMENT_ROOT}/hostal-web/frontend/dist/$1 -f
 RewriteRule ^(.+)$ hostal-web/frontend/dist/$1 [L]
 
