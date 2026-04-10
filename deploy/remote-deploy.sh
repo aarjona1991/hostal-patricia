@@ -3,9 +3,50 @@
 # Requiere: Node 20+, npm, pm2. Git solo si no usas DEPLOY_SKIP_GIT=1 (deploy por rsync desde CI).
 set -euo pipefail
 
-command -v npm >/dev/null 2>&1 || { echo ">>> Error: npm no está en PATH"; exit 1; }
+# SSH/ejecución no interactiva no carga .bashrc: nvm/fnm quedan fuera del PATH.
+load_node_env() {
+  command -v npm >/dev/null 2>&1 && return 0
+  set +u
+  local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
+  if [ -s "$nvm_dir/nvm.sh" ]; then
+    # shellcheck disable=SC1091
+    . "$nvm_dir/nvm.sh"
+    if type nvm >/dev/null 2>&1; then
+      nvm use default >/dev/null 2>&1 || nvm use node >/dev/null 2>&1 || true
+    fi
+  fi
+  if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env 2>/dev/null)" || true
+  fi
+  if [ -f "$HOME/.profile" ]; then
+    # shellcheck disable=SC1091
+    . "$HOME/.profile" 2>/dev/null || true
+  fi
+  for d in /usr/local/bin "$HOME/.local/bin" /opt/nodejs/bin "$HOME/.npm-global/bin"; do
+    if [ -d "$d" ]; then
+      case ":$PATH:" in *":$d:"*) ;; *) PATH="$d:$PATH" ;; esac
+    fi
+  done
+  export PATH
+  set -u
+}
+
+load_node_env
+
+command -v npm >/dev/null 2>&1 || {
+  echo ">>> Error: npm no está en PATH."
+  echo "    Las sesiones SSH del deploy no son 'login shell': no se lee .bashrc (donde suele estar nvm)."
+  echo "    Solución: en el VPS añade a ~/.profile (o ~/.bash_profile):"
+  echo "      export NVM_DIR=\"\$HOME/.nvm\""
+  echo "      [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\""
+  echo "    O instala Node con apt/NodeSource para que quede en /usr/bin."
+  exit 1
+}
 command -v node >/dev/null 2>&1 || { echo ">>> Error: node no está en PATH"; exit 1; }
-command -v pm2 >/dev/null 2>&1 || { echo ">>> Error: pm2 no está en PATH"; exit 1; }
+command -v pm2 >/dev/null 2>&1 || {
+  echo ">>> Error: pm2 no está en PATH (tras cargar Node, prueba: npm i -g pm2)."
+  exit 1
+}
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
