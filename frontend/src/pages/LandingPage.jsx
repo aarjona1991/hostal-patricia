@@ -4,6 +4,7 @@ import { SocialNavIcon } from "../components/SocialNavIcon.jsx";
 import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
 import { TrinidadLocationMap } from "../components/TrinidadLocationMap.jsx";
 import { apiFetch } from "../lib/api.js";
+import { applyHeroSeoMeta } from "../lib/seoHero.js";
 import { normalizeMapPinLabel } from "../lib/mapPins.js";
 
 function safeGet(obj, key, fallback) {
@@ -72,6 +73,12 @@ export default function LandingPage() {
       .then(setData)
       .catch((e) => setErr(e));
   }, []);
+
+  /** OG/Twitter/JSON-LD: imagen del Hero (también inyecta el servidor en index.html al servir). */
+  useEffect(() => {
+    if (!data) return;
+    applyHeroSeoMeta(safeGet(data, "hero", {}));
+  }, [data]);
 
   /** Imágenes de la lista de ubicación, por nombre normalizado (mismo criterio que los pines). */
   const pinImageMap = useMemo(() => {

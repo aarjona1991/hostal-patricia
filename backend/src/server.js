@@ -77,6 +77,7 @@ import {
 } from "./db.js";
 import { logContactMailStatus, sendContactFormNotification } from "./mail.js";
 import { mountFileUploads } from "./uploads.js";
+import { injectHeroSeo } from "./seoInject.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -216,7 +217,13 @@ if (process.env.SERVE_FRONTEND !== "0") {
     if (p === "/assets" || p.startsWith("/assets/") || staticLike.test(path.basename(p))) {
       return res.status(404).type("text/plain").send("Not found");
     }
-    res.sendFile(path.join(webDist, "index.html"));
+    const indexPath = path.join(webDist, "index.html");
+    if (!fs.existsSync(indexPath)) {
+      return res.status(500).type("text/plain").send("Missing frontend/dist/index.html");
+    }
+    let html = fs.readFileSync(indexPath, "utf8");
+    html = injectHeroSeo(html, req, db);
+    res.type("html").send(html);
   });
 }
 
