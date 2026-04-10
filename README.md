@@ -56,9 +56,12 @@ Si despliegas con **Websites → Añadir sitio → Aplicación Node.js** / **Nod
 **Variables de entorno** en el panel (o importar `.env`):
 
 - **`SERVE_FRONTEND=1`** — imprescindible: Express sirve la SPA desde `frontend/dist` además del API.
-- **`PORT`** — suele inyectarla Hostinger (a menudo `3000`). El servidor ya usa `process.env.PORT`.
-- **`BIND_HOST=0.0.0.0`** — si tras el deploy no carga nada, prueba esto: el proxy del hosting debe poder conectar al proceso (el valor por defecto del código es `127.0.0.1`, válido en muchos VPS con Apache delante, pero no siempre en el entorno “Node App”).
-- Resto como en local: `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `SQLITE_PATH`, SMTP si aplica, etc. (ver `.env.example`).
+- **`PORT`** — en Aplicación Node **no** la pongas en `.env`: la inyecta el panel. El código usa `process.env.PORT` (localmente puedes usar `8787` u otro).
+- **`BIND_HOST=0.0.0.0`** — si el sitio no responde tras el deploy, suele ser el proxy que no alcanza `127.0.0.1`.
+- **`MONOREPO_ROOT`** — solo si hace falta: **ruta absoluta** Linux (`/home/usuario/.../nodejs/app`), la carpeta donde está el `package.json` raíz con workspaces. Valores relativos tipo `domains/...` se ignoran y rompen el arranque. Ver ejemplo en `.env.example`.
+- Resto como en local: `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `SQLITE_PATH`, SMTP si aplica, etc.
+
+Al arrancar, el log incluye `listening <host> <puerto> (repoRoot=...)`: comprueba que `repoRoot` sea la raíz real del monorepo. Si falla, revisa **Runtime logs** / `stderr.log` del deploy en hPanel.
 
 **SQLite:** elige una ruta **persistente** (que no se pierda al redeploy). En hosting gestionado a veces conviene un directorio fuera del árbol que se reescribe en cada build; en VPS, por ejemplo `/var/lib/hostal-patricia/app.db`.
 
