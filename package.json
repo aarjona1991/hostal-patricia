@@ -1,6 +1,9 @@
 {
   "name": "hostal-patricia",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "workspaces": [
     "frontend",
     "backend"

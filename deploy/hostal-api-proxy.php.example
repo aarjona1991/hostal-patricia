@@ -1,0 +1,124 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Puente /api/* y /uploads/* → Node en 127.0.0.1:8787 cuando el hosting no permite
+ * mod_proxy [P] ni External App LiteSpeed (503 en el navegador).
+ *
+ * Uso: copia este archivo a public_html/hostal-api-proxy.php
+ * y en .htaccess usa las reglas del ejemplo (sin las RewriteRule [P]).
+ */
+
+if (!function_exists('curl_init')) {
+  http_response_code(500);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['error' => 'curl_missing']);
+  exit;
+}
+
+$prefix = isset($_GET['__prefix']) ? (string) $_GET['__prefix'] : '';
+$tail = isset($_GET['__p']) ? (string) $_GET['__p'] : '';
+unset($_GET['__prefix'], $_GET['__p']);
+
+if ($prefix !== 'api' && $prefix !== 'uploads') {
+  http_response_code(400);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['error' => 'bad_prefix']);
+  exit;
+}
+
+if ($prefix === 'api' && !preg_match('#^[a-zA-Z0-9/_-]*$#', $tail)) {
+  http_response_code(400);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['error' => 'bad_path']);
+  exit;
+}
+if ($prefix === 'uploads' && !preg_match('#^[a-zA-Z0-9/_.-]*$#', $tail)) {
+  http_response_code(400);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['error' => 'bad_path']);
+  exit;
+}
+
+const BACKEND = 'http://127.0.0.1:8787';
+$path = '/' . $prefix . ($tail !== '' ? '/' . $tail : '');
+$path = preg_replace('#/+#', '/', $path);
+
+$query = http_build_query($_GET);
+$url = BACKEND . $path . ($query !== '' ? '?' . $query : '');
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$body = file_get_contents('php://input');
+
+$ch = curl_init($url);
+if ($ch === false) {
+  http_response_code(502);
+  exit;
+}
+
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+
+if ($body !== '' && in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+}
+
+$headers = [];
+if (!empty($_SERVER['CONTENT_TYPE'])) {
+  $headers[] = 'Content-Type: ' . $_SERVER['CONTENT_TYPE'];
+}
+if (!empty($_SERVER['HTTP_COOKIE'])) {
+  $headers[] = 'Cookie: ' . $_SERVER['HTTP_COOKIE'];
+}
+if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+  $headers[] = 'Authorization: ' . $_SERVER['HTTP_AUTHORIZATION'];
+}
+if ($headers !== []) {
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+}
+
+$raw = curl_exec($ch);
+if ($raw === false) {
+  http_response_code(502);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['error' => 'backend_unreachable', 'detail' => curl_error($ch)]);
+  curl_close($ch);
+  exit;
+}
+
+$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$hs = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+curl_close($ch);
+
+$headerBlock = substr($raw, 0, $hs);
+$responseBody = substr($raw, $hs);
+
+$first = strtok($headerBlock, "\r\n");
+if (is_string($first) && preg_match('#HTTP/\S+\s+(\d{3})#', $first, $m)) {
+  http_response_code((int) $m[1]);
+} else {
+  http_response_code($code > 0 ? $code : 502);
+}
+
+$hopByHop = ['transfer-encoding', 'connection', 'keep-alive', 'proxy-connection', 'upgrade'];
+foreach (preg_split('/\r\n/', $headerBlock) as $line) {
+  $line = trim($line);
+  if ($line === '' || preg_match('#^HTTP/#i', $line)) {
+    continue;
+  }
+  $colon = strpos($line, ':');
+  if ($colon === false) {
+    continue;
+  }
+  $name = strtolower(trim(substr($line, 0, $colon)));
+  if (in_array($name, $hopByHop, true)) {
+    continue;
+  }
+  header($line, false);
+}
+
+echo $responseBody;

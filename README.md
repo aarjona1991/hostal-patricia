@@ -40,7 +40,35 @@ El backend guarda cada sección como JSON en SQLite (`sections.key` + `sections.
 - `GET /api/sections`: devuelve todas las secciones (landing).
 - `PUT /api/sections/:key`: actualiza una sección (requiere auth).
 
-## Deploy en Hostinger VPS (Nginx + PM2)
+## Deploy en Hostinger
+
+### Aplicación Node.js en hPanel (Node.js Web App)
+
+Si despliegas con **Websites → Añadir sitio → Aplicación Node.js** / **Node.js Apps** (GitHub o ZIP), Hostinger ejecuta instalación, build y arranque por ti. Este repo es un **monorepo**: la raíz debe ser donde está el `package.json` con workspaces (`frontend/`, `backend/`).
+
+| Campo (según el asistente) | Valor típico |
+|----------------------------|----------------|
+| Node.js | **20.x** o superior (`engines` en la raíz del repo) |
+| Instalar dependencias | Predeterminado del panel o **`npm ci`** |
+| Build | **`npm run build`** (Vite + bundle del API) |
+| Start | **`npm start`** (arranca `backend/dist/server.js` vía workspace) |
+
+**Variables de entorno** en el panel (o importar `.env`):
+
+- **`SERVE_FRONTEND=1`** — imprescindible: Express sirve la SPA desde `frontend/dist` además del API.
+- **`PORT`** — suele inyectarla Hostinger (a menudo `3000`). El servidor ya usa `process.env.PORT`.
+- **`BIND_HOST=0.0.0.0`** — si tras el deploy no carga nada, prueba esto: el proxy del hosting debe poder conectar al proceso (el valor por defecto del código es `127.0.0.1`, válido en muchos VPS con Apache delante, pero no siempre en el entorno “Node App”).
+- Resto como en local: `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `SQLITE_PATH`, SMTP si aplica, etc. (ver `.env.example`).
+
+**SQLite:** elige una ruta **persistente** (que no se pierda al redeploy). En hosting gestionado a veces conviene un directorio fuera del árbol que se reescribe en cada build; en VPS, por ejemplo `/var/lib/hostal-patricia/app.db`.
+
+Si el asistente pide **directorio de salida** o **archivo de entrada** pensando en un front estático, aquí el proceso que atiende HTTP es el **Node del backend** tras el build; el arranque correcto sigue siendo **`npm start`** en la raíz del monorepo, no solo abrir `frontend/dist` en un servidor de ficheros.
+
+Las secciones siguientes (**Nginx + PM2**, **Apache / `public_html`**, script **`remote-deploy.sh`**) aplican sobre todo a **VPS** o a sitios donde el document root es Apache y la API va aparte; con la **Aplicación Node** y `SERVE_FRONTEND=1` suele bastar el dominio que asigne el panel sin montar la SPA con `.htaccess`.
+
+---
+
+## Deploy en VPS (Nginx + PM2)
 
 ### 1) Build
 
@@ -102,43 +130,37 @@ sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
 
 ---
 
-**SPA en la raíz del dominio** (`/`): Apache solo puede reescribir a rutas **bajo** `public_html`. El **`HOSTINGER_DEPLOY_PATH`** del workflow debe ser esa carpeta, por ejemplo:
+**SPA en la raíz del dominio** (`/`): Apache solo puede reescribir a rutas **bajo** `public_html`. La **raíz del monorepo en el VPS** (donde está `package.json`) suele ser, por ejemplo:
 
 `.../domains/tudominio.com/public_html/hostal-web`
+
+**O bien** despliegas el repo **entero dentro de `public_html`** (sin subcarpeta `hostal-web`): entonces la raíz del monorepo es `.../domains/tudominio.com/public_html` y el `.htaccess` debe ser [`deploy/hostinger-public-html-flat.htaccess.example`](deploy/hostinger-public-html-flat.htaccess.example) (rutas `frontend/dist/...`). El script `remote-deploy.sh` detecta `basename` = `public_html` y crea `assets` → `frontend/dist/assets` y el proxy PHP en el sitio correcto.
 
 (no un path tipo `/var/www/...` distinto del dominio, salvo que enlaces con un symlink dentro de `public_html`).
 
 1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (`VITE_BASE=/`, build en `frontend/dist`).
-2. Copia [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) a **`public_html/.htaccess`** (ya apunta a `hostal-web/frontend/dist`; si tu carpeta tiene otro nombre, cámbialo en las reglas).
-3. Tras cada deploy, [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) crea **`public_html/assets`** como enlace simbólico a `…/frontend/dist/assets` (evita error MIME `text/html` en los `.js` en algunos planes). Si ya tienes una carpeta real `public_html/assets`, renómbrala o define `HOSTINGER_SKIP_ASSETS_SYMLINK=1`.
+2. Copia el `.htaccess` que corresponda: [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) si el monorepo está en `public_html/hostal-web/` (o otra subcarpeta; ajusta el nombre en las reglas), **o** [`deploy/hostinger-public-html-flat.htaccess.example`](deploy/hostinger-public-html-flat.htaccess.example) si el monorepo **es** la raíz de `public_html`.
+3. Tras cada deploy (pull Git en el servidor, rsync, etc.), [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) crea **`public_html/assets`** como enlace simbólico a `…/frontend/dist/assets` (evita error MIME `text/html` en los `.js` en algunos planes). Si ya tienes una carpeta real `public_html/assets`, renómbrala o define `HOSTINGER_SKIP_ASSETS_SYMLINK=1`.
 4. Si Hostinger dejó un `index.html` por defecto en `public_html`, renómbralo o bórralo para que no compita con la SPA.
-5. Comprueba en SSH que exista el build: `ls public_html/hostal-web/frontend/dist/index.html`.
+5. Comprueba en SSH el build: `ls public_html/hostal-web/frontend/dist/index.html` o, si es layout plano, `ls public_html/frontend/dist/index.html`.
 6. Abre **`https://tu-dominio.com/`**. Si ves **500**, comenta en `.htaccess` las reglas `[P]` de `/api` y `/uploads` (a veces `mod_proxy` no está permitido) y configura el proxy con soporte Hostinger si hace falta.
 
-### 6) GitHub Actions → despliegue automático (Hostinger VPS)
+**`/api/*` en 503** con Node OK en `curl http://127.0.0.1:8787/...`: muchos planes **no** dan LiteSpeed Web Admin. Usa el **puente PHP**: [`deploy/hostal-api-proxy.php.example`](deploy/hostal-api-proxy.php.example) → `public_html/hostal-api-proxy.php` y el `.htaccess` del repo (reglas a ese script, no `[P]`). El deploy lo copia la primera vez si falta. Alternativa con panel: *External App* — ver comentarios en [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example).
 
-El workflow [`.github/workflows/deploy-hostinger.yml`](.github/workflows/deploy-hostinger.yml) se ejecuta en **cada push a `main`** — al **fusionar un PR** hacia `main` GitHub hace push del merge (o squash) y también dispara el despliegue. Opcionalmente puedes lanzarlo a mano con *Run workflow*:
+### 6) Git en el VPS + Apache / PM2 (sin usar Aplicación Node del panel)
 
-1. En GitHub Actions: **build de comprobación** (`npm ci` + `npm run build` en Ubuntu).
-2. **Rsync** del repositorio (sin `node_modules` ni `.git`) a `HOSTINGER_DEPLOY_PATH` por SSH.
-3. **SSH**: en esa ruta ejecuta [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh) con `DEPLOY_SKIP_GIT=1` (`npm ci`, `npm run build`, `pm2 restart` o primer `pm2 start`). **No hace falta** `git clone` en el VPS.
+Si el código llega al servidor con **Git** clásico en hPanel (sitio → **Git**, no el flujo **Node.js Web App**) o lo subes a mano, Hostinger **solo** actualiza ficheros: el build y el proceso Node los resuelves con SSH y [`deploy/remote-deploy.sh`](deploy/remote-deploy.sh).
 
-**Preparación en el VPS (una vez):**
+Tras el pull o la copia de archivos:
 
-- Una carpeta destino (en Hostinger con Apache en `public_html`, suele ser `.../public_html/hostal-web`; en otro VPS puede ser ej. `/var/www/hostal-patricia`). El workflow crea la ruta con `mkdir -p` si el usuario SSH puede escribir ahí.
-- Crea **`.env`** en esa carpeta (raíz del monorepo **después del primer deploy**, o créalo antes: no se sobrescribe porque no está en el repo), con `JWT_SECRET`, `ADMIN_*`, `SQLITE_PATH`, SMTP si aplica, etc.
-- Instala **Node 20+**, **npm**, **PM2** y herramientas para compilar **better-sqlite3** si hace falta (`build-essential`, `python3` en Debian/Ubuntu). **Git** solo si despliegas a mano sin `DEPLOY_SKIP_GIT`.
-- Si usas **nvm**, el deploy por SSH no carga `.bashrc`: añade la carga de nvm en **`~/.profile`** (el script `deploy/remote-deploy.sh` también intenta cargar nvm y `.profile`).
+```bash
+export DEPLOY_SKIP_GIT=1
+bash deploy/remote-deploy.sh
+```
 
-**Secretos en GitHub** (Settings → Secrets and variables → Actions):
+`DEPLOY_SKIP_GIT=1` evita `git fetch`/`reset` dentro del script cuando el árbol ya está al día. El script hace `npm ci`, `npm run build`, symlink `assets`/proxy PHP si aplica y **pm2** restart/start.
 
-| Secreto | Descripción |
-|--------|----------------|
-| `HOSTINGER_HOST` | IP o hostname del VPS |
-| `HOSTINGER_USER` | Usuario SSH |
-| `HOSTINGER_SSH_KEY` | Clave privada completa (PEM) para ese usuario |
-| `HOSTINGER_DEPLOY_PATH` | Ruta absoluta donde se copia el código (equivalente a la raíz del monorepo: `package.json`, `frontend/`, `backend/`). Puede ser distinta de la carpeta que solo sirve Nginx |
-| `HOSTINGER_SSH_PORT` | *(Opcional)* Puerto SSH; si no existe, se usa `22` |
+**Preparación (una vez):** raíz del monorepo en el VPS (`package.json` ahí), **`.env`**, Node 20+, npm, PM2, y **nvm** en `~/.profile` si aplica.
 
-La clave SSH debe poder **escribir** en `HOSTINGER_DEPLOY_PATH` y ejecutar `npm` y `pm2`.
+Si gestionas el repo **solo** por SSH con `git pull` y quieres que el script alinee la rama, ejecuta `bash deploy/remote-deploy.sh` **sin** `DEPLOY_SKIP_GIT` (variable `GIT_REF`, por defecto `main`).
 

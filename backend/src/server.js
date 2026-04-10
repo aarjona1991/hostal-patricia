@@ -135,8 +135,11 @@ if (process.env.SERVE_FRONTEND === "1") {
 }
 
 const port = Number(process.env.PORT || 8787);
-app.listen(port, () => {
-  console.log(`API listening on :${port}`);
+// Por defecto solo loopback IPv4: encaja con .htaccess → 127.0.0.1 y no expone el API a la red.
+// En Docker o acceso LAN: BIND_HOST=0.0.0.0
+const bindHost = process.env.BIND_HOST || "127.0.0.1";
+app.listen(port, bindHost, () => {
+  console.log(`API listening on http://${bindHost}:${port}`);
   logContactMailStatus();
 });
 
