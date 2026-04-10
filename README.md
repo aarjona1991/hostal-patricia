@@ -92,6 +92,16 @@ Con Certbot:
 sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
 ```
 
+### Hostinger sin poder cambiar el “document root”
+
+Si el dominio apunta a `public_html` y el monorepo está en `public_html/hostal-web/`:
+
+1. **No** definas `HOSTINGER_STATIC_SUBDIR` en el `.env` del VPS (así el build queda con `VITE_BASE=/` y los ficheros en `hostal-web/frontend/dist`).
+2. Copia [`deploy/hostinger-public-html.htaccess.example`](deploy/hostinger-public-html.htaccess.example) a **`public_html/.htaccess`** (proxy `/api` + reescritura a `hostal-web/frontend/dist`).
+3. Abre **`https://tu-dominio.com/`**. Si el proxy `[P]` falla, configura `/api` y `/uploads` en el panel o con soporte Hostinger.
+
+*Alternativa (URLs bajo `/app/`):* `.env` con `HOSTINGER_STATIC_SUBDIR=app` y [`deploy/htaccess-opcion-b-subcarpeta-app.example`](deploy/htaccess-opcion-b-subcarpeta-app.example) como `.htaccess`.
+
 ### 6) GitHub Actions → despliegue automático (Hostinger VPS)
 
 El workflow [`.github/workflows/deploy-hostinger.yml`](.github/workflows/deploy-hostinger.yml) se ejecuta en **cada push a `main`** — al **fusionar un PR** hacia `main` GitHub hace push del merge (o squash) y también dispara el despliegue. Opcionalmente puedes lanzarlo a mano con *Run workflow*:

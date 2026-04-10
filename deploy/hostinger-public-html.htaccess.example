@@ -1,0 +1,28 @@
+# =============================================================================
+# public_html/.htaccess — Hostinger (document root = public_html)
+# =============================================================================
+# Por defecto: SPA en la RAÍZ del dominio (/), sirviendo el build que está en
+#   hostal-web/frontend/dist
+# No uses HOSTINGER_STATIC_SUBDIR en .env del VPS (déjalo sin definir).
+#
+# Si [P] en api/uploads da error 500, mod_proxy no está permitido — quita esas
+# líneas o configura el proxy en el panel Hostinger.
+#
+# Alternativa con URLs bajo /app/: ver deploy/htaccess-opcion-b-subcarpeta-app.example
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^api/(.*)$ http://127.0.0.1:8787/api/$1 [P,L]
+RewriteRule ^uploads/(.*)$ http://127.0.0.1:8787/uploads/$1 [P,L]
+
+RewriteCond %{DOCUMENT_ROOT}/hostal-web/frontend/dist/$1 -f
+RewriteRule ^(.*)$ hostal-web/frontend/dist/$1 [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ hostal-web/frontend/dist/index.html [L]
+
+</IfModule>
