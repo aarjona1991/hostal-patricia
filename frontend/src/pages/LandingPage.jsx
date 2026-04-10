@@ -4,6 +4,7 @@ import { SocialNavIcon } from "../components/SocialNavIcon.jsx";
 import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
 import { TrinidadLocationMap } from "../components/TrinidadLocationMap.jsx";
 import { apiFetch } from "../lib/api.js";
+import { normalizeMapPinLabel } from "../lib/mapPins.js";
 
 function safeGet(obj, key, fallback) {
   return obj && obj[key] != null ? obj[key] : fallback;
@@ -19,14 +20,6 @@ function normalizeLocationAttraction(raw) {
     imgUrl: raw.imgUrl != null ? String(raw.imgUrl) : "",
     alt: raw.alt != null ? String(raw.alt) : "",
   };
-}
-
-function normalizeMapPinLabel(s) {
-  return String(s || "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
 }
 
 /** Quita comillas tipográficas envolventes para mostrar el texto con decoración propia. */
@@ -53,6 +46,18 @@ function getAttractionPinModifier(raw, mapSection) {
   return "";
 }
 
+/** Icono genérico cuando el atractivo no trae `imgUrl`. */
+function LocationAttractionPlaceholderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+      />
+    </svg>
+  );
+}
+
 export default function LandingPage() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
@@ -67,6 +72,19 @@ export default function LandingPage() {
       .then(setData)
       .catch((e) => setErr(e));
   }, []);
+
+  /** Imágenes de la lista de ubicación, por nombre normalizado (mismo criterio que los pines). */
+  const pinImageMap = useMemo(() => {
+    const loc = data && safeGet(data, "location", { attractions: [] });
+    const m = new Map();
+    for (const raw of loc?.attractions || []) {
+      const a = normalizeLocationAttraction(raw);
+      const key = normalizeMapPinLabel(a.text);
+      const u = a.imgUrl?.trim();
+      if (key && u) m.set(key, u);
+    }
+    return m;
+  }, [data]);
 
   useEffect(() => {
     if (!data) return;
@@ -410,14 +428,26 @@ export default function LandingPage() {
                   const a = normalizeLocationAttraction(raw);
                   const hasImg = Boolean(a.imgUrl?.trim());
                   const pinMod = getAttractionPinModifier(raw, mapSection);
-                  const liClass = ["location-attraction", hasImg ? "location-attraction--has-image" : "", pinMod].filter(Boolean).join(" ");
+                  const liClass = ["location-attraction", hasImg ? "location-attraction--has-thumb" : "", pinMod]
+                    .filter(Boolean)
+                    .join(" ");
                   return (
                     <li key={idx} className={liClass}>
                       {hasImg ? (
-                        <div className="location-attraction-thumb">
-                          <img src={a.imgUrl} alt={a.alt || a.text || ""} loading="lazy" />
-                        </div>
-                      ) : null}
+                        <span className="location-attraction-thumb-wrap">
+                          <img
+                            className="location-attraction-thumb-img"
+                            src={a.imgUrl}
+                            alt={a.alt || a.text || ""}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </span>
+                      ) : (
+                        <span className="location-attraction-icon">
+                          <LocationAttractionPlaceholderIcon />
+                        </span>
+                      )}
                       <span className="location-attraction-label">{a.text}</span>
                     </li>
                   );
@@ -428,7 +458,11 @@ export default function LandingPage() {
             <div className="location-map-column">
               <div className="location-map-panel">
                 <div className="location-map-canvas-wrap">
-                  <TrinidadLocationMap className="location-map-canvas" config={mapSection || undefined} />
+                  <TrinidadLocationMap
+                    className="location-map-canvas"
+                    config={mapSection || undefined}
+                    pinImages={pinImageMap}
+                  />
                 </div>
                 <p className="location-map-osm-credit">
                   <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">

@@ -349,7 +349,7 @@ function MapNearbyEditor({ items = [], onChange }) {
     <div className="adm-field" style={{ marginTop: 16 }}>
       <label>Lugares cercanos (lista ampliable)</label>
       <p className="adm-text-muted" style={{ marginTop: 0, marginBottom: "0.75rem" }}>
-        Cada punto aparece en el mapa con un marcador distinto al del hostal. Coordenadas en grados decimales (como en Google Maps).
+        Cada punto aparece en el mapa con un marcador distinto al del hostal. Coordenadas en grados decimales (como en Google Maps). Opcionalmente sube una imagen para el pin circular.
       </p>
       {list.map((row, i) => (
         <div key={i} className="adm-subpanel">
@@ -398,6 +398,15 @@ function MapNearbyEditor({ items = [], onChange }) {
               }}
             />
           </div>
+          <ImageUrlField
+            label="Imagen del pin en el mapa"
+            value={row.imgUrl || ""}
+            onChange={(url) => {
+              const n = [...list];
+              n[i] = { ...n[i], imgUrl: url };
+              onChange(n);
+            }}
+          />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div className="adm-field" style={{ marginBottom: 0 }}>
               <label>Latitud</label>
@@ -434,7 +443,7 @@ function MapNearbyEditor({ items = [], onChange }) {
         type="button"
         className="adm-btn adm-btn-ghost adm-btn-sm"
         style={{ marginTop: 8 }}
-        onClick={() => onChange([...list, { name: "", note: "", lat: "", lng: "" }])}
+        onClick={() => onChange([...list, { name: "", note: "", lat: "", lng: "", imgUrl: "" }])}
       >
         + Añadir lugar
       </button>
@@ -540,8 +549,8 @@ export function emptySectionDraft(key) {
     return {
       title: "Mapa del entorno",
       lead: "",
-      defaultZoom: 14,
-      main: { lat: "", lng: "", name: "", description: "" },
+      defaultZoom: 15,
+      main: { lat: "", lng: "", name: "", description: "", imgUrl: "" },
       nearby: [],
     };
   }
@@ -557,7 +566,7 @@ export const SECTION_NAV = [
   { key: "split", label: "Servicios", icon: "✧", hint: "Imagen + comodidades" },
   { key: "rooms", label: "Habitaciones", icon: "◇", hint: "Título y tarjetas" },
   { key: "location", label: "Ubicación", icon: "⌖", hint: "Fondo, lista de atractivos (con foto opcional)" },
-  { key: "map", label: "Mapa", icon: "◉", hint: "Punto principal (hostal) y lugares cercanos en el mapa" },
+  { key: "map", label: "Mapa", icon: "◉", hint: "Hostal, lugares cercanos e imagen de cada pin" },
   { key: "testimonials", label: "Opiniones", icon: "❝", hint: "Carrusel de citas" },
   { key: "cta", label: "Reservas / CTA", icon: "✉", hint: "Bloque de contacto" },
   { key: "ads", label: "Publicidad", icon: "▣", hint: "Google AdSense (tras reservas, antes del pie)" },
@@ -682,7 +691,7 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
       return (
         <>
           <p className="adm-text-muted" style={{ marginTop: 0 }}>
-            En la página pública el mapa no muestra título ni pie de leyenda; solo el lienzo y la atribución OpenStreetMap debajo. Los colores de la lista en «Ubicación» se alinean por nombre con el punto principal y los cercanos.
+            En la página pública el mapa no muestra título ni pie de leyenda; solo el lienzo y la atribución OpenStreetMap debajo. Los colores de la lista en «Ubicación» se alinean por nombre con el punto principal y los cercanos. Puedes subir una imagen por pin (circular en el mapa); si la dejas vacía, se intenta usar la foto del mismo nombre en «Ubicación».
           </p>
           <div className="adm-field">
             <label>Título (reservado / no visible en la web)</label>
@@ -693,7 +702,7 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
             <textarea className="adm-textarea" rows={2} value={draft.lead || ""} onChange={(e) => patch({ lead: e.target.value })} />
           </div>
           <div className="adm-field">
-            <label>Zoom inicial (aprox. 12–16)</label>
+            <label>Zoom inicial (centrado en el hostal; p. ej. 14–16 = barrio)</label>
             <input
               type="number"
               className="adm-input"
@@ -724,6 +733,11 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
                 onChange={(e) => patch({ main: { ...(draft.main || {}), description: e.target.value } })}
               />
             </div>
+            <ImageUrlField
+              label="Imagen del pin en el mapa"
+              value={draft.main?.imgUrl || ""}
+              onChange={(url) => patch({ main: { ...(draft.main || {}), imgUrl: url } })}
+            />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div className="adm-field" style={{ marginBottom: 0 }}>
                 <label>Latitud</label>

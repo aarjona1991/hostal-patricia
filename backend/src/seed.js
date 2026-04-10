@@ -105,16 +105,28 @@ export const DEFAULT_SECTIONS = {
   map: {
     title: "Mapa del entorno",
     lead: "Tu alojamiento y lugares cercanos que puedes visitar.",
-    defaultZoom: 13.5,
+    defaultZoom: 15,
     main: {
       lat: 21.8058,
       lng: -79.9825,
       name: "Casa Trinidad Viva",
-      description: "Hostal · centro histórico"
+      description: "Hostal · centro histórico",
+      imgUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80"
     },
     nearby: [
-      { lat: 21.8045, lng: -79.9842, name: "Plaza Mayor", note: "A pocos minutos a pie" },
-      { lat: 21.8031, lng: -79.9855, name: "Iglesia Parroquial", note: "" },
+      {
+        lat: 21.8045,
+        lng: -79.9842,
+        name: "Plaza Mayor de Trinidad",
+        note: "A pocos minutos a pie"
+      },
+      {
+        lat: 21.8031,
+        lng: -79.9855,
+        name: "Iglesia Parroquial",
+        note: "",
+        imgUrl: "https://images.unsplash.com/photo-1431274172761-fca41d869294?w=400&q=80"
+      },
       { lat: 21.7385, lng: -79.8568, name: "Playa Ancón", note: "En taxi o excursión" }
     ]
   },
