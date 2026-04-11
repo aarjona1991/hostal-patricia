@@ -109,6 +109,33 @@ ensureSchema(db);
   tx();
 }
 
+// Galería: el seed solo rellena claves que faltan; si la BD ya tenía `gallery` con menos fotos,
+// añadimos al final las del DEFAULT cuya imgUrl aún no exista (p. ej. nuevas fotos dummy en el repo).
+{
+  const row = getSection(db, "gallery");
+  const def = DEFAULT_SECTIONS.gallery;
+  if (row?.data && def?.photos?.length) {
+    const data = row.data;
+    const existing = Array.isArray(data.photos) ? data.photos : [];
+    const urls = new Set(
+      existing
+        .map((p) => (p && typeof p.imgUrl === "string" ? p.imgUrl.trim() : ""))
+        .filter(Boolean)
+    );
+    const toAdd = def.photos.filter((p) => {
+      const u = p?.imgUrl != null ? String(p.imgUrl).trim() : "";
+      return u && !urls.has(u);
+    });
+    if (toAdd.length > 0) {
+      upsertSection(db, "gallery", {
+        ...data,
+        photos: [...existing, ...toAdd],
+      });
+      console.log("[sections] gallery: añadidas %d foto(s) desde seed (URLs nuevas)", toAdd.length);
+    }
+  }
+}
+
 // Siempre 200: { user: null } si no hay cookie o el JWT no vale (evita 401 en consola del navegador).
 app.get("/api/auth/me", (req, res) => {
   const user = getOptionalAuthUser(req);

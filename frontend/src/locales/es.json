@@ -13,6 +13,7 @@
     "closeMenu": "Cerrar menú",
     "experiencia": "Experiencia",
     "habitaciones": "Habitaciones",
+    "galeria": "Galería",
     "ubicacion": "Ubicación",
     "opiniones": "Opiniones",
     "reservar": "Reservar",
@@ -37,6 +38,9 @@
     "splitCta": "Ir a reservas",
     "roomsTitleDefault": "Habitaciones cómodas y privadas",
     "locationTitleDefault": "Ubicación privilegiada",
+    "galleryEyebrow": "Galería",
+    "galleryTitleDefault": "Galería de fotos",
+    "galleryEmpty": "Pronto añadiremos fotos a la galería.",
     "testimonialsEyebrow": "Opiniones",
     "testimonialsTitleDefault": "Lo que dicen nuestros huéspedes",
     "testimonialsEmpty": "Pronto añadiremos opiniones de huéspedes.",
@@ -64,6 +68,17 @@
   },
   "whatsapp": {
     "floatLabel": "Escríbenos por WhatsApp"
+  },
+  "gallery": {
+    "close": "Cerrar",
+    "prev": "Foto anterior",
+    "next": "Foto siguiente",
+    "dialogLabel": "Vista ampliada de la galería",
+    "openAria": "Ampliar foto {{n}} de {{total}}",
+    "showMore": "Ver más ({{count}})",
+    "showMoreAria": "Abrir la galería completa: {{total}} fotos en total; {{more}} no se muestran en la cuadrícula",
+    "adCounter": "Publicidad",
+    "adContinueHint": "Pulsa siguiente o → para seguir con la galería"
   },
   "map": {
     "ariaLabel": "Mapa de Trinidad, la península y Playa Ancón",

@@ -13,6 +13,7 @@
     "closeMenu": "Close menu",
     "experiencia": "Experience",
     "habitaciones": "Rooms",
+    "galeria": "Gallery",
     "ubicacion": "Location",
     "opiniones": "Reviews",
     "reservar": "Book",
@@ -37,6 +38,9 @@
     "splitCta": "Go to bookings",
     "roomsTitleDefault": "Comfortable private rooms",
     "locationTitleDefault": "Prime location",
+    "galleryEyebrow": "Gallery",
+    "galleryTitleDefault": "Photo gallery",
+    "galleryEmpty": "We’ll add photos to the gallery soon.",
     "testimonialsEyebrow": "Reviews",
     "testimonialsTitleDefault": "What our guests say",
     "testimonialsEmpty": "Guest reviews coming soon.",
@@ -64,6 +68,17 @@
   },
   "whatsapp": {
     "floatLabel": "Message us on WhatsApp"
+  },
+  "gallery": {
+    "close": "Close",
+    "prev": "Previous photo",
+    "next": "Next photo",
+    "dialogLabel": "Enlarged gallery view",
+    "openAria": "Enlarge photo {{n}} of {{total}}",
+    "showMore": "See more ({{count}})",
+    "showMoreAria": "Open the full gallery: {{total}} photos in total; {{more}} are not shown in the grid",
+    "adCounter": "Advertisement",
+    "adContinueHint": "Press next or → to continue the gallery"
   },
   "map": {
     "ariaLabel": "Map of Trinidad, the peninsula and Playa Ancón",

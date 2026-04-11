@@ -150,6 +150,89 @@ function ExperienceCardsEditor({ cards = [], onChange }) {
   );
 }
 
+function GalleryPhotosEditor({ photos = [], onChange }) {
+  const list = Array.isArray(photos) ? photos : [];
+  return (
+    <div className="adm-field">
+      <label>Fotos</label>
+      <p className="adm-text-muted" style={{ marginTop: 0, marginBottom: "0.75rem" }}>
+        Sube imágenes o pega URL. En la web se muestran en cuadrícula; al hacer clic se abren en grande (lightbox). La leyenda bajo la miniatura es opcional.
+      </p>
+      {list.map((p, i) => (
+        <div key={i} className="adm-subpanel">
+          <div className="adm-subpanel-head">
+            <span>Foto {i + 1}</span>
+            <div className="adm-row-actions">
+              <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
+                ↑
+              </button>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                disabled={i === list.length - 1}
+                onClick={() => onChange(moveItem(list, i, 1))}
+              >
+                ↓
+              </button>
+              <button type="button" className="adm-icon-btn" onClick={() => onChange(list.filter((_, j) => j !== i))}>
+                ×
+              </button>
+            </div>
+          </div>
+          <ImageUrlField
+            label="Imagen"
+            value={p.imgUrl || ""}
+            onChange={(url) => {
+              const n = [...list];
+              n[i] = { ...n[i], imgUrl: url };
+              onChange(n);
+            }}
+          />
+          <div className="adm-field">
+            <label>Texto alternativo (alt)</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={p.alt || ""}
+              onChange={(e) => {
+                const n = [...list];
+                n[i] = { ...n[i], alt: e.target.value };
+                onChange(n);
+              }}
+            />
+          </div>
+          <div className="adm-field">
+            <label>Leyenda visible (opcional)</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={p.caption || ""}
+              onChange={(e) => {
+                const n = [...list];
+                const v = e.target.value;
+                const next = { ...n[i] };
+                if (v.trim()) next.caption = v;
+                else delete next.caption;
+                n[i] = next;
+                onChange(n);
+              }}
+              placeholder="Ej. Patio, Desayuno, Playa…"
+            />
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="adm-btn adm-btn-ghost adm-btn-sm"
+        style={{ marginTop: 8 }}
+        onClick={() => onChange([...list, { imgUrl: "", alt: "", caption: "" }])}
+      >
+        + Añadir foto
+      </button>
+    </div>
+  );
+}
+
 function RoomCardsEditor({ cards = [], onChange }) {
   const list = Array.isArray(cards) ? cards : [];
   return (
@@ -557,6 +640,9 @@ export function emptySectionDraft(key) {
   if (key === "ads") {
     return { enabled: false, label: "Publicidad", adClient: "", adSlot: "" };
   }
+  if (key === "gallery") {
+    return { eyebrow: "", title: "", lead: "", photos: [] };
+  }
   return null;
 }
 
@@ -565,6 +651,7 @@ export const SECTION_NAV = [
   { key: "experiences", label: "Experiencias", icon: "◎", hint: "Lista y tarjetas" },
   { key: "split", label: "Servicios", icon: "✧", hint: "Imagen + comodidades" },
   { key: "rooms", label: "Habitaciones", icon: "◇", hint: "Título y tarjetas" },
+  { key: "gallery", label: "Galería", icon: "▦", hint: "Fotos con vista ampliada (lightbox)" },
   { key: "location", label: "Ubicación", icon: "⌖", hint: "Fondo, lista de atractivos (con foto opcional)" },
   { key: "map", label: "Mapa", icon: "◉", hint: "Hostal, lugares cercanos e imagen de cada pin" },
   { key: "testimonials", label: "Opiniones", icon: "❝", hint: "Carrusel de citas" },
@@ -679,6 +766,25 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
             <textarea className="adm-textarea" rows={2} value={draft.subtitle || ""} onChange={(e) => patch({ subtitle: e.target.value })} />
           </div>
           <RoomCardsEditor cards={draft.cards} onChange={(cards) => patch({ cards })} />
+        </>
+      );
+
+    case "gallery":
+      return (
+        <>
+          <div className="adm-field">
+            <label>Antetítulo (eyebrow)</label>
+            <input type="text" className="adm-input" value={draft.eyebrow || ""} onChange={(e) => patch({ eyebrow: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Título de sección</label>
+            <input type="text" className="adm-input" value={draft.title || ""} onChange={(e) => patch({ title: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Texto introductorio</label>
+            <textarea className="adm-textarea" rows={2} value={draft.lead || ""} onChange={(e) => patch({ lead: e.target.value })} />
+          </div>
+          <GalleryPhotosEditor photos={draft.photos} onChange={(photos) => patch({ photos })} />
         </>
       );
 
@@ -917,6 +1023,17 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
               value={draft.navLabels?.habitaciones || ""}
               onChange={(e) =>
                 patch({ navLabels: { ...(draft.navLabels || {}), habitaciones: e.target.value } })
+              }
+            />
+          </div>
+          <div className="adm-field">
+            <label>Menú · ancla #galeria</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={draft.navLabels?.galeria || ""}
+              onChange={(e) =>
+                patch({ navLabels: { ...(draft.navLabels || {}), galeria: e.target.value } })
               }
             />
           </div>
