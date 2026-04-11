@@ -83,6 +83,59 @@ export const DEFAULT_SECTIONS = {
       }
     ]
   },
+  /** Galería de fotos del hostal y alrededores (lightbox en la web pública). */
+  gallery: {
+    eyebrow: "Galería",
+    title: "Momentos en Casa Trinidad Viva",
+    lead: "Un vistazo a los espacios, el ambiente y Trinidad.",
+    photos: [
+      {
+        imgUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1000&q=80",
+        alt: "Patio colonial con plantas y luz natural",
+        caption: "Patio y zona común"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1000&q=80",
+        alt: "Habitación acogedora con cama y ventana",
+        caption: "Habitaciones"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1000&q=80",
+        alt: "Desayuno y mesa preparada",
+        caption: "Desayunos"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1000&q=80",
+        alt: "Valle verde cerca de Trinidad",
+        caption: "Alrededores · Valle de los Ingenios"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000&q=80",
+        alt: "Playa con mar turquesa",
+        caption: "Playa Ancón"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1000&q=80",
+        alt: "Mar caribeño al atardecer",
+        caption: "Caribe"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1000&q=80",
+        alt: "Fachada colonial con ventanas de madera",
+        caption: "Fachada"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1000&q=80",
+        alt: "Terraza con plantas y mesa al aire libre",
+        caption: "Terraza"
+      },
+      {
+        imgUrl: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1000&q=80",
+        alt: "Calles empedradas del centro histórico",
+        caption: "Trinidad · Calles"
+      }
+    ]
+  },
   location: {
     title: "Ubicación privilegiada",
     lead: "Nos encontramos a pocos minutos de los principales atractivos turísticos:",
@@ -169,6 +222,7 @@ export const DEFAULT_SECTIONS = {
     navLabels: {
       experiencia: "Experiencia",
       habitaciones: "Habitaciones",
+      galeria: "Galería",
       ubicacion: "Ubicación",
       opiniones: "Opiniones",
       reservar: "Reservar"

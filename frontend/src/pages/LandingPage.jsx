@@ -5,6 +5,7 @@ import { SocialNavIcon } from "../components/SocialNavIcon.jsx";
 import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
 import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
 import { TrinidadLocationMap } from "../components/TrinidadLocationMap.jsx";
+import { PhotoLightbox } from "../components/PhotoLightbox.jsx";
 import { apiFetch } from "../lib/api.js";
 import { applyHeroSeoMeta } from "../lib/seoHero.js";
 import { normalizeMapPinLabel } from "../lib/mapPins.js";
@@ -12,6 +13,9 @@ import { normalizeMapPinLabel } from "../lib/mapPins.js";
 function safeGet(obj, key, fallback) {
   return obj && obj[key] != null ? obj[key] : fallback;
 }
+
+/** Miniaturas en la página; el resto solo en lightbox (botón «Ver más»). */
+const GALLERY_PREVIEW_MAX = 6;
 
 /** Atractivo: string legacy o { text, imgUrl?, alt? } */
 function normalizeLocationAttraction(raw) {
@@ -71,6 +75,7 @@ export default function LandingPage({ lang = "es" }) {
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [contactState, setContactState] = useState({ status: "idle", message: "" });
+  const [galleryLightbox, setGalleryLightbox] = useState(null);
 
   useEffect(() => {
     const target = lang === "en" ? "en" : "es";
@@ -256,13 +261,27 @@ export default function LandingPage({ lang = "es" }) {
   const ads = data.ads && typeof data.ads === "object" ? data.ads : {};
   const site = safeGet(data, "site", {});
   const navL = site?.navLabels && typeof site.navLabels === "object" ? site.navLabels : {};
+  const gallery = safeGet(data, "gallery", { photos: [] });
+  const galleryPhotos = (gallery?.photos || [])
+    .filter((p) => p && String(p.imgUrl || "").trim())
+    .map((p) => ({
+      imgUrl: String(p.imgUrl).trim(),
+      alt: p.alt != null ? String(p.alt) : "",
+      caption: p.caption != null ? String(p.caption) : "",
+    }));
+  const galleryPreviewPhotos = galleryPhotos.slice(0, GALLERY_PREVIEW_MAX);
+  const galleryExtraCount = Math.max(0, galleryPhotos.length - GALLERY_PREVIEW_MAX);
+
+  const brandTitle = site?.brandName || t("brand.defaultName");
+  const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
 
   return (
     <>
       <header className={`site-header${headerScrolled ? " is-scrolled" : ""}`} id="inicio">
         <nav className="nav" aria-label={t("nav.ariaMain")}>
           <a className="logo" href="#inicio">
-            {site?.brandName || t("brand.defaultName")}
+            <img className="logo__mark" src={logoSrc} alt={brandTitle} width="32" height="32" decoding="async" />
+            <span className="logo__title">{brandTitle}</span>
           </a>
           <div className="nav-end">
             <div className="nav-cluster">
@@ -275,6 +294,11 @@ export default function LandingPage({ lang = "es" }) {
                 <li>
                   <a href="#habitaciones" onClick={() => setNavOpen(false)}>
                     {(navL.habitaciones || "").trim() || t("nav.habitaciones")}
+                  </a>
+                </li>
+                <li>
+                  <a href="#galeria" onClick={() => setNavOpen(false)}>
+                    {(navL.galeria || "").trim() || t("nav.galeria")}
                   </a>
                 </li>
                 <li>
@@ -435,6 +459,87 @@ export default function LandingPage({ lang = "es" }) {
             </div>
           </div>
         </section>
+
+        <section className="section section-gallery" id="galeria" aria-labelledby="galeria-title">
+          <div className="container">
+            <p className="section-eyebrow">{(gallery?.eyebrow || "").trim() || t("section.galleryEyebrow")}</p>
+            <h2 className="section-title" id="galeria-title">
+              {gallery?.title || t("section.galleryTitleDefault")}
+            </h2>
+            {(gallery?.lead || "").trim() ? (
+              <p className="section-subtitle narrow-text">{gallery.lead.trim()}</p>
+            ) : null}
+
+            {galleryPhotos.length === 0 ? (
+              <p className="gallery-empty">{t("section.galleryEmpty")}</p>
+            ) : (
+              <>
+                <ul className="gallery-grid">
+                  {galleryPreviewPhotos.map((photo, idx) => (
+                    <li key={`${photo.imgUrl}-${idx}`} className="gallery-tile">
+                      <button
+                        type="button"
+                        className="gallery-tile-btn"
+                        onClick={() => setGalleryLightbox(idx)}
+                        aria-haspopup="dialog"
+                        aria-label={t("gallery.openAria", { n: idx + 1, total: galleryPhotos.length })}
+                      >
+                        <figure className="gallery-tile-figure">
+                          <img src={photo.imgUrl} alt={photo.alt || ""} loading="lazy" decoding="async" />
+                          {photo.caption?.trim() ? (
+                            <figcaption className="gallery-tile-cap">{photo.caption.trim()}</figcaption>
+                          ) : null}
+                        </figure>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {galleryExtraCount > 0 ? (
+                  <div className="gallery-more">
+                    <button
+                      type="button"
+                      className="btn btn-secondary gallery-more__btn"
+                      onClick={() => setGalleryLightbox(GALLERY_PREVIEW_MAX)}
+                      aria-label={t("gallery.showMoreAria", {
+                        total: galleryPhotos.length,
+                        more: galleryExtraCount,
+                      })}
+                    >
+                      {t("gallery.showMore", { count: galleryExtraCount })}
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </section>
+
+        {galleryLightbox !== null && galleryPhotos.length > 0 ? (
+          <PhotoLightbox
+            items={galleryPhotos}
+            index={galleryLightbox}
+            onClose={() => setGalleryLightbox(null)}
+            onIndexChange={setGalleryLightbox}
+            labels={{
+              close: t("gallery.close"),
+              prev: t("gallery.prev"),
+              next: t("gallery.next"),
+              dialogLabel: t("gallery.dialogLabel"),
+              adEyebrow: t("section.adsDefault"),
+              adCounter: t("gallery.adCounter"),
+              adContinueHint: t("gallery.adContinueHint"),
+            }}
+            adSense={
+              ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim()
+                ? {
+                    adClient: ads.adClient,
+                    adSlot: ads.adSlot,
+                    label: (ads.label || "").trim(),
+                  }
+                : null
+            }
+          />
+        ) : null}
 
         <section
           ref={locationSectionRef}
@@ -616,6 +721,7 @@ export default function LandingPage({ lang = "es" }) {
           <div className="footer-links">
             <a href="#experiencia">{(navL.experiencia || "").trim() || t("nav.experiencia")}</a>
             <a href="#habitaciones">{(navL.habitaciones || "").trim() || t("nav.habitaciones")}</a>
+            <a href="#galeria">{(navL.galeria || "").trim() || t("nav.galeria")}</a>
             <a href="#ubicacion">{(navL.ubicacion || "").trim() || t("nav.ubicacion")}</a>
             <a href="#opiniones">{(navL.opiniones || "").trim() || t("nav.opiniones")}</a>
             <a href="#contacto">{(navL.reservar || "").trim() || t("nav.reservar")}</a>
