@@ -37,10 +37,10 @@ function toLngLat(lat, lng) {
   return [ln, la];
 }
 
-function createImagePinElement(imgUrl, variant, title) {
+function createImagePinElement(imgUrl, variant, title, markerFallbackLabel) {
   const wrap = document.createElement("div");
   wrap.className = `maplibregl-custom-pin maplibregl-custom-pin--${variant}`;
-  wrap.setAttribute("aria-label", title || "Marcador");
+  wrap.setAttribute("aria-label", title || markerFallbackLabel || "Marker");
   const img = document.createElement("img");
   img.src = imgUrl;
   img.alt = "";
@@ -54,10 +54,10 @@ function createImagePinElement(imgUrl, variant, title) {
 }
 
 function addMarker(map, ll, opts) {
-  const { imgUrl, variant, title, color, popupHtml } = opts;
+  const { imgUrl, variant, title, color, popupHtml, markerFallbackLabel } = opts;
   let m;
   if (imgUrl) {
-    const el = createImagePinElement(imgUrl, variant, title);
+    const el = createImagePinElement(imgUrl, variant, title, markerFallbackLabel);
     m = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(ll).addTo(map);
   } else {
     m = new maplibregl.Marker({ color }).setLngLat(ll).addTo(map);
@@ -70,7 +70,13 @@ function addMarker(map, ll, opts) {
  * Mapa (OpenFreeMap + MapLibre). Marcadores en `main` y `nearby`; la vista inicial se centra
  * en el hostal (`main`) con `defaultZoom` (p. ej. 15 = barrio). Los demás puntos se ven al desplazar el mapa.
  */
-export function TrinidadLocationMap({ className = "", config, pinImages }) {
+export function TrinidadLocationMap({
+  className = "",
+  config,
+  pinImages,
+  mapAriaLabel,
+  markerFallbackLabel,
+}) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -112,6 +118,7 @@ export function TrinidadLocationMap({ className = "", config, pinImages }) {
           title: main.name,
           color: MAP_PIN_MAIN,
           popupHtml: html.join("<br>"),
+          markerFallbackLabel,
         })
       );
     }
@@ -127,6 +134,7 @@ export function TrinidadLocationMap({ className = "", config, pinImages }) {
           title: p.name,
           color: MAP_PIN_NEAR,
           popupHtml: html.join("<br>"),
+          markerFallbackLabel,
         })
       );
     }
@@ -161,14 +169,14 @@ export function TrinidadLocationMap({ className = "", config, pinImages }) {
       for (const m of markers) m.remove();
       map.remove();
     };
-  }, [config, pinImages]);
+  }, [config, pinImages, markerFallbackLabel, mapAriaLabel]);
 
   return (
     <div
       ref={containerRef}
       className={className}
       role="img"
-      aria-label="Mapa de Trinidad, la península y Playa Ancón"
+      aria-label={mapAriaLabel || "Map"}
     />
   );
 }

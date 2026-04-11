@@ -1,0 +1,72 @@
+{
+  "seo": {
+    "title": "Casa Trinidad Viva | Hostal en Trinidad, Cuba — Reserva"
+  },
+  "brand": {
+    "defaultName": "Casa Trinidad Viva",
+    "defaultTagline": "Tu casa en el corazón de Trinidad, Cuba."
+  },
+  "nav": {
+    "ariaMain": "Principal",
+    "ariaSocial": "Redes sociales",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "experiencia": "Experiencia",
+    "habitaciones": "Habitaciones",
+    "ubicacion": "Ubicación",
+    "opiniones": "Opiniones",
+    "reservar": "Reservar",
+    "langSwitch": "Idioma",
+    "langEs": "Español",
+    "langEn": "English"
+  },
+  "loading": "Cargando…",
+  "errorLoad": "Error cargando contenido:",
+  "hero": {
+    "bgAltDefault": "Playa tropical y mar turquesa",
+    "tagDefault": "Trinidad, Cuba · Patrimonio vivo",
+    "titleDefault": "Vive la auténtica experiencia cubana en Trinidad",
+    "whatsappCta": "Reservar por WhatsApp",
+    "discoverMore": "Descubrir más",
+    "scrollHint": "Desliza"
+  },
+  "section": {
+    "experiencesEyebrow": "Experiencias",
+    "experiencesTitleDefault": "Vive Trinidad como un local",
+    "splitTitleDefault": "Todo lo que necesitas",
+    "splitCta": "Ir a reservas",
+    "roomsTitleDefault": "Habitaciones cómodas y privadas",
+    "locationTitleDefault": "Ubicación privilegiada",
+    "testimonialsEyebrow": "Opiniones",
+    "testimonialsTitleDefault": "Lo que dicen nuestros huéspedes",
+    "testimonialsEmpty": "Pronto añadiremos opiniones de huéspedes.",
+    "testimonialsSplideAria": "Opiniones de huéspedes",
+    "guestBadge": "Huésped",
+    "ctaEyebrow": "Reservas",
+    "ctaTitleDefault": "Reserva fácilmente",
+    "adsDefault": "Publicidad"
+  },
+  "contact": {
+    "name": "Nombre",
+    "email": "Email",
+    "message": "Mensaje",
+    "placeholderName": "Tu nombre",
+    "placeholderEmail": "correo@ejemplo.com",
+    "placeholderMessage": "Fechas, tipo de habitación, dudas…",
+    "submit": "Enviar consulta",
+    "sending": "Enviando…",
+    "success": "Gracias. Hemos recibido tu consulta y te responderemos pronto.",
+    "error400": "Revisa nombre, email y mensaje.",
+    "errorGeneric": "No se pudo enviar. Inténtalo de nuevo en unos minutos."
+  },
+  "footer": {
+    "copyPrefix": "©"
+  },
+  "whatsapp": {
+    "floatLabel": "Escríbenos por WhatsApp"
+  },
+  "map": {
+    "ariaLabel": "Mapa de Trinidad, la península y Playa Ancón",
+    "markerFallback": "Marcador"
+  }
+}

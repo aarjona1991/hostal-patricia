@@ -151,6 +151,56 @@ a:hover {
   min-width: 0;
 }
 
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.lang-switch__sep {
+  color: rgba(255, 255, 255, 0.45);
+  user-select: none;
+}
+
+.site-header.is-scrolled .lang-switch__sep {
+  color: color-mix(in srgb, var(--ink-muted) 55%, transparent);
+}
+
+.lang-switch__link {
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lang-switch__link:hover {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.lang-switch__link.is-active {
+  color: var(--mango);
+}
+
+.site-header.is-scrolled .lang-switch__link {
+  color: var(--ink-muted);
+  text-shadow: none;
+}
+
+.site-header.is-scrolled .lang-switch__link:hover {
+  color: var(--ocean);
+}
+
+.site-header.is-scrolled .lang-switch__link.is-active {
+  color: var(--ocean);
+  font-weight: 700;
+}
+
 .nav-social {
   display: flex;
   align-items: center;

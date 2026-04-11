@@ -570,7 +570,7 @@ export const SECTION_NAV = [
   { key: "testimonials", label: "Opiniones", icon: "❝", hint: "Carrusel de citas" },
   { key: "cta", label: "Reservas / CTA", icon: "✉", hint: "Bloque de contacto" },
   { key: "ads", label: "Publicidad", icon: "▣", hint: "Google AdSense (tras reservas, antes del pie)" },
-  { key: "site", label: "Marca y redes", icon: "⚙", hint: "Nombre y enlaces" },
+  { key: "site", label: "Marca y redes", icon: "⚙", hint: "Marca, textos del menú/pie y redes" },
 ];
 
 export function SectionForm({ sectionKey, draft, setDraft }) {
@@ -598,6 +598,18 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
             <label>URL WhatsApp (enlace completo)</label>
             <input type="url" className="adm-input" value={draft.whatsappUrl || ""} onChange={(e) => patch({ whatsappUrl: e.target.value })} />
           </div>
+          <div className="adm-field">
+            <label>Texto botón principal (WhatsApp)</label>
+            <input type="text" className="adm-input" value={draft.primaryCta || ""} onChange={(e) => patch({ primaryCta: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Texto botón secundario (ancla a experiencias)</label>
+            <input type="text" className="adm-input" value={draft.secondaryCta || ""} onChange={(e) => patch({ secondaryCta: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Indicador de scroll (hero)</label>
+            <input type="text" className="adm-input" value={draft.scrollHint || ""} onChange={(e) => patch({ scrollHint: e.target.value })} />
+          </div>
           <ImageUrlField
             label="Imagen de fondo"
             previewTall
@@ -614,6 +626,10 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
     case "experiences":
       return (
         <>
+          <div className="adm-field">
+            <label>Antetítulo (eyebrow, pequeño encima del título)</label>
+            <input type="text" className="adm-input" value={draft.eyebrow || ""} onChange={(e) => patch({ eyebrow: e.target.value })} />
+          </div>
           <div className="adm-field">
             <label>Título de sección</label>
             <input type="text" className="adm-input" value={draft.title || ""} onChange={(e) => patch({ title: e.target.value })} />
@@ -637,6 +653,10 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
           <div className="adm-field">
             <label>Título</label>
             <input type="text" className="adm-input" value={draft.title || ""} onChange={(e) => patch({ title: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Texto del botón (enlace a contacto)</label>
+            <input type="text" className="adm-input" value={draft.ctaLabel || ""} onChange={(e) => patch({ ctaLabel: e.target.value })} />
           </div>
           <ImageUrlField label="Imagen" value={draft.imgUrl || ""} onChange={(url) => patch({ imgUrl: url })} />
           <div className="adm-field">
@@ -776,8 +796,20 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
       return (
         <>
           <div className="adm-field">
+            <label>Antetítulo (eyebrow)</label>
+            <input type="text" className="adm-input" value={draft.eyebrow || ""} onChange={(e) => patch({ eyebrow: e.target.value })} />
+          </div>
+          <div className="adm-field">
             <label>Título de sección</label>
             <input type="text" className="adm-input" value={draft.title || ""} onChange={(e) => patch({ title: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Etiqueta bajo la cita (p. ej. «Huésped»)</label>
+            <input type="text" className="adm-input" value={draft.guestBadge || ""} onChange={(e) => patch({ guestBadge: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Accesibilidad · descripción del carrusel</label>
+            <input type="text" className="adm-input" value={draft.carouselLabel || ""} onChange={(e) => patch({ carouselLabel: e.target.value })} />
           </div>
           <StringListEditor label="Opiniones (una por línea)" items={draft.items} onChange={(items) => patch({ items })} addLabel="Añadir opinión" />
         </>
@@ -786,6 +818,10 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
     case "cta":
       return (
         <>
+          <div className="adm-field">
+            <label>Antetítulo (eyebrow)</label>
+            <input type="text" className="adm-input" value={draft.eyebrow || ""} onChange={(e) => patch({ eyebrow: e.target.value })} />
+          </div>
           <div className="adm-field">
             <label>Título</label>
             <input type="text" className="adm-input" value={draft.title || ""} onChange={(e) => patch({ title: e.target.value })} />
@@ -858,6 +894,64 @@ export function SectionForm({ sectionKey, draft, setDraft }) {
           <div className="adm-field">
             <label>Eslogan (footer)</label>
             <input type="text" className="adm-input" value={draft.tagline || ""} onChange={(e) => patch({ tagline: e.target.value })} />
+          </div>
+          <p className="adm-text-muted" style={{ marginTop: 0, marginBottom: "0.75rem" }}>
+            Menú superior y pie: si dejas un campo vacío, la web usa el texto según el idioma (ES/EN) de la ruta.
+          </p>
+          <div className="adm-field">
+            <label>Menú · ancla #experiencia</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={draft.navLabels?.experiencia || ""}
+              onChange={(e) =>
+                patch({ navLabels: { ...(draft.navLabels || {}), experiencia: e.target.value } })
+              }
+            />
+          </div>
+          <div className="adm-field">
+            <label>Menú · ancla #habitaciones</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={draft.navLabels?.habitaciones || ""}
+              onChange={(e) =>
+                patch({ navLabels: { ...(draft.navLabels || {}), habitaciones: e.target.value } })
+              }
+            />
+          </div>
+          <div className="adm-field">
+            <label>Menú · ancla #ubicacion</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={draft.navLabels?.ubicacion || ""}
+              onChange={(e) =>
+                patch({ navLabels: { ...(draft.navLabels || {}), ubicacion: e.target.value } })
+              }
+            />
+          </div>
+          <div className="adm-field">
+            <label>Menú · ancla #opiniones</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={draft.navLabels?.opiniones || ""}
+              onChange={(e) =>
+                patch({ navLabels: { ...(draft.navLabels || {}), opiniones: e.target.value } })
+              }
+            />
+          </div>
+          <div className="adm-field">
+            <label>Menú · botón reservas (#contacto)</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={draft.navLabels?.reservar || ""}
+              onChange={(e) =>
+                patch({ navLabels: { ...(draft.navLabels || {}), reservar: e.target.value } })
+              }
+            />
           </div>
           <SocialLinksEditor links={draft.socialLinks} onChange={(socialLinks) => patch({ socialLinks })} />
         </>
