@@ -8,6 +8,7 @@ import { TrinidadLocationMap } from "../components/TrinidadLocationMap.jsx";
 import { PhotoLightbox } from "../components/PhotoLightbox.jsx";
 import { apiFetch } from "../lib/api.js";
 import { applyHeroSeoMeta } from "../lib/seoHero.js";
+import { localizeSectionsMap } from "../lib/sectionI18n.js";
 import { normalizeMapPinLabel } from "../lib/mapPins.js";
 
 function safeGet(obj, key, fallback) {
@@ -90,14 +91,16 @@ export default function LandingPage({ lang = "es" }) {
   }, []);
 
   /** OG/Twitter/JSON-LD: imagen del Hero (también inyecta el servidor en index.html al servir). */
+  const viewData = useMemo(() => (data ? localizeSectionsMap(data, lang) : null), [data, lang]);
+
   useEffect(() => {
-    if (!data) return;
-    applyHeroSeoMeta(safeGet(data, "hero", {}));
-  }, [data]);
+    if (!viewData) return;
+    applyHeroSeoMeta(safeGet(viewData, "hero", {}));
+  }, [viewData]);
 
   /** Imágenes de la lista de ubicación, por nombre normalizado (mismo criterio que los pines). */
   const pinImageMap = useMemo(() => {
-    const loc = data && safeGet(data, "location", { attractions: [] });
+    const loc = viewData && safeGet(viewData, "location", { attractions: [] });
     const m = new Map();
     for (const raw of loc?.attractions || []) {
       const a = normalizeLocationAttraction(raw);
@@ -106,7 +109,7 @@ export default function LandingPage({ lang = "es" }) {
       if (key && u) m.set(key, u);
     }
     return m;
-  }, [data]);
+  }, [viewData]);
 
   useEffect(() => {
     if (!data) return;
@@ -216,11 +219,11 @@ export default function LandingPage({ lang = "es" }) {
   const year = useMemo(() => new Date().getFullYear(), []);
 
   const testimonialItems = useMemo(() => {
-    if (!data) return [];
-    const t = safeGet(data, "testimonials", { items: [] });
+    if (!viewData) return [];
+    const t = safeGet(viewData, "testimonials", { items: [] });
     const raw = Array.isArray(t?.items) ? t.items : [];
     return raw.map((item) => String(item || "").trim()).filter(Boolean);
-  }, [data]);
+  }, [viewData]);
 
   const testimonialsSplideOptions = useMemo(() => {
     const n = testimonialItems.length;
@@ -248,20 +251,20 @@ export default function LandingPage({ lang = "es" }) {
   }, [testimonialItems.length]);
 
   if (err) return <div style={{ padding: 24 }}>{t("errorLoad")} {String(err.message || err)}</div>;
-  if (!data) return <div style={{ padding: 24 }}>{t("loading")}</div>;
+  if (!data || !viewData) return <div style={{ padding: 24 }}>{t("loading")}</div>;
 
-  const hero = safeGet(data, "hero", {});
-  const experiences = safeGet(data, "experiences", { list: [], cards: [] });
-  const split = safeGet(data, "split", { amenities: [] });
-  const rooms = safeGet(data, "rooms", { cards: [] });
-  const location = safeGet(data, "location", { attractions: [] });
-  const mapSection = data.map && typeof data.map === "object" ? data.map : null;
-  const testimonials = safeGet(data, "testimonials", { items: [] });
-  const cta = safeGet(data, "cta", {});
-  const ads = data.ads && typeof data.ads === "object" ? data.ads : {};
-  const site = safeGet(data, "site", {});
+  const hero = safeGet(viewData, "hero", {});
+  const experiences = safeGet(viewData, "experiences", { list: [], cards: [] });
+  const split = safeGet(viewData, "split", { amenities: [] });
+  const rooms = safeGet(viewData, "rooms", { cards: [] });
+  const location = safeGet(viewData, "location", { attractions: [] });
+  const mapSection = viewData.map && typeof viewData.map === "object" ? viewData.map : null;
+  const testimonials = safeGet(viewData, "testimonials", { items: [] });
+  const cta = safeGet(viewData, "cta", {});
+  const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
+  const site = safeGet(viewData, "site", {});
   const navL = site?.navLabels && typeof site.navLabels === "object" ? site.navLabels : {};
-  const gallery = safeGet(data, "gallery", { photos: [] });
+  const gallery = safeGet(viewData, "gallery", { photos: [] });
   const galleryPhotos = (gallery?.photos || [])
     .filter((p) => p && String(p.imgUrl || "").trim())
     .map((p) => ({

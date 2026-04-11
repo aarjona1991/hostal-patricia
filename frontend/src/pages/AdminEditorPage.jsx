@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api.js";
 import { useSession } from "../lib/SessionProvider.jsx";
 import { SECTION_NAV, SectionForm, emptySectionDraft } from "../admin/SectionForm.jsx";
+import { CONTENT_LOCALE_EN, CONTENT_LOCALE_ES } from "../lib/sectionI18n.js";
 import "../styles/admin.css";
 
 export default function AdminEditorPage() {
@@ -19,6 +20,7 @@ export default function AdminEditorPage() {
   const [err, setErr] = useState("");
   const [saving, setSaving] = useState(false);
   const [advRaw, setAdvRaw] = useState("");
+  const [contentLang, setContentLang] = useState(CONTENT_LOCALE_ES);
 
   useEffect(() => {
     apiFetch("/api/sections")
@@ -40,6 +42,7 @@ export default function AdminEditorPage() {
     setStatus("");
     setErr("");
     setAdvRaw("");
+    setContentLang(CONTENT_LOCALE_ES);
   }, [activeKey, sections]);
 
   useEffect(() => {
@@ -175,8 +178,26 @@ export default function AdminEditorPage() {
           </div>
 
           <div className="adm-panel">
-            <p className="adm-panel-title">Contenido</p>
-            <SectionForm sectionKey={activeKey} draft={draft} setDraft={setDraft} />
+            <div className="adm-panel-head">
+              <p className="adm-panel-title">Contenido</p>
+              <div className="adm-content-lang" role="group" aria-label="Idioma de los textos editables">
+                <button
+                  type="button"
+                  className={contentLang === CONTENT_LOCALE_ES ? "is-active" : ""}
+                  onClick={() => setContentLang(CONTENT_LOCALE_ES)}
+                >
+                  Español
+                </button>
+                <button
+                  type="button"
+                  className={contentLang === CONTENT_LOCALE_EN ? "is-active" : ""}
+                  onClick={() => setContentLang(CONTENT_LOCALE_EN)}
+                >
+                  English
+                </button>
+              </div>
+            </div>
+            <SectionForm sectionKey={activeKey} draft={draft} setDraft={setDraft} contentLang={contentLang} />
           </div>
 
           <details

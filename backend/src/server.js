@@ -83,6 +83,7 @@ import {
 import { mountFileUploads } from "./uploads.js";
 import { injectHeroSeo } from "./seoInject.js";
 import { isAdminAdvertisingSectionEnabled } from "./adminFeatures.js";
+import { localizeSectionsMap } from "./sectionI18n.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -168,8 +169,11 @@ app.post("/api/auth/logout", (_req, res) => {
   res.json({ ok: true });
 });
 
-app.get("/api/sections", (_req, res) => {
+// Cada sección puede incluir `i18n.en` (parche opcional de textos). Sin `?lang=en` se devuelve el JSON tal cual (admin / SPA).
+app.get("/api/sections", (req, res) => {
   const all = getAllSections(db);
+  const lang = String(req.query.lang || "").toLowerCase();
+  if (lang === "en") return res.json(localizeSectionsMap(all, "en"));
   res.json(all);
 });
 
