@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { SessionProvider } from "./lib/SessionProvider.jsx";
 import "@splidejs/react-splide/css";
+import "./i18n/config.js";
 import "./styles/styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(

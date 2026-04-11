@@ -1,0 +1,72 @@
+{
+  "seo": {
+    "title": "Casa Trinidad Viva | Guesthouse in Trinidad, Cuba — Book"
+  },
+  "brand": {
+    "defaultName": "Casa Trinidad Viva",
+    "defaultTagline": "Your home in the heart of Trinidad, Cuba."
+  },
+  "nav": {
+    "ariaMain": "Main",
+    "ariaSocial": "Social media",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "experiencia": "Experience",
+    "habitaciones": "Rooms",
+    "ubicacion": "Location",
+    "opiniones": "Reviews",
+    "reservar": "Book",
+    "langSwitch": "Language",
+    "langEs": "Español",
+    "langEn": "English"
+  },
+  "loading": "Loading…",
+  "errorLoad": "Error loading content:",
+  "hero": {
+    "bgAltDefault": "Tropical beach and turquoise sea",
+    "tagDefault": "Trinidad, Cuba · Living heritage",
+    "titleDefault": "Experience authentic Cuba in Trinidad",
+    "whatsappCta": "Book on WhatsApp",
+    "discoverMore": "Discover more",
+    "scrollHint": "Scroll"
+  },
+  "section": {
+    "experiencesEyebrow": "Experiences",
+    "experiencesTitleDefault": "Live Trinidad like a local",
+    "splitTitleDefault": "Everything you need",
+    "splitCta": "Go to bookings",
+    "roomsTitleDefault": "Comfortable private rooms",
+    "locationTitleDefault": "Prime location",
+    "testimonialsEyebrow": "Reviews",
+    "testimonialsTitleDefault": "What our guests say",
+    "testimonialsEmpty": "Guest reviews coming soon.",
+    "testimonialsSplideAria": "Guest reviews",
+    "guestBadge": "Guest",
+    "ctaEyebrow": "Bookings",
+    "ctaTitleDefault": "Book with ease",
+    "adsDefault": "Advertisement"
+  },
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "placeholderName": "Your name",
+    "placeholderEmail": "you@example.com",
+    "placeholderMessage": "Dates, room type, questions…",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "success": "Thank you. We’ve received your message and will reply soon.",
+    "error400": "Please check name, email and message.",
+    "errorGeneric": "Could not send. Please try again in a few minutes."
+  },
+  "footer": {
+    "copyPrefix": "©"
+  },
+  "whatsapp": {
+    "floatLabel": "Message us on WhatsApp"
+  },
+  "map": {
+    "ariaLabel": "Map of Trinidad, the peninsula and Playa Ancón",
+    "markerFallback": "Marker"
+  }
+}

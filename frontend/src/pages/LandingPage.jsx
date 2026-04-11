@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { SocialNavIcon } from "../components/SocialNavIcon.jsx";
 import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
+import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
 import { TrinidadLocationMap } from "../components/TrinidadLocationMap.jsx";
 import { apiFetch } from "../lib/api.js";
 import { applyHeroSeoMeta } from "../lib/seoHero.js";
@@ -59,14 +61,22 @@ function LocationAttractionPlaceholderIcon() {
   );
 }
 
-export default function LandingPage() {
+export default function LandingPage({ lang = "es" }) {
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const heroRef = useRef(null);
   const locationSectionRef = useRef(null);
   const [whatsappFloatVisible, setWhatsappFloatVisible] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const [contactState, setContactState] = useState({ status: "idle", message: "" });
+
+  useEffect(() => {
+    const target = lang === "en" ? "en" : "es";
+    if (i18n.language !== target) void i18n.changeLanguage(target);
+    document.documentElement.lang = target;
+  }, [lang, i18n]);
 
   useEffect(() => {
     apiFetch("/api/sections")
@@ -129,14 +139,11 @@ export default function LandingPage() {
       await apiFetch("/api/contact", { method: "POST", body: JSON.stringify(payload) });
       setContactState({
         status: "success",
-        message: "Gracias. Hemos recibido tu consulta y te responderemos pronto.",
+        message: t("contact.success"),
       });
       form.reset();
     } catch (err) {
-      const hint =
-        err.status === 400
-          ? "Revisa nombre, email y mensaje."
-          : "No se pudo enviar. Inténtalo de nuevo en unos minutos.";
+      const hint = err.status === 400 ? t("contact.error400") : t("contact.errorGeneric");
       setContactState({ status: "error", message: err.message ? `${hint} (${err.message})` : hint });
     }
   }
@@ -235,8 +242,8 @@ export default function LandingPage() {
     };
   }, [testimonialItems.length]);
 
-  if (err) return <div style={{ padding: 24 }}>Error cargando contenido: {String(err.message || err)}</div>;
-  if (!data) return <div style={{ padding: 24 }}>Cargando…</div>;
+  if (err) return <div style={{ padding: 24 }}>{t("errorLoad")} {String(err.message || err)}</div>;
+  if (!data) return <div style={{ padding: 24 }}>{t("loading")}</div>;
 
   const hero = safeGet(data, "hero", {});
   const experiences = safeGet(data, "experiences", { list: [], cards: [] });
@@ -248,36 +255,46 @@ export default function LandingPage() {
   const cta = safeGet(data, "cta", {});
   const ads = data.ads && typeof data.ads === "object" ? data.ads : {};
   const site = safeGet(data, "site", {});
+  const navL = site?.navLabels && typeof site.navLabels === "object" ? site.navLabels : {};
 
   return (
     <>
       <header className={`site-header${headerScrolled ? " is-scrolled" : ""}`} id="inicio">
-        <nav className="nav" aria-label="Principal">
+        <nav className="nav" aria-label={t("nav.ariaMain")}>
           <a className="logo" href="#inicio">
-            {site?.brandName || "Casa Trinidad Viva"}
+            {site?.brandName || t("brand.defaultName")}
           </a>
           <div className="nav-end">
             <div className="nav-cluster">
-              <ul className="nav-menu" id="nav-menu">
+              <ul className={`nav-menu${navOpen ? " is-open" : ""}`} id="nav-menu">
                 <li>
-                  <a href="#experiencia">Experiencia</a>
+                  <a href="#experiencia" onClick={() => setNavOpen(false)}>
+                    {(navL.experiencia || "").trim() || t("nav.experiencia")}
+                  </a>
                 </li>
                 <li>
-                  <a href="#habitaciones">Habitaciones</a>
+                  <a href="#habitaciones" onClick={() => setNavOpen(false)}>
+                    {(navL.habitaciones || "").trim() || t("nav.habitaciones")}
+                  </a>
                 </li>
                 <li>
-                  <a href="#ubicacion">Ubicación</a>
+                  <a href="#ubicacion" onClick={() => setNavOpen(false)}>
+                    {(navL.ubicacion || "").trim() || t("nav.ubicacion")}
+                  </a>
                 </li>
                 <li>
-                  <a href="#opiniones">Opiniones</a>
+                  <a href="#opiniones" onClick={() => setNavOpen(false)}>
+                    {(navL.opiniones || "").trim() || t("nav.opiniones")}
+                  </a>
                 </li>
                 <li>
-                  <a href="#contacto" className="nav-cta">
-                    Reservar
+                  <a href="#contacto" className="nav-cta" onClick={() => setNavOpen(false)}>
+                    {(navL.reservar || "").trim() || t("nav.reservar")}
                   </a>
                 </li>
               </ul>
-              <div className="nav-social" aria-label="Redes sociales">
+              <LanguageSwitcher />
+              <div className="nav-social" aria-label={t("nav.ariaSocial")}>
                 {Array.isArray(site?.socialLinks) &&
                   site.socialLinks
                     .filter((l) => l?.enabled !== false)
@@ -300,9 +317,10 @@ export default function LandingPage() {
             <button
               type="button"
               className="nav-toggle"
-              aria-expanded="false"
+              aria-expanded={navOpen}
               aria-controls="nav-menu"
-              aria-label="Abrir menú"
+              aria-label={navOpen ? t("nav.closeMenu") : t("nav.openMenu")}
+              onClick={() => setNavOpen((o) => !o)}
             >
               <span></span>
               <span></span>
@@ -317,33 +335,33 @@ export default function LandingPage() {
           <div
             className="hero-bg"
             role="img"
-            aria-label={hero?.bgAlt || "Playa tropical y mar turquesa"}
+            aria-label={hero?.bgAlt || t("hero.bgAltDefault")}
             style={hero?.bgImageUrl ? { backgroundImage: `url("${hero.bgImageUrl}")` } : undefined}
           ></div>
           <div className="hero-overlay"></div>
           <div className="hero-content">
-            <p className="hero-tag">{hero?.tag || "Trinidad, Cuba · Patrimonio vivo"}</p>
-            <h1>{hero?.title || "Vive la auténtica experiencia cubana en Trinidad"}</h1>
+            <p className="hero-tag">{hero?.tag || t("hero.tagDefault")}</p>
+            <h1>{hero?.title || t("hero.titleDefault")}</h1>
             <p className="hero-lead">{hero?.lead || ""}</p>
             <div className="hero-actions">
               <a href={hero?.whatsappUrl || "#"} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
-                Reservar por WhatsApp
+                {(hero?.primaryCta || "").trim() || t("hero.whatsappCta")}
               </a>
               <a href="#experiencia" className="btn btn-ghost">
-                Descubrir más
+                {(hero?.secondaryCta || "").trim() || t("hero.discoverMore")}
               </a>
             </div>
           </div>
           <div className="hero-scroll" aria-hidden="true">
-            <span>Desliza</span>
+            <span>{(hero?.scrollHint || "").trim() || t("hero.scrollHint")}</span>
             <div className="hero-scroll-line"></div>
           </div>
         </section>
 
         <section className="section section-intro" id="experiencia">
           <div className="container narrow experience-block">
-            <p className="section-eyebrow">Experiencias</p>
-            <h2 className="section-title">{experiences?.title || "Vive Trinidad como un local"}</h2>
+            <p className="section-eyebrow">{(experiences?.eyebrow || "").trim() || t("section.experiencesEyebrow")}</p>
+            <h2 className="section-title">{experiences?.title || t("section.experiencesTitleDefault")}</h2>
             <p className="experience-lead">{experiences?.lead || ""}</p>
           </div>
           <div className="container experience-list-outer">
@@ -384,21 +402,21 @@ export default function LandingPage() {
             {split?.imgUrl ? <img src={split.imgUrl} alt={split.alt || ""} loading="lazy" /> : null}
           </div>
           <div className="split-content">
-            <h2 className="section-title align-left">{split?.title || "Todo lo que necesitas"}</h2>
+            <h2 className="section-title align-left">{split?.title || t("section.splitTitleDefault")}</h2>
             <ul className="amenities-list">
               {(split?.amenities || []).map((a, idx) => (
                 <li key={idx}>{a}</li>
               ))}
             </ul>
             <a href="#contacto" className="btn btn-secondary">
-              Ir a reservas
+              {(split?.ctaLabel || "").trim() || t("section.splitCta")}
             </a>
           </div>
         </section>
 
         <section className="section section-rooms" id="habitaciones">
           <div className="container">
-            <h2 className="section-title">{rooms?.title || "Habitaciones cómodas y privadas"}</h2>
+            <h2 className="section-title">{rooms?.title || t("section.roomsTitleDefault")}</h2>
             <p className="section-subtitle narrow-text">{rooms?.subtitle || ""}</p>
 
             <div className="rooms-grid">
@@ -428,7 +446,7 @@ export default function LandingPage() {
         >
           <div className="location-layout">
             <div className="location-copy">
-              <h2 className="section-title align-left">{location?.title || "Ubicación privilegiada"}</h2>
+              <h2 className="section-title align-left">{location?.title || t("section.locationTitleDefault")}</h2>
               <p className="section-subtitle location-lead">{location?.lead || ""}</p>
               <ul className="location-attractions">
                 {(location?.attractions || []).map((raw, idx) => {
@@ -469,6 +487,8 @@ export default function LandingPage() {
                     className="location-map-canvas"
                     config={mapSection || undefined}
                     pinImages={pinImageMap}
+                    mapAriaLabel={t("map.ariaLabel")}
+                    markerFallbackLabel={t("map.markerFallback")}
                   />
                 </div>
                 <p className="location-map-osm-credit">
@@ -483,21 +503,21 @@ export default function LandingPage() {
 
         <section className="section section-testimonials" id="opiniones" aria-labelledby="opiniones-title">
           <div className="container">
-            <p className="section-eyebrow">Opiniones</p>
+            <p className="section-eyebrow">{(testimonials?.eyebrow || "").trim() || t("section.testimonialsEyebrow")}</p>
             <h2 className="section-title" id="opiniones-title">
-              {testimonials?.title || "Lo que dicen nuestros huéspedes"}
+              {testimonials?.title || t("section.testimonialsTitleDefault")}
             </h2>
 
             {testimonialItems.length === 0 ? (
-              <p className="testimonials-empty">Pronto añadiremos opiniones de huéspedes.</p>
+              <p className="testimonials-empty">{t("section.testimonialsEmpty")}</p>
             ) : (
               <Splide
                 className="testimonials-splide"
                 options={testimonialsSplideOptions}
-                aria-label="Opiniones de huéspedes"
+                aria-label={(testimonials?.carouselLabel || "").trim() || t("section.testimonialsSplideAria")}
               >
-                {testimonialItems.map((t, idx) => (
-                  <SplideSlide key={`${idx}-${t.slice(0, 24)}`}>
+                {testimonialItems.map((quoteText, idx) => (
+                  <SplideSlide key={`${idx}-${quoteText.slice(0, 24)}`}>
                     <blockquote className="testimonial-card">
                       <div className="testimonial-card__inner">
                         <div className="testimonial-card__stars" aria-hidden="true">
@@ -507,12 +527,14 @@ export default function LandingPage() {
                           <span>★</span>
                           <span>★</span>
                         </div>
-                        <p className="testimonial-card__quote">{testimonialPlainText(t)}</p>
+                        <p className="testimonial-card__quote">{testimonialPlainText(quoteText)}</p>
                         <footer className="testimonial-card__footer">
                           <span className="testimonial-card__mark" aria-hidden="true">
                             “
                           </span>
-                          <span className="testimonial-card__badge">Huésped</span>
+                          <span className="testimonial-card__badge">
+                            {(testimonials?.guestBadge || "").trim() || t("section.guestBadge")}
+                          </span>
                         </footer>
                       </div>
                     </blockquote>
@@ -529,21 +551,23 @@ export default function LandingPage() {
               {cta?.imgUrl ? <img src={cta.imgUrl} alt={cta.alt || ""} loading="lazy" /> : null}
             </div>
             <div className="cta-content">
-              <p className="section-eyebrow section-eyebrow--left">Reservas</p>
-              <h2 className="section-title align-left">{cta?.title || "Reserva fácilmente"}</h2>
+              <p className="section-eyebrow section-eyebrow--left">
+                {(cta?.eyebrow || "").trim() || t("section.ctaEyebrow")}
+              </p>
+              <h2 className="section-title align-left">{cta?.title || t("section.ctaTitleDefault")}</h2>
               <p>{cta?.lead || ""}</p>
               <form className="contact-form" noValidate onSubmit={handleContactSubmit}>
                 <label>
-                  <span>Nombre</span>
-                  <input type="text" name="nombre" placeholder="Tu nombre" autoComplete="name" required />
+                  <span>{t("contact.name")}</span>
+                  <input type="text" name="nombre" placeholder={t("contact.placeholderName")} autoComplete="name" required />
                 </label>
                 <label>
-                  <span>Email</span>
-                  <input type="email" name="email" placeholder="correo@ejemplo.com" autoComplete="email" required />
+                  <span>{t("contact.email")}</span>
+                  <input type="email" name="email" placeholder={t("contact.placeholderEmail")} autoComplete="email" required />
                 </label>
                 <label>
-                  <span>Mensaje</span>
-                  <textarea name="mensaje" rows="4" placeholder="Fechas, tipo de habitación, dudas…" required></textarea>
+                  <span>{t("contact.message")}</span>
+                  <textarea name="mensaje" rows="4" placeholder={t("contact.placeholderMessage")} required></textarea>
                 </label>
                 {(contactState.status === "success" || contactState.status === "error") && (
                   <p
@@ -560,7 +584,7 @@ export default function LandingPage() {
                   disabled={contactState.status === "sending"}
                   aria-busy={contactState.status === "sending"}
                 >
-                  {contactState.status === "sending" ? "Enviando…" : "Enviar consulta"}
+                  {contactState.status === "sending" ? t("contact.sending") : t("contact.submit")}
                 </button>
               </form>
             </div>
@@ -568,9 +592,9 @@ export default function LandingPage() {
         </section>
 
         {ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim() ? (
-          <aside className="section section-ads" aria-label={ads.label || "Publicidad"}>
+          <aside className="section section-ads" aria-label={ads.label || t("section.adsDefault")}>
             <div className="container section-ads-inner">
-              <p className="section-ads-eyebrow">{ads.label || "Publicidad"}</p>
+              <p className="section-ads-eyebrow">{ads.label || t("section.adsDefault")}</p>
               <div className="section-ads-slot">
                 <GoogleAdSlot
                   key={`${String(ads.adClient || "").trim()}-${String(ads.adSlot || "").trim()}`}
@@ -586,18 +610,18 @@ export default function LandingPage() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <div className="footer-brand">
-            <strong>{site?.brandName || "Casa Trinidad Viva"}</strong>
-            <p>{site?.tagline || "Tu casa en el corazón de Trinidad, Cuba."}</p>
+            <strong>{site?.brandName || t("brand.defaultName")}</strong>
+            <p>{site?.tagline || t("brand.defaultTagline")}</p>
           </div>
           <div className="footer-links">
-            <a href="#experiencia">Experiencia</a>
-            <a href="#habitaciones">Habitaciones</a>
-            <a href="#ubicacion">Ubicación</a>
-            <a href="#opiniones">Opiniones</a>
-            <a href="#contacto">Reservas</a>
+            <a href="#experiencia">{(navL.experiencia || "").trim() || t("nav.experiencia")}</a>
+            <a href="#habitaciones">{(navL.habitaciones || "").trim() || t("nav.habitaciones")}</a>
+            <a href="#ubicacion">{(navL.ubicacion || "").trim() || t("nav.ubicacion")}</a>
+            <a href="#opiniones">{(navL.opiniones || "").trim() || t("nav.opiniones")}</a>
+            <a href="#contacto">{(navL.reservar || "").trim() || t("nav.reservar")}</a>
           </div>
           <p className="footer-copy">
-            © {year} {site?.brandName || "Casa Trinidad Viva"}.
+            {t("footer.copyPrefix")} {year} {site?.brandName || t("brand.defaultName")}.
           </p>
         </div>
       </footer>
@@ -607,7 +631,7 @@ export default function LandingPage() {
         className={`whatsapp-float${whatsappFloatVisible ? " is-visible" : ""}`}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Escríbenos por WhatsApp"
+        aria-label={t("whatsapp.floatLabel")}
         aria-hidden={!whatsappFloatVisible}
         tabIndex={whatsappFloatVisible ? undefined : -1}
       >

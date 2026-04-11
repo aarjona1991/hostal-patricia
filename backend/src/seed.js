@@ -7,9 +7,13 @@ export const DEFAULT_SECTIONS = {
     whatsappUrl:
       "https://wa.me/5351234567?text=Hola%2C%20me%20interesa%20reservar%20en%20Casa%20Trinidad%20Viva",
     bgImageUrl: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1920&q=85",
-    bgAlt: "Playa tropical y mar turquesa"
+    bgAlt: "Playa tropical y mar turquesa",
+    primaryCta: "Reservar por WhatsApp",
+    secondaryCta: "Descubrir más",
+    scrollHint: "Desliza"
   },
   experiences: {
+    eyebrow: "Experiencias",
     title: "Vive Trinidad como un local",
     lead: "No solo ofrecemos alojamiento, también te ayudamos a vivir experiencias únicas:",
     list: [
@@ -43,6 +47,7 @@ export const DEFAULT_SECTIONS = {
   },
   split: {
     title: "Todo lo que necesitas",
+    ctaLabel: "Ir a reservas",
     imgUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80",
     alt: "Interior de casa colonial con luz natural",
     amenities: [
@@ -131,7 +136,10 @@ export const DEFAULT_SECTIONS = {
     ]
   },
   testimonials: {
+    eyebrow: "Opiniones",
     title: "Lo que dicen nuestros huéspedes",
+    guestBadge: "Huésped",
+    carouselLabel: "Opiniones de huéspedes",
     items: [
       "«Una experiencia increíble, nos sentimos como en casa desde el primer momento.»",
       "«Ubicación perfecta y atención excelente.»",
@@ -141,6 +149,7 @@ export const DEFAULT_SECTIONS = {
     ]
   },
   cta: {
+    eyebrow: "Reservas",
     title: "Reserva fácilmente",
     lead:
       "Consulta disponibilidad y precios: envíanos el formulario con tus fechas y número de personas y te responderemos pronto.",
@@ -157,6 +166,13 @@ export const DEFAULT_SECTIONS = {
   site: {
     brandName: "Casa Trinidad Viva",
     tagline: "Tu casa en el corazón de Trinidad, Cuba.",
+    navLabels: {
+      experiencia: "Experiencia",
+      habitaciones: "Habitaciones",
+      ubicacion: "Ubicación",
+      opiniones: "Opiniones",
+      reservar: "Reservar"
+    },
     socialLinks: [
       { key: "instagram", label: "Instagram", href: "https://www.instagram.com/", iconText: "IG" },
       { key: "airbnb", label: "Airbnb", href: "https://www.airbnb.com/", iconText: "AB" },
