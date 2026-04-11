@@ -1540,7 +1540,8 @@ a:hover {
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--palm);
+  color: var(--ink);
+  letter-spacing: 0.01em;
   margin-bottom: 0.35rem;
 }
 
@@ -1550,17 +1551,31 @@ a:hover {
   padding: 0.75rem 1rem;
   font-family: var(--font-sans);
   font-size: 1rem;
-  border: 1px solid var(--sand-deep);
+  line-height: 1.5;
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--sand-deep));
   border-radius: 10px;
-  background: var(--sand);
+  background: var(--white);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+.contact-form input::-moz-placeholder,
+.contact-form textarea::-moz-placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
 }
 
 .contact-form input:focus,
 .contact-form textarea:focus {
   outline: none;
-  border-color: var(--ocean-light);
-  box-shadow: 0 0 0 3px rgba(20, 163, 163, 0.2);
+  border-color: var(--ocean);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ocean-light) 35%, transparent);
 }
 
 .contact-form textarea {
@@ -1575,7 +1590,8 @@ a:hover {
 }
 
 .contact-form-status--success {
-  color: var(--palm);
+  color: #0a3f36;
+  font-weight: 600;
 }
 
 .contact-form-status--error {
@@ -1584,7 +1600,7 @@ a:hover {
 
 .cta-note {
   font-size: 0.8125rem;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--ink) 78%, var(--ink-muted));
   margin: 1.25rem 0 0;
   font-weight: 500;
 }
