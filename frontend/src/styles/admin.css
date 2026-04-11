@@ -182,12 +182,16 @@
   margin-bottom: 1rem;
 }
 
-/* Dashboard layout: una sola columna con scroll (main), sin doble barra con el documento */
+/* Escritorio: capa fija = una sola barra de scroll (.adm-main), sin depender de #root */
+@media (min-width: 901px) {
+  html:has(.adm-dash),
+  body:has(.adm-dash) {
+    overflow: hidden;
+  }
+}
+
+/* Dashboard layout: scroll solo en .adm-main (escritorio) o en la página (móvil) */
 .adm-dash {
-  height: 100vh;
-  height: 100dvh;
-  max-height: 100vh;
-  max-height: 100dvh;
   overflow: hidden;
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -195,8 +199,22 @@
   background: #0c100e;
 }
 
+@media (min-width: 901px) {
+  .adm-dash {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    z-index: 1;
+  }
+}
+
 @media (max-width: 900px) {
   .adm-dash {
+    position: relative;
+    inset: auto;
+    z-index: auto;
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     height: auto;

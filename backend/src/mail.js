@@ -8,15 +8,30 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
-export function getContactMailSettings() {
+function readContactMailEnv() {
   const host = process.env.SMTP_HOST?.trim();
-  const notifyTo = process.env.CONTACT_NOTIFY_TO?.trim() || process.env.MAIL_TO?.trim();
+  const notifyTo =
+    process.env.CONTACT_NOTIFY_TO?.trim() || process.env.MAIL_TO?.trim();
   const user = process.env.SMTP_USER?.trim();
   const pass = process.env.SMTP_PASS;
   const allowNoPass = process.env.SMTP_ALLOW_NO_PASS === "1";
-  if (!host || !notifyTo) return null;
-  if (!user && !allowNoPass) return null;
-  if ((pass === undefined || pass === "") && !allowNoPass) return null;
+  return { host, notifyTo, user, pass, allowNoPass };
+}
+
+/** Motivo por el que no se envía correo (para logs); null si la config es válida. */
+export function getContactMailConfigIssue() {
+  const { host, notifyTo, user, pass, allowNoPass } = readContactMailEnv();
+  if (!host) return "falta SMTP_HOST";
+  if (!notifyTo) return "falta CONTACT_NOTIFY_TO (o MAIL_TO)";
+  if (!user && !allowNoPass) return "falta SMTP_USER (o SMTP_ALLOW_NO_PASS=1)";
+  if ((pass === undefined || pass === "") && !allowNoPass)
+    return "falta SMTP_PASS (contraseña del buzón noreply / SMTP)";
+  return null;
+}
+
+export function getContactMailSettings() {
+  if (getContactMailConfigIssue()) return null;
+  const { host, notifyTo, user, pass, allowNoPass } = readContactMailEnv();
   return {
     host,
     notifyTo,
@@ -30,12 +45,11 @@ export function isContactMailConfigured() {
 }
 
 export function logContactMailStatus() {
-  if (isContactMailConfigured()) {
-    console.log("Contact form: email notifications enabled (SMTP)");
+  const issue = getContactMailConfigIssue();
+  if (!issue) {
+    console.log("Contact form: avisos por correo activos (SMTP)");
   } else {
-    console.log(
-      "Contact form: email notifications disabled — set SMTP_HOST, SMTP_USER, SMTP_PASS, CONTACT_NOTIFY_TO"
-    );
+    console.log("Contact form: avisos por correo desactivados — %s", issue);
   }
 }
 
@@ -59,6 +73,7 @@ export async function sendContactFormNotification({ id, nombre, email, mensaje, 
     host: base.host,
     port,
     secure,
+    requireTLS: !secure && port === 587,
     auth: base.user ? { user: base.user, pass: base.pass } : undefined,
   });
 
