@@ -5,22 +5,42 @@ const SessionContext = createContext(null);
 
 export function SessionProvider({ children }) {
   const [status, setStatus] = useState("loading"); // loading | authenticated | anonymous
+  const [features, setFeatures] = useState(null);
+
+  async function refreshSession() {
+    try {
+      const data = await apiFetch("/api/auth/me");
+      setStatus(data?.user ? "authenticated" : "anonymous");
+      setFeatures(data?.user && data?.features ? data.features : null);
+    } catch {
+      setStatus("anonymous");
+      setFeatures(null);
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
-    apiFetch("/api/auth/me")
-      .then((data) => {
-        if (mounted) setStatus(data?.user ? "authenticated" : "anonymous");
-      })
-      .catch(() => {
-        if (mounted) setStatus("anonymous");
-      });
+    (async () => {
+      try {
+        const data = await apiFetch("/api/auth/me");
+        if (!mounted) return;
+        setStatus(data?.user ? "authenticated" : "anonymous");
+        setFeatures(data?.user && data?.features ? data.features : null);
+      } catch {
+        if (!mounted) return;
+        setStatus("anonymous");
+        setFeatures(null);
+      }
+    })();
     return () => {
       mounted = false;
     };
   }, []);
 
-  const value = useMemo(() => ({ status, setStatus }), [status]);
+  const value = useMemo(
+    () => ({ status, features, setStatus, refreshSession }),
+    [status, features]
+  );
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

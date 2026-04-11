@@ -82,6 +82,7 @@ import {
 } from "./mail.js";
 import { mountFileUploads } from "./uploads.js";
 import { injectHeroSeo } from "./seoInject.js";
+import { isAdminAdvertisingSectionEnabled } from "./adminFeatures.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -111,7 +112,13 @@ ensureSchema(db);
 // Siempre 200: { user: null } si no hay cookie o el JWT no vale (evita 401 en consola del navegador).
 app.get("/api/auth/me", (req, res) => {
   const user = getOptionalAuthUser(req);
-  res.json({ user });
+  const payload = { user };
+  if (user) {
+    payload.features = {
+      advertisingSection: isAdminAdvertisingSectionEnabled(),
+    };
+  }
+  res.json(payload);
 });
 
 app.post("/api/auth/login", async (req, res) => {
