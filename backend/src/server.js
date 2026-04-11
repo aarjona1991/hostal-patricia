@@ -75,7 +75,11 @@ import {
   openDb,
   upsertSection,
 } from "./db.js";
-import { logContactMailStatus, sendContactFormNotification } from "./mail.js";
+import {
+  logContactMailStatus,
+  sendContactFormNotification,
+  verifyContactSmtpIfConfigured,
+} from "./mail.js";
 import { mountFileUploads } from "./uploads.js";
 import { injectHeroSeo } from "./seoInject.js";
 
@@ -162,9 +166,27 @@ app.post("/api/contact", (req, res) => {
       email: parsed.email,
       mensaje: parsed.mensaje,
       ip,
-    }).catch((err) => {
-      console.error("[mail] contact notification failed:", err?.message || err);
-    });
+    })
+      .then((r) => {
+        if (r?.skipped) {
+          console.warn("[mail] aviso de contacto no enviado:", r.reason || "SMTP no configurado");
+          return;
+        }
+        if (r?.sent) {
+          console.log(
+            "[mail] aviso de contacto enviado id=%s messageId=%s",
+            row.id,
+            r.messageId || "—"
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("[mail] contact notification failed:", err?.message || err);
+        if (err?.code) console.error("[mail] código:", err.code);
+        if (err?.responseCode != null)
+          console.error("[mail] responseCode:", err.responseCode);
+        if (err?.response) console.error("[mail] respuesta servidor:", err.response);
+      });
     return res.status(201).json({ ok: true, id: row.id });
   } catch (e) {
     return res.status(500).json({ error: e.message || "server_error" });
@@ -234,5 +256,6 @@ const bindHost = process.env.BIND_HOST || "0.0.0.0";
 app.listen(port, bindHost, () => {
   console.log(`listening ${bindHost} ${port} (repoRoot=${repoRoot})`);
   logContactMailStatus();
+  void verifyContactSmtpIfConfigured();
 });
 

@@ -13,7 +13,9 @@ function readContactMailEnv() {
   const notifyTo =
     process.env.CONTACT_NOTIFY_TO?.trim() || process.env.MAIL_TO?.trim();
   const user = process.env.SMTP_USER?.trim();
-  const pass = process.env.SMTP_PASS;
+  const rawPass = process.env.SMTP_PASS;
+  const pass =
+    typeof rawPass === "string" ? rawPass.trim() : rawPass;
   const allowNoPass = process.env.SMTP_ALLOW_NO_PASS === "1";
   return { host, notifyTo, user, pass, allowNoPass };
 }
@@ -53,14 +55,7 @@ export function logContactMailStatus() {
   }
 }
 
-/**
- * Envía aviso por correo. Si SMTP no está configurado, no hace nada.
- * @returns {Promise<{ sent?: boolean, skipped?: boolean }>}
- */
-export async function sendContactFormNotification({ id, nombre, email, mensaje, ip }) {
-  const base = getContactMailSettings();
-  if (!base) return { skipped: true };
-
+function buildContactTransporter(base) {
   const port = Number(process.env.SMTP_PORT || 587);
   const secureFlag = String(process.env.SMTP_SECURE ?? "").toLowerCase();
   const secure =
@@ -69,13 +64,53 @@ export async function sendContactFormNotification({ id, nombre, email, mensaje, 
     secureFlag === "yes" ||
     port === 465;
 
-  const transporter = nodemailer.createTransport({
+  const requireTlsExplicit = process.env.SMTP_REQUIRE_TLS;
+  const requireTLS =
+    requireTlsExplicit === "0" || requireTlsExplicit === "false"
+      ? false
+      : !secure && port === 587;
+
+  return nodemailer.createTransport({
     host: base.host,
     port,
     secure,
-    requireTLS: !secure && port === 587,
+    requireTLS,
     auth: base.user ? { user: base.user, pass: base.pass } : undefined,
   });
+}
+
+/**
+ * Comprueba usuario/contraseña/puerto contra el servidor SMTP (logs en consola).
+ * No bloquea el arranque si falla.
+ */
+export async function verifyContactSmtpIfConfigured() {
+  const base = getContactMailSettings();
+  if (!base) return;
+  try {
+    const t = buildContactTransporter(base);
+    await t.verify();
+    console.log("[mail] SMTP: verificación OK (auth y puerto correctos)");
+  } catch (err) {
+    console.error(
+      "[mail] SMTP verify falló — el formulario guardará mensajes pero no enviará correo:",
+      err?.message || err
+    );
+    if (err?.code) console.error("[mail] código:", err.code);
+    if (err?.responseCode != null)
+      console.error("[mail] responseCode:", err.responseCode);
+    if (err?.response) console.error("[mail] respuesta servidor:", err.response);
+  }
+}
+
+/**
+ * Envía aviso por correo. Si SMTP no está configurado, no hace nada.
+ * @returns {Promise<{ sent?: boolean, skipped?: boolean }>}
+ */
+export async function sendContactFormNotification({ id, nombre, email, mensaje, ip }) {
+  const base = getContactMailSettings();
+  if (!base) return { skipped: true, reason: getContactMailConfigIssue() || "unknown" };
+
+  const transporter = buildContactTransporter(base);
 
   const from =
     process.env.MAIL_FROM?.trim() ||
@@ -107,7 +142,7 @@ export async function sendContactFormNotification({ id, nombre, email, mensaje, 
     <pre style="white-space:pre-wrap;font-family:inherit;">${escapeHtml(mensaje)}</pre>
   `.trim();
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from,
     to: base.notifyTo,
     replyTo: email,
@@ -116,5 +151,5 @@ export async function sendContactFormNotification({ id, nombre, email, mensaje, 
     html,
   });
 
-  return { sent: true };
+  return { sent: true, messageId: info?.messageId };
 }
