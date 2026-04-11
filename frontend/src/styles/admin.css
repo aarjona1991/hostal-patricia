@@ -182,32 +182,51 @@
   margin-bottom: 1rem;
 }
 
-/* Dashboard layout */
+/* Dashboard layout: una sola columna con scroll (main), sin doble barra con el documento */
 .adm-dash {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 280px 1fr;
+  grid-template-rows: 1fr;
   background: #0c100e;
 }
 
 @media (max-width: 900px) {
   .adm-dash {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
   }
 
   .adm-sidebar {
     position: sticky;
     top: 0;
     z-index: 20;
+    max-height: none;
+  }
+
+  .adm-main {
+    overflow: visible;
+    min-height: 0;
   }
 }
 
 .adm-sidebar {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   padding: 1.5rem 1rem 1.25rem;
   background: linear-gradient(180deg, #141a17 0%, #0f1412 100%);
   border-right: 1px solid var(--adm-border);
+  overflow: hidden;
 }
 
 .adm-sidebar-head {
@@ -233,6 +252,7 @@
   flex-direction: column;
   gap: 0.25rem;
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -278,8 +298,10 @@
 }
 
 .adm-main {
-  overflow: auto;
-  max-height: 100vh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(20, 163, 163, 0.08), transparent),
     linear-gradient(180deg, #0e1311 0%, #0a0d0b 100%);
