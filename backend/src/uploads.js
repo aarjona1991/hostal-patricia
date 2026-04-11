@@ -1,5 +1,6 @@
 import multer from "multer";
 import fs from "node:fs";
+import path from "node:path";
 import crypto from "node:crypto";
 import express from "express";
 import { resolveUploadDir } from "./dataPaths.js";
