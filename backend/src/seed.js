@@ -10,7 +10,20 @@ export const DEFAULT_SECTIONS = {
     bgAlt: "Playa tropical y mar turquesa",
     primaryCta: "Reservar por WhatsApp",
     secondaryCta: "Descubrir más",
-    scrollHint: "Desliza"
+    scrollHint: "Desliza",
+    /** Textos en inglés opcionales (la web en /en los fusiona con el español). */
+    i18n: {
+      en: {
+        tag: "Trinidad, Cuba · Living heritage",
+        title: "Experience authentic Cuban hospitality in Trinidad",
+        lead:
+          "Welcome to Casa Trinidad Viva, a welcoming space in the heart of Trinidad where you can enjoy culture, history, and Cuban warmth.",
+        primaryCta: "Book on WhatsApp",
+        secondaryCta: "Discover more",
+        scrollHint: "Scroll",
+        bgAlt: "Tropical beach and turquoise sea"
+      }
+    }
   },
   experiences: {
     eyebrow: "Experiencias",
