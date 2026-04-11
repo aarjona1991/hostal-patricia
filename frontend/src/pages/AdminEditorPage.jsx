@@ -1,9 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api.js";
+import { useSession } from "../lib/SessionProvider.jsx";
 import { SECTION_NAV, SectionForm, emptySectionDraft } from "../admin/SectionForm.jsx";
 import "../styles/admin.css";
 
 export default function AdminEditorPage() {
+  const { features } = useSession();
+  const showAdvertisingSection = features?.advertisingSection !== false;
+  const sectionNav = useMemo(
+    () => (showAdvertisingSection ? SECTION_NAV : SECTION_NAV.filter((n) => n.key !== "ads")),
+    [showAdvertisingSection]
+  );
+
   const [activeKey, setActiveKey] = useState("hero");
   const [sections, setSections] = useState(null);
   const [draft, setDraft] = useState(null);
@@ -33,6 +41,12 @@ export default function AdminEditorPage() {
     setErr("");
     setAdvRaw("");
   }, [activeKey, sections]);
+
+  useEffect(() => {
+    if (!showAdvertisingSection && activeKey === "ads") {
+      setActiveKey("hero");
+    }
+  }, [showAdvertisingSection, activeKey]);
 
   async function save() {
     if (!draft) return;
@@ -120,7 +134,7 @@ export default function AdminEditorPage() {
           <span>Casa Trinidad Viva</span>
         </div>
         <nav className="adm-nav" aria-label="Secciones">
-          {SECTION_NAV.map((item) => (
+          {sectionNav.map((item) => (
             <button
               key={item.key}
               type="button"

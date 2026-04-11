@@ -52,7 +52,11 @@ function normalizeClient(raw) {
 
 /**
  * Unidad display responsive (data-ad-format="auto").
- * El script global equivale al snippet de Google; el slot viene de la unidad «En pantalla» en AdSense.
+ *
+ * El snippet oficial termina con un <script>(adsbygoogle = …).push({});</script> junto al <ins>.
+ * En una SPA no verás ese script en “Ver código fuente” (solo el index.html vacío); aquí insertamos
+ * el mismo script en el DOM después del <ins> para que aparezca en DevTools → Elements y se ejecute
+ * igual que el ejemplo de Google.
  */
 export default function GoogleAdSlot({ adClient, adSlot }) {
   const insRef = useRef(null);
@@ -64,6 +68,7 @@ export default function GoogleAdSlot({ adClient, adSlot }) {
     if (!client || !slot) return undefined;
 
     filledRef.current = false;
+    let pushScript = null;
 
     const tryFill = () => {
       if (filledRef.current) return;
@@ -71,11 +76,14 @@ export default function GoogleAdSlot({ adClient, adSlot }) {
       if (!ins || !document.contains(ins)) return;
       filledRef.current = true;
       try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        const scr = document.createElement("script");
+        scr.textContent = "(adsbygoogle = window.adsbygoogle || []).push({});";
+        ins.insertAdjacentElement("afterend", scr);
+        pushScript = scr;
       } catch (e) {
         filledRef.current = false;
         if (typeof console !== "undefined" && console.warn) {
-          console.warn("[AdSense] adsbygoogle.push falló:", e);
+          console.warn("[AdSense] insertar script push falló:", e);
         }
       }
     };
@@ -84,6 +92,9 @@ export default function GoogleAdSlot({ adClient, adSlot }) {
 
     return () => {
       filledRef.current = false;
+      if (pushScript?.parentNode) {
+        pushScript.parentNode.removeChild(pushScript);
+      }
     };
   }, [adClient, adSlot]);
 

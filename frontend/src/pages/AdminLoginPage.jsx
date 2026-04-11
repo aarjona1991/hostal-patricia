@@ -6,7 +6,7 @@ import "../styles/admin.css";
 
 export default function AdminLoginPage() {
   const nav = useNavigate();
-  const { setStatus } = useSession();
+  const { refreshSession } = useSession();
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
         method: "POST",
         body: JSON.stringify({ username, password }),
       });
-      setStatus("authenticated");
+      await refreshSession();
       nav("/admin", { replace: true });
     } catch (e2) {
       setErr(e2.message || "Credenciales incorrectas");
