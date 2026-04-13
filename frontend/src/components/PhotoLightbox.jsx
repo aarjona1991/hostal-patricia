@@ -102,6 +102,27 @@ export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, ad
       }}
     >
       <div className="photo-lightbox__inner">
+        <div className="photo-lightbox__stage">
+          {inAdBreak && adsActive ? (
+            <div className="photo-lightbox__ad">
+              <p className="photo-lightbox__ad-eyebrow">{adEyebrow}</p>
+              <div className="photo-lightbox__ad-slot">
+                <GoogleAdSlot key={adSlotKey} adClient={adSense.adClient} adSlot={adSense.adSlot} />
+              </div>
+              <p className="photo-lightbox__ad-hint">{labels.adContinueHint}</p>
+            </div>
+          ) : (
+            <figure className="photo-lightbox__figure">
+              <img className="photo-lightbox__img" src={current.imgUrl} alt={current.alt || ""} decoding="async" />
+              {current.caption?.trim() ? <figcaption className="photo-lightbox__caption">{current.caption.trim()}</figcaption> : null}
+            </figure>
+          )}
+          {n > 1 ? (
+            <p className="photo-lightbox__counter" aria-live="polite">
+              {inAdBreak ? labels.adCounter : `${safeIndex + 1} / ${n}`}
+            </p>
+          ) : null}
+        </div>
         <button
           ref={closeBtnRef}
           type="button"
@@ -120,25 +141,6 @@ export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, ad
               <span aria-hidden="true">›</span>
             </button>
           </>
-        ) : null}
-        {inAdBreak && adsActive ? (
-          <div className="photo-lightbox__ad">
-            <p className="photo-lightbox__ad-eyebrow">{adEyebrow}</p>
-            <div className="photo-lightbox__ad-slot">
-              <GoogleAdSlot key={adSlotKey} adClient={adSense.adClient} adSlot={adSense.adSlot} />
-            </div>
-            <p className="photo-lightbox__ad-hint">{labels.adContinueHint}</p>
-          </div>
-        ) : (
-          <figure className="photo-lightbox__figure">
-            <img className="photo-lightbox__img" src={current.imgUrl} alt={current.alt || ""} decoding="async" />
-            {current.caption?.trim() ? <figcaption className="photo-lightbox__caption">{current.caption.trim()}</figcaption> : null}
-          </figure>
-        )}
-        {n > 1 ? (
-          <p className="photo-lightbox__counter" aria-live="polite">
-            {inAdBreak ? labels.adCounter : `${safeIndex + 1} / ${n}`}
-          </p>
         ) : null}
       </div>
     </div>,
