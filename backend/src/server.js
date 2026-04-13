@@ -97,6 +97,8 @@ app.get("/api/health", (_req, res) => res.json({ ok: true }));
 const db = openDb(repoRoot);
 ensureSchema(db);
 
+const isProduction = process.env.NODE_ENV === "production";
+
 // Inserta secciones por defecto si faltan (BD vacía o nuevas claves como `map`).
 {
   const insert = db.prepare("INSERT INTO sections(key, data, updatedAt) VALUES(?, ?, ?)");
@@ -104,15 +106,22 @@ ensureSchema(db);
   const now = Date.now();
   const tx = db.transaction(() => {
     for (const [key, data] of Object.entries(DEFAULT_SECTIONS)) {
-      if (!hasKey.get(key)) insert.run(key, JSON.stringify(data), now);
+      if (!hasKey.get(key)) {
+        let payload = data;
+        // En producción no insertamos fotos demo de Unsplash: la galería se rellena desde el admin.
+        if (key === "gallery" && isProduction) {
+          payload = { ...data, photos: [] };
+        }
+        insert.run(key, JSON.stringify(payload), now);
+      }
     }
   });
   tx();
 }
 
-// Galería: el seed solo rellena claves que faltan; si la BD ya tenía `gallery` con menos fotos,
-// añadimos al final las del DEFAULT cuya imgUrl aún no exista (p. ej. nuevas fotos dummy en el repo).
-{
+// Galería (solo desarrollo): si la BD ya tenía `gallery` con menos fotos, añadimos al final las del
+// DEFAULT cuya imgUrl aún no exista. En producción no se ejecuta: evita que cada deploy reinyecte dummies.
+if (!isProduction) {
   const row = getSection(db, "gallery");
   const def = DEFAULT_SECTIONS.gallery;
   if (row?.data && def?.photos?.length) {
