@@ -484,10 +484,44 @@
   margin-bottom: 0.85rem;
 }
 
+.adm-subpanel-head-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .adm-subpanel-head span {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--adm-muted);
+}
+
+/* Misma lógica que la web pública: clave → SVG; si no hay match, texto corto (iconText) */
+.adm-social-icon-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  height: 2.375rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--adm-border);
+  color: var(--adm-text);
+}
+
+.adm-social-icon-preview .nav-social-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.adm-social-icon-preview .nav-social-fallback {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .adm-row-actions {

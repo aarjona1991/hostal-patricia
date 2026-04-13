@@ -6,7 +6,7 @@ const svgProps = {
   focusable: "false",
 };
 
-/** Inline paths for Instagram / Facebook / Airbnb / TikTok (currentColor). */
+/** Inline paths for Instagram / Facebook / Airbnb / TikTok / Booking / etc. (currentColor). */
 function Icon({ d }) {
   return (
     <svg {...svgProps} viewBox="0 0 24 24">
@@ -70,8 +70,43 @@ export function SocialNavIcon({ linkKey, iconText }) {
   }
 
   if (k.includes("tripadvisor")) {
+    /* Búho estilo marca: trazos (Tabler Icons, MIT) — se lee mejor que el path relleno antiguo a ~18px */
     return (
-      <Icon d="M12.006 4.295c-2.67 0-5.338.784-7.645 2.353H0l1.963 2.135a9.97 9.97 0 0 0 2.463 5.753 9.96 9.96 0 0 0 7.58 3.45 9.96 9.96 0 0 0 7.548-3.45 9.97 9.97 0 0 0 2.494-5.784l1.963-2.104h-4.361a12.104 12.104 0 0 0-7.634-2.353zm0 1.862a7.2 7.2 0 0 1 6.607 4.13.35.35 0 0 1-.07.404 7.11 7.11 0 0 1-6.537 2.29 7.11 7.11 0 0 1-6.537-2.29.35.35 0 0 1-.07-.404 7.2 7.2 0 0 1 6.607-4.13zm-3.007 7.013a3.01 3.01 0 1 0 0 6.018 3.01 3.01 0 0 0 0-6.018zm6.014 0a3.01 3.01 0 1 0 0 6.018 3.01 3.01 0 0 0 0-6.018z" />
+      <svg
+        {...svgProps}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.65}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M5 13.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0" />
+        <path d="M16 13.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0" />
+        <path d="M17.5 9a4.5 4.5 0 1 0 3.5 1.671l1-1.671h-4.5" />
+        <path d="M6.5 9a4.5 4.5 0 1 1-3.5 1.671l-1-1.671h4.5" />
+        <path d="M10.5 15.5l1.5 2l1.5-2" />
+        <path d="M9 6.75c2-.667 4-.667 6 0" />
+      </svg>
+    );
+  }
+
+  if (k.includes("booking")) {
+    /* Marca B.: contorno + punto (Tabler Icons, MIT) — más legible a ~18px que el path relleno */
+    return (
+      <svg
+        {...svgProps}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.65}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 18v-9.5a4.5 4.5 0 0 1 4.5-4.5h7a4.5 4.5 0 0 1 4.5 4.5v7a4.5 4.5 0 0 1-4.5 4.5h-9.5a2 2 0 0 1-2-2" />
+        <path d="M8 12h3.5a2 2 0 1 1 0 4H8v-7a1 1 0 0 1 1-1h1.5a2 2 0 1 1 0 4h-1.5" />
+        <circle cx="16" cy="16" r="1.05" fill="currentColor" stroke="none" />
+      </svg>
     );
   }
 

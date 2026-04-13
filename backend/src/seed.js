@@ -243,6 +243,8 @@ export const DEFAULT_SECTIONS = {
     socialLinks: [
       { key: "instagram", label: "Instagram", href: "https://www.instagram.com/", iconText: "IG" },
       { key: "airbnb", label: "Airbnb", href: "https://www.airbnb.com/", iconText: "AB" },
+      { key: "booking", label: "Booking.com", href: "https://www.booking.com/", iconText: "B." },
+      { key: "tripadvisor", label: "TripAdvisor", href: "https://www.tripadvisor.com/", iconText: "TA" },
       { key: "tiktok", label: "TikTok", href: "https://www.tiktok.com/", iconText: "TT" }
     ]
   }

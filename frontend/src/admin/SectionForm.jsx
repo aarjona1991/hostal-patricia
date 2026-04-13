@@ -1,5 +1,6 @@
 import React from "react";
 import { ImageUrlField } from "./ImageUrlField.jsx";
+import { SocialNavIcon } from "../components/SocialNavIcon.jsx";
 import { CONTENT_LOCALE_ES, deepMergeEn, readLocaleField } from "../lib/sectionI18n.js";
 
 function moveItem(arr, index, delta) {
@@ -667,7 +668,15 @@ function SocialLinksEditor({ links = [], onChange, localeMode = "es", onEnSocial
       {list.map((l, i) => (
         <div key={i} className="adm-subpanel">
           <div className="adm-subpanel-head">
-            <span>Enlace {i + 1}</span>
+            <div className="adm-subpanel-head-left">
+              <span>Enlace {i + 1}</span>
+              <div
+                className="adm-social-icon-preview"
+                title="Vista previa del icono en la barra superior de la web"
+              >
+                <SocialNavIcon linkKey={l.key} iconText={l.iconText} />
+              </div>
+            </div>
             {isEs ? (
               <button type="button" className="adm-icon-btn" onClick={() => onChange(list.filter((_, j) => j !== i))}>
                 ×
@@ -687,6 +696,10 @@ function SocialLinksEditor({ links = [], onChange, localeMode = "es", onEnSocial
                   onChange(n);
                 }}
               />
+              <p className="adm-text-muted" style={{ marginTop: 6, marginBottom: 0, fontSize: "0.8rem" }}>
+                El icono depende de la clave (p. ej. <code>instagram</code>, <code>booking</code>,{" "}
+                <code>tripadvisor</code>, <code>airbnb</code>). Si no coincide ninguna red conocida, se usa «Texto icono».
+              </p>
             </div>
           ) : (
             <p className="adm-text-muted" style={{ marginTop: 0 }}>
