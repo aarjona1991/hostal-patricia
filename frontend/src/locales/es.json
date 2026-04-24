@@ -17,6 +17,9 @@
     "ubicacion": "Ubicación",
     "opiniones": "Opiniones",
     "reservar": "Reservar",
+    "servicios": "Servicios",
+    "sobre": "Sobre nosotros",
+    "guia": "Guía del viajero",
     "langSwitch": "Idioma",
     "langEs": "Español",
     "langEn": "English"
@@ -64,7 +67,138 @@
     "errorGeneric": "No se pudo enviar. Inténtalo de nuevo en unos minutos."
   },
   "footer": {
-    "copyPrefix": "©"
+    "copyPrefix": "©",
+    "exploreLabel": "Navegación principal",
+    "legalNavLabel": "Información legal",
+    "privacy": "Política de privacidad",
+    "terms": "Términos y condiciones",
+    "cookies": "Política de cookies"
+  },
+  "home": {
+    "richIntro": {
+      "title": "Bienvenida a nuestra casa en Trinidad",
+      "summary": [
+        "Casa Trinidad Viva es una casa particular en el centro histórico de Trinidad, Patrimonio de la Humanidad. Vivimos aquí: conocemos el empedrado, el calor del valle y los atajos para llegar a la escalinata o al casco sin perderse. Priorizamos habitaciones frescas, baño privado y un patio donde charlar al volver de la playa o de un concierto al aire libre.",
+        "Reservar con nosotros es trato directo: te orientamos con mapas sencillos, desayunos de verdad y consejos honestos sobre museos, música en vivo, Topes de Collantes o una tarde en Playa Ancón. Un buen viaje empieza con información clara — en nuestra guía del viajero reunimos temporada, transporte y costumbres locales para que llegues con buen pie."
+      ],
+      "imageAlt": "Imagen de la casa y la experiencia en Casa Trinidad Viva, Trinidad de Cuba",
+      "guideLink": "Ver guía del viajero"
+    },
+    "roomsTeaser": {
+      "text": "Aquí tienes un resumen visual de nuestras habitaciones. Para medidas, orientación de luz, baño privado y recomendaciones por tipo de viajero, visita la página dedicada.",
+      "link": "Abrir guía completa de habitaciones"
+    }
+  },
+  "pages": {
+    "rooms": {
+      "seoTitle": "Habitaciones | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Habitaciones en el corazón de Trinidad",
+      "sliderAria": "Carrusel de fotos de esta habitación",
+      "openLightboxAria": "Ampliar foto {{n}} de {{total}}",
+      "slideHint": "Desliza o usa las flechas · pulsa la foto para verla en grande",
+      "lightboxLabel": "Fotos de la habitación",
+      "blocks": [
+        "En Casa Trinidad Viva ofrecemos alojamiento en habitaciones privadas, pensadas para parejas, amigos o familias pequeñas que buscan tranquilidad después de caminar el empedrado colonial. Cada espacio está equipado con ropa de cama fresca, ventilación natural o asistida según la habitación, y baño privado con agua caliente para relajar los músculos tras una jornada de playa o de senderismo.",
+        "Nuestra habitación doble estándar suele rondar los 18–22 m² útiles (medidas orientativas según distribución), con cama matrimonial o dos camas individuales previo acuerdo, mesitas de noche, perchero amplio y enchufes accesibles para cargar cámaras y teléfonos. Las ventanas dan hacia el patio interior o fachadas laterales, lo que ayuda a mantener una temperatura agradable en las noches más cálidas del valle trinitario.",
+        "Si viajas en grupo reducido o con un adolescente, podemos valorar una configuración triple o una habitación comunicada según disponibilidad del calendario. Lo importante es que sepas con antelación qué camas hay, si hay escalones dentro de la habitación y si el baño es con ducha o bañera: lo detallamos en la confirmación para evitar malentendidos.",
+        "El baño privado incluye jabón, papel higiénico inicial y toallas limpias renovadas según estancia. El agua presurizada puede variar en horas punta en la ciudad; en nuestra casa monitorizamos depósitos y horarios para minimizar molestias. Si necesitas secador de pelo o adaptaciones por movilidad reducida, escríbenos antes de reservar y buscaremos la mejor opción disponible.",
+        "La limpieza diaria del cuarto se coordina en un horario discreto; respetamos la privacidad y el descanso. También disponemos de caja fuerte pequeña bajo petición y orientación para lavandería cercana si te quedas varios días explorando Topes de Collantes o la costa sur.",
+        "Trinidad es un destino musical: no es raro volver tarde de una casa de la trova. Por eso reforzamos aislamiento acústico en puertas y ventanas donde es posible, y ofrecemos tapones para oídos bajo petición. Queremos que el silencio no sea un lujo sino parte del servicio.",
+        "Para reservar, indica fechas exactas, número de personas y si necesitas cuna o trona. Respondemos por WhatsApp y por el formulario de contacto con disponibilidad, precio orientativo y política de depósito si aplica. La confirmación final siempre incluye dirección, referencias de llegada y consejos de transporte desde La Habana, Santa Clara o Cienfuegos.",
+        "Si tu vuelo llega antes del check-in o sales tarde, guardamos maletas de forma gratuita cuando el calendario lo permite. Así puedes aprovechar la mañana en el Museo Romántico o un último baño en Ancón sin arrastrar las valijas.",
+        "Nuestra filosofía es hospitalidad familiar: no somos un hotel anónimo. Estarás en una casa viva, con aromas de café por la mañana y conversaciones honestas sobre qué merece la pena hoy según el clima. Esa cercanía es la verdadera razón por la que muchos huéspedes repiten."
+      ]
+    },
+    "services": {
+      "seoTitle": "Servicios | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Servicios y comodidades",
+      "blocks": [
+        "El desayuno cubano en Casa Trinidad Viva es abundante: fruta de temporada, pan recién tostado, huevos a la preferencia del día, café recién colado y jugos naturales cuando el mercado lo permite. Lo servimos en el patio o en el comedor interior según la temperatura. Si tienes alergias o dieta vegetariana, avísanos con 48 h de antelación para adaptar ingredientes dentro de lo disponible localmente.",
+        "La conectividad a Internet en Cuba depende de tarjetas NAUTA y de la congestión de la red nacional. En la casa facilitamos orientación para comprar tarjetas y zonas con mejor señal; algunos espacios del patio suelen tener recepción más estable que el interior de muros gruesos coloniales. No prometemos fibra simétrica, sí honestidad sobre qué esperar y cómo optimizar tus videollamadas breves.",
+        "Ayudamos a gestionar taxis colectivos o privados hacia Cienfuegos, El Nicho o La Habana, siempre con precios transparentes acordados antes de subir al vehículo. También recomendamos bicicletas de alquiler para trayectos cortos si dominas el terreno empedrado y el calor. Para Playa Ancón, comparamos opciones de taxi vs bus local según hora y presupuesto.",
+        "Guardamos equipaje, prestamos mapas impresos y marcamos en ellos museos, miradores y cajeros automáticos funcionales. Si te interesa la fotografía nocturna de las calles coloniales, sugerimos rutas seguras y horarios concurridos donde es más cómodo transitar con trípode.",
+        "Ofrecemos agua filtrada o hervida para rellenar tu botella reutilizable, reduciendo plástico de un solo uso. En la zona hay tiendas estatales y mercados agropecuarios; te explicamos cómo leer precios en CUP y cómo combinar efectivo con tarjetas internacionales donde acepten.",
+        "Si celebras aniversario u ocasión especial, coordinamos flores locales, pastel pequeño o reserva en paladar con anticipación. No cobramos comisión por el gesto: solo organizamos con proveedores de confianza.",
+        "La seguridad es conversación abierta: Trinidad es relativamente tranquila para caminar de día, pero recomendamos no ostentar objetos de valor y usar bolsos cruzados en zonas muy turísticas. En la casa hay candados de calidad en puertas exteriores y recomendaciones de caja fuerte.",
+        "Para familias, disponemos de adaptaciones lúdicas sencillas: juegos de mesa, libros ilustrados sobre fauna cubana y sugerencias de talleres de cerámica locales. Queremos que los niños también entiendan el contexto histórico de la ciudad sin aburrirse."
+      ]
+    },
+    "about": {
+      "seoTitle": "Sobre nosotros | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Nuestra historia y por qué Trinidad",
+      "blocks": [
+        "Casa Trinidad Viva nació de la decisión de compartir nuestro hogar con viajeros curiosos, no solo de pasar una noche más en una ciudad postal. Trinidad nos eligió tanto como nosotros a ella: el contraste entre el silencio del valle y la música espontánea en las plazas, el mar cercano y la montaña verde, hace que cada semana sea distinta según festivales, lluvias o mercados de fin de semana.",
+        "Antes de abrir formalmente la casa particular, viajamos por Europa y América Latina entendiendo qué hace memorable un alojamiento: camas firmes, duchas predecibles, desayunos honestos y dueños que escuchan. Aplicamos esa brújula aquí, donde la logística puede ser impredecible y la creatividad cotidiana marca la diferencia.",
+        "Creemos en el turismo que distribuye beneficios: recomendamos artesanos locales, músicos independientes y proyectos comunitarios de conservación. Cuando un huésped compra una pieza de barro en el taller vecino o deja propina directa a la banda, la economía circular del pueblo se refuerza.",
+        "Nuestro equipo familiar pequeño alterna recepción, cocina y mantenimiento; no subcontratamos limpieza opaca. Así controlamos calidad y trato. Si algo falla —un grifo que gotea, un ventilador ruidoso— lo reparamos con prioridad porque dormir bien es el núcleo del servicio.",
+        "Trinidad es sensible al cambio climático y al flujo masivo de visitantes en temporada alta. Por eso educamos sobre consumo de agua, uso racional de aire acondicionado cuando existe, y respeto por fachadas históricas (no tocar cal fresca, no dejar basura en callejones estrechos).",
+        "Colaboramos con guías licenciados cuando el itinerario lo requiere, pero también disfrutamos caminar con huéspedes una mañana libre mostrando el mercado real, no solo la vitrina turística. Esa mezcla define nuestra personalidad: formalidad cuando hace falta, cercanía siempre.",
+        "Si te quedas más de tres noches, armamos un microplan de días alternando cultura, naturaleza y descanso para no saturar. Preferimos que salgas con energía y buenos recuerdos a que marques diez museos en 48 horas sin disfrutar ninguno."
+      ]
+    },
+    "guide": {
+      "seoTitle": "Guía del viajero | Trinidad, Cuba — Casa Trinidad Viva",
+      "h1": "Guía práctica para visitar Trinidad",
+      "blocks": [
+        "Trinidad combina clima tropical de montaña y costa: diciembre a abril suele ser más seco y fresco por la noche; mayo a noviembre trae lluvias cortas pero intensas. Empaca capa ligera impermeable, calzado cerrado antideslizante para empedrado mojado y protección solar alta. Un pañuelo o sombrero de ala ancha vale más que tres cremas después de una quemadura.",
+        "Llegar en autobús Víazul desde La Habana o Varadero es económico pero largo; reserva asientos con antelación en temporada alta. En taxi privado negocia precio fijo por trayecto completo, incluido peajes si aplican. Desde Cienfuegos el tramo es corto y panorámico; ideal si vienes en coche de alquiler con GPS offline descargado.",
+        "En la ciudad caminar es el mejor modo de descubrir miradores escondidos, pero las cuestas castigan rodillas: usa bastón plegable si lo necesitas y planifica pausas en patios con sombra. Los coches eléctricos turísticos pueden ahorrar tiempo si vas con niños pequeños o mucho calor extremo.",
+        "El cambio de moneda fluctúa; lleva efectivo en euros o dólares canadienses además de tarjetas. Pregunta en recepción por tasas del día y dónde retirar con menor cola. Evita cambiar con desconocidos en la calle: arriesgas billetes falsos o tasas desleales.",
+        "La gastronomía va de casas particulares con menú del día a paladares gourmet. Pide siempre precio antes de pedir langosta o langostino en temporada turística. El café en aguas de casa suele ser más fuerte que en cadenas internacionales: diluye con leche caliente si prefieres suavidad.",
+        "Para Playa Ancón, combina taxi de ida con regreso en bicitaxi o guagua si quieres ahorrar. Lleva agua doble cantidad de la que crees necesaria y snack salado: el sol reflejado en la arena agota rápido. Ducha al volver antes de siesta evita golpes de calor.",
+        "Cinco ideas rápidas: (1) sube la torre del Museo de Historia Municipal al atardecer para luz cálida; (2) reserva concierto en Casa de la Música con margen de llegada; (3) visita Valle de los Ingenios temprano para niebla fotogénica; (4) prueba miel de caña local con queso campesino; (5) respeta códigos de vestimenta en iglesias activas.",
+        "Si viajas solo, únete a tours grupales reducidos para Topes de Collantes: compartes coste de guía y transporte. Si viajas en pareja, un taxi privado te da flexibilidad de paradas fotográficas. Pregunta siempre si el vehículo tiene aire acondicionado funcional en verano.",
+        "La etiqueta local valora el saludo cordial, la paciencia en colas y propinas modestas en servicios directos (maleteros, músicos en mesa). No filmes a personas mayores sin permiso en mercados: algunas prefieren privacidad.",
+        "Antes de marcharte, revisa ventanas y enchufes: la humedad tropical a veces hincha puertas. Si olvidas un cargador, lo guardamos meses en caja de objetos perdidos etiquetados. Queremos que la última impresión sea tan cuidada como la primera."
+      ]
+    },
+    "contact": {
+      "seoTitle": "Contacto y reservas | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Contacto y reservas",
+      "lead": "Escríbenos con tus fechas aproximadas, número de huéspedes y cualquier necesidad especial (dieta, movilidad, llegada nocturna). Respondemos lo antes posible con disponibilidad y siguientes pasos. También puedes reservar por WhatsApp desde el botón flotante."
+    },
+    "privacy": {
+      "seoTitle": "Política de privacidad | Casa Trinidad Viva",
+      "h1": "Política de privacidad",
+      "blocks": [
+        "En Casa Trinidad Viva respetamos su privacidad y tratamos los datos personales conforme a principios de licitud, lealtad y transparencia. Esta política describe qué información recopilamos a través de este sitio web, con qué finalidad y durante cuánto tiempo.",
+        "Datos del formulario de contacto: cuando envía nombre, dirección de correo electrónico y mensaje, utilizamos esos datos exclusivamente para gestionar su consulta de alojamiento, enviarle una respuesta y, si procede, formalizar una reserva. La base jurídica es la ejecución de medidas precontractuales o contractuales a petición del interesado.",
+        "Datos técnicos: el servidor de alojamiento puede registrar dirección IP, fecha y hora de la solicitud y tipo de navegador con fines de seguridad, diagnóstico y prevención de abuso (spam o ataques). Conservamos estos registros el tiempo mínimo necesario salvo obligación legal distinta.",
+        "Cookies y tecnologías similares: podemos utilizar cookies estrictamente necesarias para el funcionamiento del sitio (por ejemplo, sesión administrativa si accede al panel). Si en el futuro habilitamos cookies analíticas o de publicidad de terceros (como Google AdSense), solicitaremos su consentimiento previo cuando la normativa aplicable lo exija y actualizaremos esta política con detalle de cada cookie y plazos de conservación.",
+        "Google AdSense: si activa anuncios de Google en este sitio, Google puede usar cookies o identificadores móviles para personalizar la publicidad que ve. Puede consultar cómo Google usa la información en las políticas de Google y ajustar sus preferencias de anuncios en su cuenta de Google.",
+        "Destinatarios: no vendemos sus datos a terceros. Solo comunicamos información a proveedores que nos ayudan a operar el sitio o el correo (por ejemplo, hosting o servicio SMTP) bajo acuerdos de tratamiento acorde a su finalidad.",
+        "Conservación: los mensajes de contacto se conservan el tiempo necesario para gestionar la reserva y posteriores obligaciones contables o legales. Puede solicitar acceso, rectificación, supresión u oposición cuando corresponda según ley aplicable escribiendo al correo de contacto publicado en este sitio.",
+        "Menores: este sitio no está dirigido a menores de 16 años de forma intencionada. Si detectamos datos de menores recolectados sin consentimiento parental válido, los eliminaremos.",
+        "Cambios: podemos actualizar esta política para reflejar cambios legales o del sitio. La fecha de la última revisión aparecerá al final de la página. El uso continuado del sitio tras cambios sustanciales implica que ha tomado conocimiento de los mismos.",
+        "Última actualización: abril de 2026."
+      ]
+    },
+    "terms": {
+      "seoTitle": "Términos y condiciones | Casa Trinidad Viva",
+      "h1": "Términos y condiciones de uso del sitio web",
+      "blocks": [
+        "El acceso y uso de este sitio web atribuye la condición de usuario e implica la aceptación de estos términos. Si no está de acuerdo, le rogamos que no utilice el sitio.",
+        "La información sobre servicios, precios y disponibilidad es orientativa salvo confirmación expresa por escrito (correo o mensaje acordado). Las fotografías muestran el estado general de las instalaciones; detalles decorativos menores pueden variar sin menoscabo de la categoría anunciada.",
+        "Las reservas quedan sujetas a confirmación mutua: fechas, número de personas, tarifa y política de cancelación deben constar claramente en el intercambio. El incumplimiento de pago acordado o la cancelación tardía pueden generar cargos según política comunicada caso por caso.",
+        "El usuario se compromete a proporcionar datos veraces en el formulario de contacto y a no utilizar el sitio para fines ilícitos, envío de spam o suplantación de identidad.",
+        "Enlaces externos: el sitio puede contener enlaces a terceros (mapas, redes sociales, proveedores). No somos responsables del contenido ni de las prácticas de privacidad de esos sitios.",
+        "Propiedad intelectual: textos, logotipos y fotografías propias están protegidos. No se permite su reproducción comercial sin autorización escrita. Puede compartir enlaces al sitio libremente.",
+        "Limitación de responsabilidad: hacemos esfuerzos razonables para mantener el sitio disponible y libre de errores, pero no garantizamos funcionamiento ininterrumpido. No nos hacemos responsables de daños indirectos derivados del uso o imposibilidad de uso del sitio salvo dolo o culpa grave.",
+        "Ley aplicable y jurisdicción: salvo norma imperativa en contrario, las controversias se someterán a los tribunales competentes según el domicilio del titular del alojamiento, sin perjuicio de derechos del consumidor residente en la Unión Europea cuando corresponda.",
+        "Última actualización: abril de 2026."
+      ]
+    },
+    "cookies": {
+      "seoTitle": "Política de cookies | Casa Trinidad Viva",
+      "h1": "Política de cookies",
+      "blocks": [
+        "Las cookies son pequeños archivos que se almacenan en su dispositivo cuando visita un sitio web. Sirven para recordar preferencias, mantener sesiones seguras o, en algunos casos, mostrar publicidad relevante.",
+        "Cookies necesarias: utilizamos cookies técnicas imprescindibles para el funcionamiento básico del sitio (por ejemplo, gestión de sesión en el área de administración). Estas no requieren consentimiento según la normativa europea aplicable.",
+        "Cookies de terceros y publicidad: si se muestran anuncios mediante Google AdSense u otros proveedores, estos pueden instalar cookies o utilizar identificadores para medir impresiones, limitar la frecuencia de anuncios o personalizar contenidos. Puede gestionar o revocar el consentimiento mediante el banner de cookies cuando esté disponible o desde la configuración de su navegador.",
+        "Duración: las cookies de sesión se eliminan al cerrar el navegador; las persistentes tienen fecha de caducidad definida por el proveedor. Consulte la documentación técnica de su navegador para bloquear o borrar cookies.",
+        "Más información sobre privacidad y tratamiento de datos en nuestra Política de privacidad. Última actualización: abril de 2026."
+      ]
+    }
   },
   "whatsapp": {
     "floatLabel": "Escríbenos por WhatsApp"

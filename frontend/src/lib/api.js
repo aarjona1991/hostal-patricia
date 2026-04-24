@@ -1,11 +1,13 @@
 export async function apiFetch(path, options = {}) {
+  const { headers: optHeaders, ...fetchRest } = options;
   const res = await fetch(path, {
     credentials: "include",
+    cache: options.cache ?? "default",
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
+      ...(optHeaders || {}),
     },
-    ...options,
+    ...fetchRest,
   });
 
   if (!res.ok) {

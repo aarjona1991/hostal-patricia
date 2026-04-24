@@ -13,6 +13,11 @@ function moveItem(arr, index, delta) {
   return copy;
 }
 
+function preventDetailsToggle(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
 function StringListEditor({ label, items = [], onChange, addLabel = "Añadir", readOnlyStructure = false }) {
   const list = Array.isArray(items) ? items : [];
   return (
@@ -71,6 +76,61 @@ function StringListEditor({ label, items = [], onChange, addLabel = "Añadir", r
   );
 }
 
+/** Lista de párrafos largos (p. ej. página /servicios): un textarea por ítem. */
+function TextBlockListEditor({ label, items = [], onChange, addLabel = "Añadir párrafo", readOnlyStructure = false }) {
+  const list = Array.isArray(items) ? items : [];
+  return (
+    <div className="adm-field">
+      <label>{label}</label>
+      {list.map((text, i) => (
+        <div key={i} className="adm-list-row" style={{ alignItems: "stretch", marginBottom: 10 }}>
+          <textarea
+            className="adm-textarea"
+            rows={4}
+            style={{ flex: 1, minWidth: 0 }}
+            value={text}
+            onChange={(e) => {
+              const n = [...list];
+              n[i] = e.target.value;
+              onChange(n);
+            }}
+          />
+          {readOnlyStructure ? null : (
+            <>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title="Subir"
+                disabled={i === 0}
+                onClick={() => onChange(moveItem(list, i, -1))}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title="Bajar"
+                disabled={i === list.length - 1}
+                onClick={() => onChange(moveItem(list, i, 1))}
+              >
+                ↓
+              </button>
+              <button type="button" className="adm-icon-btn" title="Eliminar" onClick={() => onChange(list.filter((_, j) => j !== i))}>
+                ×
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+      {readOnlyStructure ? null : (
+        <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm" style={{ marginTop: 8 }} onClick={() => onChange([...list, ""])}>
+          + {addLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ExperienceCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatch }) {
   const list = Array.isArray(cards) ? cards : [];
   const isEs = localeMode === "es";
@@ -78,11 +138,11 @@ function ExperienceCardsEditor({ cards = [], onChange, localeMode = "es", onEnCa
     <div className="adm-field">
       <label>Tarjetas (experiencias)</label>
       {list.map((c, i) => (
-        <div key={i} className="adm-subpanel">
-          <div className="adm-subpanel-head">
+        <details key={i} className="adm-subpanel">
+          <summary className="adm-subpanel-head">
             <span>Tarjeta {i + 1}</span>
             {isEs ? (
-              <div className="adm-row-actions">
+              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
                 <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
                   ↑
                 </button>
@@ -99,7 +159,8 @@ function ExperienceCardsEditor({ cards = [], onChange, localeMode = "es", onEnCa
                 </button>
               </div>
             ) : null}
-          </div>
+          </summary>
+          <div className="adm-subpanel-body">
           {isEs ? (
             <ImageUrlField
               label="Imagen"
@@ -166,7 +227,8 @@ function ExperienceCardsEditor({ cards = [], onChange, localeMode = "es", onEnCa
               }}
             />
           </div>
-        </div>
+          </div>
+        </details>
       ))}
       {isEs ? (
         <button
@@ -191,11 +253,11 @@ function GalleryPhotosEditor({ photos = [], onChange, localeMode = "es", onEnPho
         Sube imágenes o pega URL. En la web se muestran en cuadrícula; al hacer clic se abren en grande (lightbox). La leyenda bajo la miniatura es opcional.
       </p>
       {list.map((p, i) => (
-        <div key={i} className="adm-subpanel">
-          <div className="adm-subpanel-head">
+        <details key={i} className="adm-subpanel">
+          <summary className="adm-subpanel-head">
             <span>Foto {i + 1}</span>
             {isEs ? (
-              <div className="adm-row-actions">
+              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
                 <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
                   ↑
                 </button>
@@ -212,7 +274,8 @@ function GalleryPhotosEditor({ photos = [], onChange, localeMode = "es", onEnPho
                 </button>
               </div>
             ) : null}
-          </div>
+          </summary>
+          <div className="adm-subpanel-body">
           {isEs ? (
             <ImageUrlField
               label="Imagen"
@@ -268,7 +331,8 @@ function GalleryPhotosEditor({ photos = [], onChange, localeMode = "es", onEnPho
               placeholder="Ej. Patio, Desayuno, Playa…"
             />
           </div>
-        </div>
+          </div>
+        </details>
       ))}
       {isEs ? (
         <button
@@ -291,11 +355,11 @@ function RoomCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatc
     <div className="adm-field">
       <label>Tarjetas (habitaciones)</label>
       {list.map((c, i) => (
-        <div key={i} className="adm-subpanel">
-          <div className="adm-subpanel-head">
+        <details key={i} className="adm-subpanel">
+          <summary className="adm-subpanel-head">
             <span>Habitación {i + 1}</span>
             {isEs ? (
-              <div className="adm-row-actions">
+              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
                 <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
                   ↑
                 </button>
@@ -312,7 +376,8 @@ function RoomCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatc
                 </button>
               </div>
             ) : null}
-          </div>
+          </summary>
+          <div className="adm-subpanel-body">
           {isEs ? (
             <ImageUrlField
               label="Imagen"
@@ -402,7 +467,8 @@ function RoomCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatc
               placeholder="Vacío = sin badge"
             />
           </div>
-        </div>
+          </div>
+        </details>
       ))}
       {isEs ? (
         <button
@@ -411,6 +477,241 @@ function RoomCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatc
           onClick={() => onChange([...list, { imgUrl: "", alt: "", title: "", body: "" }])}
         >
           + Añadir habitación
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** Ítems de la página /habitaciones: varias imágenes + texto por habitación. */
+function RoomPageItemsEditor({ draft, setDraft, patch, patchEnItem, localeMode, localeHint, rf, isEs }) {
+  const list = Array.isArray(draft.pageItems) ? draft.pageItems : [];
+  const pageItemsForForm = isEs
+    ? list
+    : list.map((it, i) => ({
+        ...it,
+        title: draft.i18n?.en?.pageItems?.[i]?.title ?? "",
+        body: draft.i18n?.en?.pageItems?.[i]?.body ?? "",
+        images: (Array.isArray(it.images) ? it.images : []).map((img, j) => ({
+          imgUrl: img.imgUrl,
+          alt: draft.i18n?.en?.pageItems?.[i]?.images?.[j]?.alt ?? img.alt ?? "",
+        })),
+      }));
+
+  const patchEnImageAlt = (itemIndex, imageIndex, alt) => {
+    setDraft((d) => {
+      const en = { ...(d.i18n?.en || {}) };
+      const pi = Array.isArray(en.pageItems) ? [...en.pageItems] : [];
+      while (pi.length <= itemIndex) pi.push({});
+      const row = { ...(pi[itemIndex] || {}) };
+      const imgs = Array.isArray(row.images) ? [...row.images] : [];
+      while (imgs.length <= imageIndex) imgs.push({});
+      imgs[imageIndex] = { ...(imgs[imageIndex] || {}), alt };
+      row.images = imgs;
+      pi[itemIndex] = row;
+      return { ...d, i18n: { ...d.i18n, en: deepMergeEn(en, { pageItems: pi }) } };
+    });
+  };
+
+  return (
+    <div className="adm-field" style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(148,163,184,0.35)" }}>
+      <label style={{ fontWeight: 700 }}>Página «Habitaciones» (/habitaciones)</label>
+      <p className="adm-text-muted" style={{ marginTop: "0.35rem", marginBottom: "1rem" }}>
+        Cada ítem es una tarjeta: mini carrusel de fotos a la izquierda y descripción a la derecha. En la web, al pulsar una foto se abre el visor ampliado (lightbox).
+      </p>
+      {localeHint}
+      <div className="adm-field">
+        <label>Título principal (H1) de la página</label>
+        <input type="text" className="adm-input" value={rf("pageH1") || ""} onChange={(e) => patch({ pageH1: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Texto bajo el título (opcional, una o dos líneas)</label>
+        <textarea className="adm-textarea" rows={2} value={rf("pageLead") || ""} onChange={(e) => patch({ pageLead: e.target.value })} />
+      </div>
+      <div className="adm-field">
+        <label>Título del navegador (SEO, pestaña del navegador)</label>
+        <input type="text" className="adm-input" value={rf("pageSeoTitle") || ""} onChange={(e) => patch({ pageSeoTitle: e.target.value })} />
+      </div>
+
+      {pageItemsForForm.map((it, itemIdx) => (
+        <details key={itemIdx} className="adm-subpanel" style={{ marginTop: "1rem" }}>
+          <summary className="adm-subpanel-head">
+            <span>Habitación (página detalle) {itemIdx + 1}</span>
+            {isEs ? (
+              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
+                <button type="button" className="adm-icon-btn" disabled={itemIdx === 0} onClick={() => patch({ pageItems: moveItem(list, itemIdx, -1) })}>
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className="adm-icon-btn"
+                  disabled={itemIdx === list.length - 1}
+                  onClick={() => patch({ pageItems: moveItem(list, itemIdx, 1) })}
+                >
+                  ↓
+                </button>
+                <button type="button" className="adm-icon-btn" onClick={() => patch({ pageItems: list.filter((_, j) => j !== itemIdx) })}>
+                  ×
+                </button>
+              </div>
+            ) : null}
+          </summary>
+          <div className="adm-subpanel-body">
+          <div className="adm-field">
+            <label>Título del ítem</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={it.title || ""}
+              onChange={(e) => {
+                if (isEs) {
+                  const n = [...list];
+                  n[itemIdx] = { ...n[itemIdx], title: e.target.value };
+                  patch({ pageItems: n });
+                } else {
+                  patchEnItem("pageItems", itemIdx, { title: e.target.value });
+                }
+              }}
+            />
+          </div>
+          <div className="adm-field">
+            <label>Descripción (puedes usar párrafos separados con línea en blanco)</label>
+            <textarea
+              className="adm-textarea"
+              rows={5}
+              value={it.body || ""}
+              onChange={(e) => {
+                if (isEs) {
+                  const n = [...list];
+                  n[itemIdx] = { ...n[itemIdx], body: e.target.value };
+                  patch({ pageItems: n });
+                } else {
+                  patchEnItem("pageItems", itemIdx, { body: e.target.value });
+                }
+              }}
+            />
+          </div>
+          <div className="adm-field">
+            <label>Fotos del carrusel</label>
+            {(Array.isArray(it.images) ? it.images : []).map((img, j) => (
+              <details key={j} className="adm-subpanel" style={{ marginTop: "0.65rem" }}>
+                <summary className="adm-subpanel-head">
+                  <span>Foto {j + 1}</span>
+                  {isEs ? (
+                    <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
+                      <button
+                        type="button"
+                        className="adm-icon-btn"
+                        disabled={j === 0}
+                        onClick={() => {
+                          const n = [...list];
+                          const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                          n[itemIdx] = { ...n[itemIdx], images: moveItem(imgs, j, -1) };
+                          patch({ pageItems: n });
+                        }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        className="adm-icon-btn"
+                        disabled={j === (it.images || []).length - 1}
+                        onClick={() => {
+                          const n = [...list];
+                          const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                          n[itemIdx] = { ...n[itemIdx], images: moveItem(imgs, j, 1) };
+                          patch({ pageItems: n });
+                        }}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        className="adm-icon-btn"
+                        onClick={() => {
+                          const n = [...list];
+                          const imgs = (Array.isArray(n[itemIdx].images) ? n[itemIdx].images : []).filter((_, k) => k !== j);
+                          n[itemIdx] = { ...n[itemIdx], images: imgs };
+                          patch({ pageItems: n });
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : null}
+                </summary>
+                <div className="adm-subpanel-body">
+                {isEs ? (
+                  <ImageUrlField
+                    label="URL imagen"
+                    value={img.imgUrl || ""}
+                    onChange={(url) => {
+                      const n = [...list];
+                      const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                      imgs[j] = { ...imgs[j], imgUrl: url };
+                      n[itemIdx] = { ...n[itemIdx], images: imgs };
+                      patch({ pageItems: n });
+                    }}
+                  />
+                ) : (
+                  <p className="adm-text-muted" style={{ marginTop: 0 }}>
+                    Imagen (definida en Español): {(img.imgUrl || "").trim() || "—"}
+                  </p>
+                )}
+                <div className="adm-field">
+                  <label>Texto alternativo (alt)</label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    value={img.alt || ""}
+                    onChange={(e) => {
+                      if (isEs) {
+                        const n = [...list];
+                        const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                        imgs[j] = { ...imgs[j], alt: e.target.value };
+                        n[itemIdx] = { ...n[itemIdx], images: imgs };
+                        patch({ pageItems: n });
+                      } else {
+                        patchEnImageAlt(itemIdx, j, e.target.value);
+                      }
+                    }}
+                  />
+                </div>
+                </div>
+              </details>
+            ))}
+            {isEs ? (
+              <button
+                type="button"
+                className="adm-btn adm-btn-ghost adm-btn-sm"
+                style={{ marginTop: 8 }}
+                onClick={() => {
+                  const n = [...list];
+                  const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                  imgs.push({ imgUrl: "", alt: "" });
+                  n[itemIdx] = { ...n[itemIdx], images: imgs };
+                  patch({ pageItems: n });
+                }}
+              >
+                + Añadir foto a este ítem
+              </button>
+            ) : null}
+          </div>
+          </div>
+        </details>
+      ))}
+      {isEs ? (
+        <button
+          type="button"
+          className="adm-btn adm-btn-ghost adm-btn-sm"
+          style={{ marginTop: 12 }}
+          onClick={() =>
+            patch({
+              pageItems: [...list, { title: "", body: "", images: [{ imgUrl: "", alt: "" }] }],
+            })
+          }
+        >
+          + Añadir habitación a la página detalle
         </button>
       ) : null}
     </div>
@@ -803,14 +1104,47 @@ export function emptySectionDraft(key) {
   if (key === "gallery") {
     return { eyebrow: "", title: "", lead: "", photos: [] };
   }
+  if (key === "homeIntro") {
+    return {
+      enabled: true,
+      title: "",
+      summary: ["", ""],
+      guideCtaLabel: "",
+      imgUrl: "",
+      alt: "",
+    };
+  }
+  if (key === "travelGuide") {
+    return {
+      pageH1: "",
+      pageLead: "",
+      pageSeoTitle: "",
+      cover: { imgUrl: "", alt: "", caption: "" },
+      photos: [],
+      pageBlocks: [],
+    };
+  }
+  if (key === "aboutPage") {
+    return {
+      pageH1: "",
+      pageLead: "",
+      pageSeoTitle: "",
+      cover: { imgUrl: "", alt: "", caption: "" },
+      photos: [],
+      pageBlocks: [],
+    };
+  }
   return null;
 }
 
 export const SECTION_NAV = [
   { key: "hero", label: "Hero", icon: "✦", hint: "Portada, imagen y WhatsApp" },
+  { key: "homeIntro", label: "Bienvenida", icon: "⌂", hint: "Bloque bajo el hero: imagen + texto y botón a la guía" },
+  { key: "travelGuide", label: "Guía del viajero", icon: "✎", hint: "Página /guia-del-viajero (/en/travel-guide)" },
+  { key: "aboutPage", label: "Sobre nosotros", icon: "❜", hint: "Página /sobre-nosotros (/en/about)" },
   { key: "experiences", label: "Experiencias", icon: "◎", hint: "Lista y tarjetas" },
-  { key: "split", label: "Servicios", icon: "✧", hint: "Imagen + comodidades" },
-  { key: "rooms", label: "Habitaciones", icon: "◇", hint: "Título y tarjetas" },
+  { key: "split", label: "Servicios", icon: "✧", hint: "Imagen + comodidades + página /servicios" },
+  { key: "rooms", label: "Habitaciones", icon: "◇", hint: "Tarjetas en inicio + página detalle (/habitaciones)" },
   { key: "gallery", label: "Galería", icon: "▦", hint: "Fotos con vista ampliada (lightbox)" },
   { key: "location", label: "Ubicación", icon: "⌖", hint: "Fondo, lista de atractivos (con foto opcional)" },
   { key: "map", label: "Mapa", icon: "◉", hint: "Hostal, lugares cercanos e imagen de cada pin" },
@@ -877,8 +1211,11 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
             <p className="adm-text-muted">WhatsApp URL (definida en Español): {(draft.whatsappUrl || "").trim() || "—"}</p>
           )}
           <div className="adm-field">
-            <label>Texto botón principal (WhatsApp)</label>
+            <label>Texto botón principal (enlace al formulario #contacto en portada)</label>
             <input type="text" className="adm-input" value={rf("primaryCta") || ""} onChange={(e) => patch({ primaryCta: e.target.value })} />
+            <p className="adm-text-muted" style={{ marginTop: 6, marginBottom: 0 }}>
+              WhatsApp sigue en el botón flotante; el CTA del hero ya no abre WhatsApp.
+            </p>
           </div>
           <div className="adm-field">
             <label>Texto botón secundario (ancla a experiencias)</label>
@@ -904,6 +1241,62 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
           </div>
         </>
       );
+
+    case "homeIntro": {
+      const baseSummary = Array.isArray(draft.summary) ? draft.summary : [];
+      const enSummary = isEs ? baseSummary : baseSummary.map((_, i) => (draft.i18n?.en?.summary || [])[i] ?? "");
+      return (
+        <>
+          {localeHint}
+          {isEs ? (
+            <div className="adm-field">
+              <div className="adm-checkbox-row">
+                <input
+                  type="checkbox"
+                  id="homeIntro-enabled"
+                  checked={draft.enabled !== false}
+                  onChange={(e) => patch({ enabled: e.target.checked })}
+                />
+                <label htmlFor="homeIntro-enabled">Mostrar sección «Bienvenida» en la página de inicio</label>
+              </div>
+            </div>
+          ) : (
+            <p className="adm-text-muted">La sección activa/inactiva se configura en «Español».</p>
+          )}
+          <div className="adm-field">
+            <label>Título de la sección</label>
+            <input type="text" className="adm-input" value={rf("title") || ""} onChange={(e) => patch({ title: e.target.value })} />
+          </div>
+          <StringListEditor
+            label="Párrafos del resumen (orden en la web)"
+            items={enSummary}
+            readOnlyStructure={!isEs}
+            onChange={(list) => patch({ summary: list })}
+          />
+          <div className="adm-field">
+            <label>Texto del botón (enlace a la guía del viajero)</label>
+            <input
+              type="text"
+              className="adm-input"
+              value={rf("guideCtaLabel") || ""}
+              onChange={(e) => patch({ guideCtaLabel: e.target.value })}
+            />
+          </div>
+          {isEs ? (
+            <ImageUrlField label="Imagen (columna izquierda)" value={draft.imgUrl || ""} onChange={(url) => patch({ imgUrl: url })} />
+          ) : (
+            <p className="adm-text-muted">URL de imagen (definida en Español): {(draft.imgUrl || "").trim() || "—"}</p>
+          )}
+          <div className="adm-field">
+            <label>Descripción de la imagen (accesibilidad)</label>
+            <input type="text" className="adm-input" value={rf("alt") || ""} onChange={(e) => patch({ alt: e.target.value })} />
+          </div>
+          <p className="adm-text-muted" style={{ marginTop: "0.5rem" }}>
+            Si dejas la imagen vacía en Español, la web intentará usar la imagen del bloque «Servicios», la primera tarjeta de «Experiencias» o la primera foto de la galería.
+          </p>
+        </>
+      );
+    }
 
     case "experiences": {
       const baseList = Array.isArray(draft.list) ? draft.list : [];
@@ -950,15 +1343,17 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
     case "split": {
       const baseAmenities = Array.isArray(draft.amenities) ? draft.amenities : [];
       const enAmenities = isEs ? baseAmenities : baseAmenities.map((_, i) => (draft.i18n?.en?.amenities || [])[i] ?? "");
+      const basePageBlocks = Array.isArray(draft.pageBlocks) ? draft.pageBlocks : [];
+      const pbForForm = isEs ? basePageBlocks : basePageBlocks.map((_, i) => (draft.i18n?.en?.pageBlocks || [])[i] ?? "");
       return (
         <>
           {localeHint}
           <div className="adm-field">
-            <label>Título</label>
+            <label>Título (bloque imagen + lista en inicio y en /servicios)</label>
             <input type="text" className="adm-input" value={rf("title") || ""} onChange={(e) => patch({ title: e.target.value })} />
           </div>
           <div className="adm-field">
-            <label>Texto del botón (enlace a contacto)</label>
+            <label>Texto del botón (formulario de reserva en portada, #contacto)</label>
             <input type="text" className="adm-input" value={rf("ctaLabel") || ""} onChange={(e) => patch({ ctaLabel: e.target.value })} />
           </div>
           {isEs ? <ImageUrlField label="Imagen" value={draft.imgUrl || ""} onChange={(url) => patch({ imgUrl: url })} /> : null}
@@ -973,6 +1368,31 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
             readOnlyStructure={!isEs}
             onChange={(amenities) => patch({ amenities })}
           />
+
+          <div className="adm-field" style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(148,163,184,0.35)" }}>
+            <label style={{ fontWeight: 700 }}>Página «Servicios» (/servicios)</label>
+            <p className="adm-text-muted" style={{ marginTop: "0.35rem", marginBottom: "1rem" }}>
+              Título principal (H1) puede diferenciarse del título del bloque verde. Los párrafos largos aparecen debajo del bloque imagen + lista.
+            </p>
+            <div className="adm-field">
+              <label>Título principal de la página (H1)</label>
+              <input type="text" className="adm-input" value={rf("pageH1") || ""} onChange={(e) => patch({ pageH1: e.target.value })} />
+            </div>
+            <div className="adm-field">
+              <label>Texto bajo el H1 (opcional)</label>
+              <textarea className="adm-textarea" rows={2} value={rf("pageLead") || ""} onChange={(e) => patch({ pageLead: e.target.value })} />
+            </div>
+            <div className="adm-field">
+              <label>Título del navegador (SEO)</label>
+              <input type="text" className="adm-input" value={rf("pageSeoTitle") || ""} onChange={(e) => patch({ pageSeoTitle: e.target.value })} />
+            </div>
+            <TextBlockListEditor
+              label="Párrafos (debajo del bloque destacado)"
+              items={pbForForm}
+              readOnlyStructure={!isEs}
+              onChange={(pageBlocks) => patch({ pageBlocks })}
+            />
+          </div>
         </>
       );
     }
@@ -1004,6 +1424,16 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
             }
             onChange={(cards) => patch({ cards })}
             onEnCardPatch={(i, partial) => patchEnItem("cards", i, partial)}
+          />
+          <RoomPageItemsEditor
+            draft={draft}
+            setDraft={setDraft}
+            patch={patch}
+            patchEnItem={patchEnItem}
+            localeMode={localeMode}
+            localeHint={localeHint}
+            rf={rf}
+            isEs={isEs}
           />
         </>
       );
@@ -1316,6 +1746,158 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
           ) : null}
         </>
       );
+
+    case "travelGuide": {
+      const baseBlocks = Array.isArray(draft.pageBlocks) ? draft.pageBlocks : [];
+      const pbForForm = isEs ? baseBlocks : baseBlocks.map((_, i) => (draft.i18n?.en?.pageBlocks || [])[i] ?? "");
+      const baseCover = draft.cover && typeof draft.cover === "object" ? draft.cover : { imgUrl: "", alt: "", caption: "" };
+      const basePhotos = Array.isArray(draft.photos) ? draft.photos : [];
+      const photosForForm = isEs
+        ? basePhotos
+        : basePhotos.map((p, i) => ({
+            imgUrl: p.imgUrl,
+            alt: draft.i18n?.en?.photos?.[i]?.alt ?? "",
+            caption: draft.i18n?.en?.photos?.[i]?.caption ?? "",
+          }));
+      return (
+        <>
+          {localeHint}
+          <div className="adm-field">
+            <label>Título principal (H1)</label>
+            <input type="text" className="adm-input" value={rf("pageH1") || ""} onChange={(e) => patch({ pageH1: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Texto bajo el título (opcional)</label>
+            <textarea className="adm-textarea" rows={2} value={rf("pageLead") || ""} onChange={(e) => patch({ pageLead: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Título del navegador (SEO)</label>
+            <input type="text" className="adm-input" value={rf("pageSeoTitle") || ""} onChange={(e) => patch({ pageSeoTitle: e.target.value })} />
+          </div>
+          <div className="adm-field" style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(148,163,184,0.35)" }}>
+            <label style={{ fontWeight: 700 }}>Imágenes (opcional)</label>
+            {isEs ? (
+              <ImageUrlField
+                label="Imagen principal (cover)"
+                previewTall
+                value={baseCover.imgUrl || ""}
+                onChange={(url) => patch({ cover: { ...baseCover, imgUrl: url } })}
+              />
+            ) : (
+              <p className="adm-text-muted" style={{ marginTop: 0 }}>
+                Imagen principal (definida en Español): {(baseCover.imgUrl || "").trim() || "—"}
+              </p>
+            )}
+            <div className="adm-field">
+              <label>Alt (imagen principal)</label>
+              <input
+                type="text"
+                className="adm-input"
+                value={rf("cover", "alt") || ""}
+                onChange={(e) => patch({ cover: { ...(isEs ? baseCover : (draft.i18n?.en?.cover || {})), alt: e.target.value } })}
+              />
+            </div>
+            <div className="adm-field">
+              <label>Leyenda (opcional, imagen principal)</label>
+              <input
+                type="text"
+                className="adm-input"
+                value={rf("cover", "caption") || ""}
+                onChange={(e) => patch({ cover: { ...(isEs ? baseCover : (draft.i18n?.en?.cover || {})), caption: e.target.value } })}
+              />
+            </div>
+            <GalleryPhotosEditor
+              localeMode={localeMode}
+              photos={photosForForm}
+              onChange={(photos) => patch({ photos })}
+              onEnPhotoPatch={(i, partial) => patchEnItem("photos", i, partial)}
+            />
+          </div>
+          <TextBlockListEditor
+            label="Párrafos de la guía"
+            items={pbForForm}
+            readOnlyStructure={!isEs}
+            onChange={(pageBlocks) => patch({ pageBlocks })}
+          />
+        </>
+      );
+    }
+
+    case "aboutPage": {
+      const baseBlocks = Array.isArray(draft.pageBlocks) ? draft.pageBlocks : [];
+      const pbForForm = isEs ? baseBlocks : baseBlocks.map((_, i) => (draft.i18n?.en?.pageBlocks || [])[i] ?? "");
+      const baseCover = draft.cover && typeof draft.cover === "object" ? draft.cover : { imgUrl: "", alt: "", caption: "" };
+      const basePhotos = Array.isArray(draft.photos) ? draft.photos : [];
+      const photosForForm = isEs
+        ? basePhotos
+        : basePhotos.map((p, i) => ({
+            imgUrl: p.imgUrl,
+            alt: draft.i18n?.en?.photos?.[i]?.alt ?? "",
+            caption: draft.i18n?.en?.photos?.[i]?.caption ?? "",
+          }));
+      return (
+        <>
+          {localeHint}
+          <div className="adm-field">
+            <label>Título principal (H1)</label>
+            <input type="text" className="adm-input" value={rf("pageH1") || ""} onChange={(e) => patch({ pageH1: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Texto bajo el título (opcional)</label>
+            <textarea className="adm-textarea" rows={2} value={rf("pageLead") || ""} onChange={(e) => patch({ pageLead: e.target.value })} />
+          </div>
+          <div className="adm-field">
+            <label>Título del navegador (SEO)</label>
+            <input type="text" className="adm-input" value={rf("pageSeoTitle") || ""} onChange={(e) => patch({ pageSeoTitle: e.target.value })} />
+          </div>
+          <div className="adm-field" style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(148,163,184,0.35)" }}>
+            <label style={{ fontWeight: 700 }}>Imágenes (opcional)</label>
+            {isEs ? (
+              <ImageUrlField
+                label="Imagen principal (cover)"
+                previewTall
+                value={baseCover.imgUrl || ""}
+                onChange={(url) => patch({ cover: { ...baseCover, imgUrl: url } })}
+              />
+            ) : (
+              <p className="adm-text-muted" style={{ marginTop: 0 }}>
+                Imagen principal (definida en Español): {(baseCover.imgUrl || "").trim() || "—"}
+              </p>
+            )}
+            <div className="adm-field">
+              <label>Alt (imagen principal)</label>
+              <input
+                type="text"
+                className="adm-input"
+                value={rf("cover", "alt") || ""}
+                onChange={(e) => patch({ cover: { ...(isEs ? baseCover : (draft.i18n?.en?.cover || {})), alt: e.target.value } })}
+              />
+            </div>
+            <div className="adm-field">
+              <label>Leyenda (opcional, imagen principal)</label>
+              <input
+                type="text"
+                className="adm-input"
+                value={rf("cover", "caption") || ""}
+                onChange={(e) => patch({ cover: { ...(isEs ? baseCover : (draft.i18n?.en?.cover || {})), caption: e.target.value } })}
+              />
+            </div>
+            <GalleryPhotosEditor
+              localeMode={localeMode}
+              photos={photosForForm}
+              onChange={(photos) => patch({ photos })}
+              onEnPhotoPatch={(i, partial) => patchEnItem("photos", i, partial)}
+            />
+          </div>
+          <TextBlockListEditor
+            label="Párrafos"
+            items={pbForForm}
+            readOnlyStructure={!isEs}
+            onChange={(pageBlocks) => patch({ pageBlocks })}
+          />
+        </>
+      );
+    }
 
     case "site":
       return (

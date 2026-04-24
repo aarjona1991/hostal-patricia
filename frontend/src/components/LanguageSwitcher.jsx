@@ -1,6 +1,7 @@
 import { useId } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { alternateLanguageLocation } from "../lib/publicRoutes.js";
 
 function FlagEs({ className }) {
   return (
@@ -30,16 +31,21 @@ function FlagGb({ className }) {
 }
 
 /**
- * Enlaces a / (es) y /en (en). Banderas visibles; etiquetas solo para lectores de pantalla.
+ * Enlaces a / (es) y /en (en), conservando la página actual (p. ej. /habitaciones ↔ /en/rooms).
+ * Banderas visibles; etiquetas solo para lectores de pantalla.
  */
 export default function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
+  const { pathname, hash } = useLocation();
   const isEn = i18n.language === "en" || i18n.language.startsWith("en-");
+  const alt = alternateLanguageLocation(pathname, hash);
+  const toEs = isEn ? alt : { pathname, hash: hash || undefined };
+  const toEn = !isEn ? alt : { pathname, hash: hash || undefined };
 
   return (
     <div className="lang-switch" role="navigation" aria-label={t("nav.langSwitch")}>
       <Link
-        to="/"
+        to={toEs}
         className={`lang-switch__link lang-switch__link--flag${!isEn ? " is-active" : ""}`}
         hrefLang="es"
         lang="es"
@@ -49,7 +55,7 @@ export default function LanguageSwitcher() {
         <span className="visually-hidden">{t("nav.langEs")}</span>
       </Link>
       <Link
-        to="/en"
+        to={toEn}
         className={`lang-switch__link lang-switch__link--flag${isEn ? " is-active" : ""}`}
         hrefLang="en"
         lang="en"
