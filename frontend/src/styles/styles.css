@@ -41,8 +41,422 @@ html {
 #galeria,
 #ubicacion,
 #opiniones,
-#contacto {
+#contacto,
+#informacion {
   scroll-margin-top: 5.5rem;
+}
+
+.main-inner {
+  padding-top: 5.25rem;
+  min-height: 55vh;
+}
+
+.static-page-wrap {
+  padding: 2.5rem 0 4rem;
+}
+
+.static-prose {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.static-prose h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  color: var(--palm);
+  line-height: 1.2;
+  margin: 0 0 1.5rem;
+}
+
+.static-prose p {
+  margin: 0 0 1.1rem;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.static-prose--contact .static-prose__lead {
+  margin: 0 0 1.75rem;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.static-prose--contact .contact-form {
+  margin-top: 0.5rem;
+}
+
+.section-rich-intro {
+  padding-top: 2.75rem;
+  padding-bottom: 2.75rem;
+  background: var(--sand-deep);
+}
+
+.rich-intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(1.35rem, 3.5vw, 2.75rem);
+  align-items: center;
+}
+
+.section-rich-intro--no-image .rich-intro-grid {
+  grid-template-columns: 1fr;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.section-rich-intro--no-image .rich-intro-title {
+  text-align: center;
+}
+
+.section-rich-intro--no-image .rich-intro-lead {
+  text-align: center;
+}
+
+.section-rich-intro--no-image .rich-intro-guide {
+  text-align: center;
+}
+
+.rich-intro-media {
+  min-width: 0;
+}
+
+.rich-intro-figure {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--sand);
+}
+
+.rich-intro-figure img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.rich-intro-copy {
+  min-width: 0;
+}
+
+.rich-intro-title {
+  margin: 0 0 1rem;
+}
+
+.rich-intro-lead {
+  margin: 0 0 1rem;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+  line-height: 1.72;
+}
+
+.rich-intro-guide {
+  margin: 1.35rem 0 0;
+}
+
+.rich-intro-guide-btn {
+  text-decoration: none;
+}
+
+.rich-intro-guide-btn:hover {
+  text-decoration: none;
+}
+
+@media (max-width: 820px) {
+  .rich-intro-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .rich-intro-media {
+    max-width: min(420px, 100%);
+    margin-inline: auto;
+  }
+
+  .section-rich-intro:not(.section-rich-intro--no-image) .rich-intro-title {
+    text-align: center;
+  }
+
+  .section-rich-intro:not(.section-rich-intro--no-image) .rich-intro-lead {
+    text-align: center;
+  }
+
+  .section-rich-intro:not(.section-rich-intro--no-image) .rich-intro-guide {
+    text-align: center;
+  }
+}
+
+.rooms-page-teaser {
+  margin-top: 0.85rem;
+  max-width: 38rem;
+}
+
+/* Página /habitaciones (ítems CMS) */
+.room-detail-page-wrap {
+  padding: 2.25rem 0 4rem;
+  width: min(1040px, 100% - clamp(1.25rem, 5vw, 2.5rem));
+  margin-inline: auto;
+}
+
+.room-detail-page-head {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.room-detail-page-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  color: var(--palm);
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+}
+
+.room-detail-page-lead {
+  margin: 0.65rem auto 0;
+  max-width: 38rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+/* Página /servicios (CMS sección split) */
+.services-page-wrap {
+  padding-bottom: 3rem;
+}
+
+.services-page-head {
+  padding: 2.25rem 0 1.5rem;
+  text-align: center;
+}
+
+.services-page-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  color: var(--palm);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.services-page-lead {
+  margin: 0.65rem auto 0;
+  max-width: 38rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.services-page-split.section {
+  padding-top: 0;
+  padding-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+.services-page-split {
+  min-height: min(420px, 55vh);
+}
+
+.services-page-prose {
+  padding-top: 0;
+}
+
+.travel-guide-page-wrap .static-prose h1,
+.about-page-wrap .static-prose h1 {
+  text-align: center;
+}
+
+.travel-guide-lead,
+.about-page-lead {
+  margin: -0.35rem 0 1.35rem;
+  color: var(--ink-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.cms-page-media {
+  margin: 1.25rem 0 1.5rem;
+}
+
+.cms-page-cover-btn {
+  display: block;
+  width: 100%;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.cms-page-cover-btn:focus-visible {
+  outline: 2px solid var(--ocean);
+  outline-offset: 4px;
+  border-radius: var(--radius-lg);
+}
+
+.cms-page-cover {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(12, 107, 107, 0.12);
+  box-shadow: 0 16px 40px -18px rgba(28, 25, 23, 0.24);
+}
+
+.cms-page-cover img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.cms-page-cover-cap {
+  display: block;
+  padding: 0.75rem 1rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--palm);
+  background: var(--white);
+}
+
+.cms-page-gallery {
+  margin-top: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 100%;
+}
+
+@media (min-width: 900px) {
+  .cms-page-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.room-detail-cards {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 4vw, 3rem);
+}
+
+.room-detail-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  align-items: start;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.room-detail-card__media {
+  min-width: 0;
+  position: relative;
+}
+
+.room-detail-card__media-placeholder {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--sand-deep), var(--sand));
+  border: 1px dashed rgba(26, 60, 52, 0.2);
+}
+
+.room-detail-splide.splide {
+  margin: 0;
+}
+
+.room-detail-splide .splide__track {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.room-detail-slide-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  cursor: zoom-in;
+  background: var(--sand-deep);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.room-detail-slide-btn img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.room-detail-slide-btn:focus-visible {
+  outline: 3px solid var(--ocean);
+  outline-offset: 2px;
+}
+
+.room-detail-splide .splide__arrow {
+  background: rgba(250, 246, 240, 0.92);
+  opacity: 1;
+  width: 2.1rem;
+  height: 2.1rem;
+  box-shadow: 0 2px 12px rgba(26, 60, 52, 0.15);
+}
+
+.room-detail-splide .splide__arrow svg {
+  fill: var(--palm);
+}
+
+.room-detail-splide .splide__pagination {
+  bottom: 0.5rem;
+}
+
+.room-detail-splide .splide__pagination__page {
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 1;
+}
+
+.room-detail-splide .splide__pagination__page.is-active {
+  background: var(--coral);
+}
+
+.room-detail-slide-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.room-detail-card__body {
+  min-width: 0;
+}
+
+.room-detail-card__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+  color: var(--palm);
+  margin: 0 0 0.85rem;
+  line-height: 1.25;
+}
+
+.room-detail-card__text {
+  color: var(--ink-muted);
+  font-size: 1.02rem;
+  line-height: 1.72;
+}
+
+.room-detail-card__text p {
+  margin: 0 0 0.9rem;
+}
+
+.room-detail-card__text p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .room-detail-card {
+    grid-template-columns: 1fr;
+  }
+
+  .room-detail-page-head {
+    margin-bottom: 1.5rem;
+  }
 }
 
 body {
@@ -98,8 +512,8 @@ a:hover {
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 0.75rem 0;
-  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding: 0.55rem 0;
+  padding-top: max(0.55rem, env(safe-area-inset-top));
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   transition: background 0.35s ease, box-shadow 0.35s ease;
@@ -130,19 +544,19 @@ a:hover {
 }
 
 .nav {
-  width: min(1120px, 100% - clamp(1.25rem, 5vw, 2.5rem));
+  width: min(1120px, 100% - clamp(1rem, 4vw, 2.25rem));
   margin-inline: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.65rem 1rem;
+  gap: 0.5rem 0.65rem;
   min-width: 0;
 }
 
 .nav-end {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.45rem;
   min-width: 0;
 }
 
@@ -157,7 +571,7 @@ a:hover {
 .logo__title {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(1rem, 3.8vw, 1.25rem);
+  font-size: clamp(0.8125rem, 1.35vw + 0.55rem, 1.0625rem);
   line-height: 1.2;
   color: var(--white);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
@@ -187,7 +601,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 1.25rem;
+  gap: clamp(0.45rem, 1.5vw, 0.85rem);
   min-width: 0;
 }
 
@@ -220,10 +634,10 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.5rem;
-  min-height: 2.5rem;
-  padding: 0.35rem;
-  border-radius: 10px;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  padding: 0.28rem;
+  border-radius: 9px;
 }
 
 .lang-switch__link--flag:hover {
@@ -238,13 +652,13 @@ a:hover {
 }
 
 .lang-switch__flag--es {
-  width: 1.45rem;
-  height: calc(1.45rem * 2 / 3);
+  width: 1.28rem;
+  height: calc(1.28rem * 2 / 3);
 }
 
 .lang-switch__flag--gb {
-  width: 1.45rem;
-  height: calc(1.45rem / 2);
+  width: 1.28rem;
+  height: calc(1.28rem / 2);
 }
 
 .lang-switch__link--flag.is-active {
@@ -295,9 +709,9 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 10px;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 9px;
   color: rgba(255, 255, 255, 0.95);
   background: rgba(255, 255, 255, 0.12);
   text-decoration: none;
@@ -328,8 +742,8 @@ a:hover {
 .nav-social-icon {
   display: block;
   flex-shrink: 0;
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .nav-social-fallback {
@@ -346,15 +760,18 @@ a:hover {
   padding: 0;
   display: flex;
   align-items: center;
-  gap: 0.25rem 1.75rem;
+  flex-wrap: nowrap;
+  gap: 0.15rem clamp(0.35rem, 0.9vw + 0.15rem, 1.05rem);
 }
 
 .nav-menu a {
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: clamp(0.8125rem, 0.2rem + 0.95vw, 0.875rem);
+  letter-spacing: -0.02em;
   text-decoration: none;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  line-height: 1.25;
 }
 
 .site-header.is-scrolled .nav-menu a {
@@ -375,9 +792,12 @@ a:hover {
 .nav-cta {
   background: var(--coral);
   color: var(--white) !important;
-  padding: 0.5rem 1.1rem;
+  padding: 0.38rem clamp(0.55rem, 1.2vw, 0.95rem);
   border-radius: 999px;
   font-weight: 600;
+  font-size: clamp(0.8125rem, 0.2rem + 0.95vw, 0.875rem);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .nav-cta:hover {
@@ -2162,6 +2582,43 @@ a:hover {
   text-decoration: underline;
 }
 
+.footer-links a.footer-nav-cta {
+  background: var(--coral);
+  color: var(--white) !important;
+  padding: 0.38rem clamp(0.55rem, 1.2vw, 0.95rem);
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-links a.footer-nav-cta:hover {
+  background: var(--coral-soft);
+  color: var(--ink) !important;
+  text-decoration: none;
+}
+
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 1.5rem;
+  padding-top: 1rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid rgba(250, 246, 240, 0.14);
+}
+
+.footer-legal a {
+  color: rgba(250, 246, 240, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.footer-legal a:hover {
+  color: var(--mango);
+  text-decoration: underline;
+}
+
 .footer-copy {
   font-size: 0.8125rem;
   color: rgba(250, 246, 240, 0.82);
@@ -2404,12 +2861,12 @@ a:hover {
   }
 
   .nav-cluster {
-    gap: 0.75rem;
+    gap: 0.55rem;
   }
 
   .nav-social-link {
-    width: 2.35rem;
-    height: 2.35rem;
+    width: 2.2rem;
+    height: 2.2rem;
   }
 
   .nav-social-icon {
@@ -2463,6 +2920,8 @@ a:hover {
     min-height: 2.75rem;
     padding: 0.5rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1rem;
+    letter-spacing: 0;
   }
 
   .nav-menu a.nav-cta {
@@ -2470,8 +2929,9 @@ a:hover {
     justify-content: center;
     width: 100%;
     margin: 0;
-    padding: 0.85rem 1.25rem;
+    padding: 0.8rem 1.15rem;
     min-height: 3rem;
+    font-size: 1.02rem;
     box-sizing: border-box;
     border-radius: 999px;
     box-shadow: 0 4px 16px rgba(232, 93, 76, 0.35);

@@ -1,6 +1,14 @@
 import React, { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage.jsx";
+import RoomsPage from "./pages/RoomsPage.jsx";
+import ServicesPage from "./pages/ServicesPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
+import TravelGuidePage from "./pages/TravelGuidePage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import LegalPrivacyPage from "./pages/LegalPrivacyPage.jsx";
+import LegalTermsPage from "./pages/LegalTermsPage.jsx";
+import LegalCookiesPage from "./pages/LegalCookiesPage.jsx";
 import AdminLoginPage from "./pages/AdminLoginPage.jsx";
 import AdminEditorPage from "./pages/AdminEditorPage.jsx";
 import { useSession } from "./lib/SessionProvider.jsx";
@@ -12,6 +20,8 @@ const DEFAULT_ROBOTS =
 function SeoRouteEffects() {
   const { pathname } = useLocation();
   const isAdmin = pathname.startsWith("/admin");
+  const pathNorm = pathname.replace(/\/$/, "") || "/";
+  const isLandingOnly = pathNorm === "/" || pathNorm === "/en";
 
   useEffect(() => {
     if (isAdmin) return;
@@ -26,13 +36,14 @@ function SeoRouteEffects() {
       document.title = "Admin · Casa Trinidad Viva";
       return;
     }
+    if (!isLandingOnly) return;
     const syncTitle = () => {
       document.title = i18n.t("seo.title");
     };
     syncTitle();
     i18n.on("languageChanged", syncTitle);
     return () => i18n.off("languageChanged", syncTitle);
-  }, [isAdmin]);
+  }, [isAdmin, isLandingOnly]);
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="robots"]');
@@ -55,7 +66,23 @@ export default function App() {
       <SeoRouteEffects />
       <Routes>
       <Route path="/en" element={<LandingPage lang="en" />} />
+      <Route path="/en/rooms" element={<RoomsPage lang="en" />} />
+      <Route path="/en/services" element={<ServicesPage lang="en" />} />
+      <Route path="/en/about" element={<AboutPage lang="en" />} />
+      <Route path="/en/travel-guide" element={<TravelGuidePage lang="en" />} />
+      <Route path="/en/contact" element={<ContactPage lang="en" />} />
+      <Route path="/en/privacy" element={<LegalPrivacyPage lang="en" />} />
+      <Route path="/en/terms" element={<LegalTermsPage lang="en" />} />
+      <Route path="/en/cookies" element={<LegalCookiesPage lang="en" />} />
       <Route path="/" element={<LandingPage lang="es" />} />
+      <Route path="/habitaciones" element={<RoomsPage lang="es" />} />
+      <Route path="/servicios" element={<ServicesPage lang="es" />} />
+      <Route path="/sobre-nosotros" element={<AboutPage lang="es" />} />
+      <Route path="/guia-del-viajero" element={<TravelGuidePage lang="es" />} />
+      <Route path="/contacto" element={<ContactPage lang="es" />} />
+      <Route path="/privacidad" element={<LegalPrivacyPage lang="es" />} />
+      <Route path="/terminos" element={<LegalTermsPage lang="es" />} />
+      <Route path="/cookies" element={<LegalCookiesPage lang="es" />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route
         path="/admin"

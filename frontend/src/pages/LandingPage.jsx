@@ -1,15 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
-import { SocialNavIcon } from "../components/SocialNavIcon.jsx";
 import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
-import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
+import { SiteHeader } from "../components/SiteHeader.jsx";
+import { SiteFooter } from "../components/SiteFooter.jsx";
+import { ContactFormBlock } from "../components/ContactFormBlock.jsx";
 import { TrinidadLocationMap } from "../components/TrinidadLocationMap.jsx";
 import { PhotoLightbox } from "../components/PhotoLightbox.jsx";
-import { apiFetch } from "../lib/api.js";
+import { usePublicSections } from "../lib/usePublicSections.js";
 import { applyHeroSeoMeta } from "../lib/seoHero.js";
 import { localizeSectionsMap } from "../lib/sectionI18n.js";
 import { normalizeMapPinLabel } from "../lib/mapPins.js";
+import { pathForHomeReservation, pathForPage } from "../lib/publicRoutes.js";
 
 function safeGet(obj, key, fallback) {
   return obj && obj[key] != null ? obj[key] : fallback;
@@ -68,14 +71,13 @@ function LocationAttractionPlaceholderIcon() {
 
 export default function LandingPage({ lang = "es" }) {
   const { t, i18n } = useTranslation();
-  const [data, setData] = useState(null);
-  const [err, setErr] = useState(null);
+  const routerLocation = useLocation();
+  const { data, err } = usePublicSections();
   const heroRef = useRef(null);
   const locationSectionRef = useRef(null);
   const [whatsappFloatVisible, setWhatsappFloatVisible] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
-  const [contactState, setContactState] = useState({ status: "idle", message: "" });
   const [galleryLightbox, setGalleryLightbox] = useState(null);
 
   useEffect(() => {
@@ -84,12 +86,6 @@ export default function LandingPage({ lang = "es" }) {
     document.documentElement.lang = target;
   }, [lang, i18n]);
 
-  useEffect(() => {
-    apiFetch("/api/sections")
-      .then(setData)
-      .catch((e) => setErr(e));
-  }, []);
-
   /** OG/Twitter/JSON-LD: imagen del Hero (también inyecta el servidor en index.html al servir). */
   const viewData = useMemo(() => (data ? localizeSectionsMap(data, lang) : null), [data, lang]);
 
@@ -97,6 +93,14 @@ export default function LandingPage({ lang = "es" }) {
     if (!viewData) return;
     applyHeroSeoMeta(safeGet(viewData, "hero", {}));
   }, [viewData]);
+
+  useEffect(() => {
+    if (routerLocation.hash !== "#contacto") return;
+    const tid = window.setTimeout(() => {
+      document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => window.clearTimeout(tid);
+  }, [routerLocation.hash, routerLocation.pathname]);
 
   /** Imágenes de la lista de ubicación, por nombre normalizado (mismo criterio que los pines). */
   const pinImageMap = useMemo(() => {
@@ -132,29 +136,6 @@ export default function LandingPage({ lang = "es" }) {
     obs.observe(heroEl);
     return () => obs.disconnect();
   }, [data]);
-
-  async function handleContactSubmit(e) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    const payload = {
-      nombre: String(fd.get("nombre") || "").trim(),
-      email: String(fd.get("email") || "").trim(),
-      mensaje: String(fd.get("mensaje") || "").trim(),
-    };
-    setContactState({ status: "sending", message: "" });
-    try {
-      await apiFetch("/api/contact", { method: "POST", body: JSON.stringify(payload) });
-      setContactState({
-        status: "success",
-        message: t("contact.success"),
-      });
-      form.reset();
-    } catch (err) {
-      const hint = err.status === 400 ? t("contact.error400") : t("contact.errorGeneric");
-      setContactState({ status: "error", message: err.message ? `${hint} (${err.message})` : hint });
-    }
-  }
 
   useEffect(() => {
     if (!data) return;
@@ -278,84 +259,52 @@ export default function LandingPage({ lang = "es" }) {
   const brandTitle = site?.brandName || t("brand.defaultName");
   const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
 
+  const homeIntro = safeGet(viewData, "homeIntro", {});
+  const introEnabled = homeIntro.enabled !== false;
+  const i18nSummaryFallback = (() => {
+    const s = t("home.richIntro.summary", { returnObjects: true });
+    return Array.isArray(s) ? s.map((p) => String(p || "").trim()).filter(Boolean) : [];
+  })();
+  const cmsSummary = Array.isArray(homeIntro.summary)
+    ? homeIntro.summary.map((p) => String(p || "").trim()).filter(Boolean)
+    : [];
+  const introSummary = cmsSummary.length > 0 ? cmsSummary : i18nSummaryFallback;
+  const introTitle = (homeIntro.title || "").trim() || t("home.richIntro.title");
+  const introGuideCta = (homeIntro.guideCtaLabel || "").trim() || t("home.richIntro.guideLink");
+  const cmsIntroImg = (homeIntro.imgUrl || "").trim();
+
+  const richIntroImageUrl =
+    cmsIntroImg ||
+    (split?.imgUrl && String(split.imgUrl).trim()) ||
+    (Array.isArray(experiences?.cards) && experiences.cards[0]?.imgUrl
+      ? String(experiences.cards[0].imgUrl).trim()
+      : "") ||
+    (galleryPhotos[0]?.imgUrl ? String(galleryPhotos[0].imgUrl).trim() : "") ||
+    "";
+
+  const richIntroImageAlt = cmsIntroImg
+    ? (homeIntro.alt || "").trim() || t("home.richIntro.imageAlt")
+    : (split?.imgUrl && String(split.alt || "").trim()) ||
+      (Array.isArray(experiences?.cards) && experiences.cards[0]?.imgUrl
+        ? String(experiences.cards[0].alt || "").trim()
+        : "") ||
+      (galleryPhotos[0]?.alt ? String(galleryPhotos[0].alt).trim() : "") ||
+      t("home.richIntro.imageAlt");
+
+  const showHomeIntroSection = introEnabled && (Boolean(introTitle) || introSummary.length > 0);
+
   return (
     <>
-      <header className={`site-header${headerScrolled ? " is-scrolled" : ""}`} id="inicio">
-        <nav className="nav" aria-label={t("nav.ariaMain")}>
-          <a className="logo" href="#inicio">
-            <img className="logo__mark" src={logoSrc} alt={brandTitle} width="32" height="32" decoding="async" />
-            <span className="logo__title">{brandTitle}</span>
-          </a>
-          <div className="nav-end">
-            <div className="nav-cluster">
-              <ul className={`nav-menu${navOpen ? " is-open" : ""}`} id="nav-menu">
-                <li>
-                  <a href="#experiencia" onClick={() => setNavOpen(false)}>
-                    {(navL.experiencia || "").trim() || t("nav.experiencia")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#habitaciones" onClick={() => setNavOpen(false)}>
-                    {(navL.habitaciones || "").trim() || t("nav.habitaciones")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#galeria" onClick={() => setNavOpen(false)}>
-                    {(navL.galeria || "").trim() || t("nav.galeria")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#ubicacion" onClick={() => setNavOpen(false)}>
-                    {(navL.ubicacion || "").trim() || t("nav.ubicacion")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#opiniones" onClick={() => setNavOpen(false)}>
-                    {(navL.opiniones || "").trim() || t("nav.opiniones")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#contacto" className="nav-cta" onClick={() => setNavOpen(false)}>
-                    {(navL.reservar || "").trim() || t("nav.reservar")}
-                  </a>
-                </li>
-              </ul>
-              <LanguageSwitcher />
-              <div className="nav-social" aria-label={t("nav.ariaSocial")}>
-                {Array.isArray(site?.socialLinks) &&
-                  site.socialLinks
-                    .filter((l) => l?.enabled !== false)
-                    .map((l) => (
-                      <a
-                        key={l.key || l.href}
-                        className="nav-social-link"
-                        href={l.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={l.label}
-                        title={l.label}
-                      >
-                        <span className="visually-hidden">{l.label}</span>
-                        <SocialNavIcon linkKey={l.key} iconText={l.iconText} />
-                      </a>
-                    ))}
-              </div>
-            </div>
-            <button
-              type="button"
-              className="nav-toggle"
-              aria-expanded={navOpen}
-              aria-controls="nav-menu"
-              aria-label={navOpen ? t("nav.closeMenu") : t("nav.openMenu")}
-              onClick={() => setNavOpen((o) => !o)}
-            >
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
-          </div>
-        </nav>
-      </header>
+      <SiteHeader
+        lang={lang}
+        headerMode="overlay"
+        headerScrolled={headerScrolled}
+        navOpen={navOpen}
+        setNavOpen={setNavOpen}
+        site={site}
+        brandTitle={brandTitle}
+        logoSrc={logoSrc}
+      />
 
       <main>
         <section className="hero" ref={heroRef}>
@@ -371,9 +320,9 @@ export default function LandingPage({ lang = "es" }) {
             <h1>{hero?.title || t("hero.titleDefault")}</h1>
             <p className="hero-lead">{hero?.lead || ""}</p>
             <div className="hero-actions">
-              <a href={hero?.whatsappUrl || "#"} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+              <Link to={pathForHomeReservation(lang)} className="btn btn-primary">
                 {(hero?.primaryCta || "").trim() || t("hero.whatsappCta")}
-              </a>
+              </Link>
               <a href="#experiencia" className="btn btn-ghost">
                 {(hero?.secondaryCta || "").trim() || t("hero.discoverMore")}
               </a>
@@ -384,6 +333,39 @@ export default function LandingPage({ lang = "es" }) {
             <div className="hero-scroll-line"></div>
           </div>
         </section>
+
+        {showHomeIntroSection ? (
+          <section
+            className={`section section-rich-intro${richIntroImageUrl ? "" : " section-rich-intro--no-image"}`}
+            id="informacion"
+            aria-labelledby="rich-intro-title"
+          >
+            <div className="container rich-intro-grid">
+              {richIntroImageUrl ? (
+                <div className="rich-intro-media">
+                  <figure className="rich-intro-figure">
+                    <img src={richIntroImageUrl} alt={richIntroImageAlt} loading="lazy" decoding="async" />
+                  </figure>
+                </div>
+              ) : null}
+              <div className="rich-intro-copy">
+                <h2 id="rich-intro-title" className="section-title rich-intro-title align-left">
+                  {introTitle}
+                </h2>
+                {introSummary.map((para, i) => (
+                  <p key={i} className="rich-intro-lead">
+                    {para}
+                  </p>
+                ))}
+                <p className="rich-intro-guide">
+                  <Link to={pathForPage("guide", lang)} className="btn btn-secondary rich-intro-guide-btn">
+                    {introGuideCta}
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="section section-intro" id="experiencia">
           <div className="container narrow experience-block">
@@ -435,9 +417,9 @@ export default function LandingPage({ lang = "es" }) {
                 <li key={idx}>{a}</li>
               ))}
             </ul>
-            <a href="#contacto" className="btn btn-secondary">
+            <Link to={pathForHomeReservation(lang)} className="btn btn-secondary">
               {(split?.ctaLabel || "").trim() || t("section.splitCta")}
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -445,6 +427,10 @@ export default function LandingPage({ lang = "es" }) {
           <div className="container">
             <h2 className="section-title">{rooms?.title || t("section.roomsTitleDefault")}</h2>
             <p className="section-subtitle narrow-text">{rooms?.subtitle || ""}</p>
+            <p className="section-subtitle narrow-text rooms-page-teaser">
+              {t("home.roomsTeaser.text")}{" "}
+              <Link to={pathForPage("rooms", lang)}>{t("home.roomsTeaser.link")}</Link>
+            </p>
 
             <div className="rooms-grid">
               {(rooms?.cards || []).map((r, idx) => (
@@ -664,37 +650,7 @@ export default function LandingPage({ lang = "es" }) {
               </p>
               <h2 className="section-title align-left">{cta?.title || t("section.ctaTitleDefault")}</h2>
               <p>{cta?.lead || ""}</p>
-              <form className="contact-form" noValidate onSubmit={handleContactSubmit}>
-                <label>
-                  <span>{t("contact.name")}</span>
-                  <input type="text" name="nombre" placeholder={t("contact.placeholderName")} autoComplete="name" required />
-                </label>
-                <label>
-                  <span>{t("contact.email")}</span>
-                  <input type="email" name="email" placeholder={t("contact.placeholderEmail")} autoComplete="email" required />
-                </label>
-                <label>
-                  <span>{t("contact.message")}</span>
-                  <textarea name="mensaje" rows="4" placeholder={t("contact.placeholderMessage")} required></textarea>
-                </label>
-                {(contactState.status === "success" || contactState.status === "error") && (
-                  <p
-                    className={`contact-form-status contact-form-status--${contactState.status}`}
-                    role="status"
-                    aria-live="polite"
-                  >
-                    {contactState.message}
-                  </p>
-                )}
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-block"
-                  disabled={contactState.status === "sending"}
-                  aria-busy={contactState.status === "sending"}
-                >
-                  {contactState.status === "sending" ? t("contact.sending") : t("contact.submit")}
-                </button>
-              </form>
+              <ContactFormBlock />
             </div>
           </div>
         </section>
@@ -715,25 +671,7 @@ export default function LandingPage({ lang = "es" }) {
         ) : null}
       </main>
 
-      <footer className="site-footer">
-        <div className="container footer-inner">
-          <div className="footer-brand">
-            <strong>{site?.brandName || t("brand.defaultName")}</strong>
-            <p>{site?.tagline || t("brand.defaultTagline")}</p>
-          </div>
-          <div className="footer-links">
-            <a href="#experiencia">{(navL.experiencia || "").trim() || t("nav.experiencia")}</a>
-            <a href="#habitaciones">{(navL.habitaciones || "").trim() || t("nav.habitaciones")}</a>
-            <a href="#galeria">{(navL.galeria || "").trim() || t("nav.galeria")}</a>
-            <a href="#ubicacion">{(navL.ubicacion || "").trim() || t("nav.ubicacion")}</a>
-            <a href="#opiniones">{(navL.opiniones || "").trim() || t("nav.opiniones")}</a>
-            <a href="#contacto">{(navL.reservar || "").trim() || t("nav.reservar")}</a>
-          </div>
-          <p className="footer-copy">
-            {t("footer.copyPrefix")} {year} {site?.brandName || t("brand.defaultName")}.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter lang={lang} year={year} site={site} navL={navL} />
 
       <a
         href={hero?.whatsappUrl || "#"}

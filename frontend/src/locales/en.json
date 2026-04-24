@@ -17,6 +17,9 @@
     "ubicacion": "Location",
     "opiniones": "Reviews",
     "reservar": "Book",
+    "servicios": "Services",
+    "sobre": "About us",
+    "guia": "Travel guide",
     "langSwitch": "Language",
     "langEs": "Español",
     "langEn": "English"
@@ -64,7 +67,138 @@
     "errorGeneric": "Could not send. Please try again in a few minutes."
   },
   "footer": {
-    "copyPrefix": "©"
+    "copyPrefix": "©",
+    "exploreLabel": "Main navigation",
+    "legalNavLabel": "Legal information",
+    "privacy": "Privacy policy",
+    "terms": "Terms and conditions",
+    "cookies": "Cookie policy"
+  },
+  "home": {
+    "richIntro": {
+      "title": "Welcome to our home in Trinidad",
+      "summary": [
+        "Casa Trinidad Viva is a casa particular in Trinidad’s UNESCO-listed historic centre. We live here: we know the cobblestones, the valley heat, and the shortcuts to the stairway and old town. We focus on cool rooms, private bathrooms, and a patio to unwind after the beach or an open-air concert.",
+        "Booking with us is a direct conversation: real breakfasts, simple maps, and honest tips on museums, live music, Topes de Collantes, or an afternoon at Playa Ancón. A good trip starts with clear information — our travel guide brings together season, transport, and local customs so you arrive on the right foot."
+      ],
+      "imageAlt": "Photo of the house and guest experience at Casa Trinidad Viva, Trinidad, Cuba",
+      "guideLink": "Open the travel guide"
+    },
+    "roomsTeaser": {
+      "text": "Below is a visual overview of our rooms. For layout, natural light, private bathroom details, and traveller-type recommendations, open the dedicated page.",
+      "link": "Open the full rooms guide"
+    }
+  },
+  "pages": {
+    "rooms": {
+      "seoTitle": "Rooms | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Rooms in the heart of Trinidad",
+      "sliderAria": "Photo carousel for this room",
+      "openLightboxAria": "Enlarge photo {{n}} of {{total}}",
+      "slideHint": "Swipe or use arrows · tap the photo to enlarge",
+      "lightboxLabel": "Room photos",
+      "blocks": [
+        "At Casa Trinidad Viva we offer private rooms for couples, friends, or small families who want peace and quiet after walking the colonial cobblestones. Each space includes fresh linen, natural or assisted ventilation depending on the room, and a private bathroom with hot water to relax after a beach day or a hike.",
+        "Our standard double room is typically around 18–22 m² (approximate layout), with a double bed or two single beds on request, bedside tables, a generous clothes rack, and easy-to-reach sockets for cameras and phones. Windows face the inner courtyard or side façades, which helps keep nights comfortable during the warmest weeks in the Trinidad valley.",
+        "If you travel in a small group or with a teenager, we can assess a triple layout or a connecting arrangement when the calendar allows. We spell out bed types, steps inside the room, and shower versus tub in the confirmation email to avoid surprises.",
+        "The private bathroom includes soap, an initial supply of toilet paper, and clean towels refreshed according to your stay. Water pressure can vary at peak times across the city; we monitor tanks and schedules to minimise inconvenience. If you need a hair dryer or mobility adaptations, contact us before booking and we will propose the best available option.",
+        "Daily housekeeping is scheduled discreetly; we respect privacy and rest. A small safe is available on request, and we can point you to nearby laundry if you stay several days exploring Topes de Collantes or the southern coast.",
+        "Trinidad is a musical destination: it is common to return late from a casa de la trova. Where possible we improve acoustic insulation on doors and windows, and we provide earplugs on request. Quiet nights should be part of the service, not a luxury.",
+        "To book, share exact dates, number of guests, and any special needs (diet, mobility, late arrival). We reply via WhatsApp or the contact form with availability, an indicative price, and deposit policy if applicable. Final confirmation always includes the address, arrival references, and transport tips from Havana, Santa Clara, or Cienfuegos.",
+        "If your flight lands before check-in or you depart late, we store luggage free of charge when the schedule allows, so you can enjoy the Romantic Museum or a last swim at Ancón without dragging suitcases.",
+        "Our philosophy is family hospitality: we are not an anonymous hotel. You stay in a lived-in home with morning coffee aromas and honest advice on what is worth it today given the weather. That closeness is why many guests return."
+      ]
+    },
+    "services": {
+      "seoTitle": "Services | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Services and amenities",
+      "blocks": [
+        "Breakfast at Casa Trinidad Viva is generous: seasonal fruit, freshly toasted bread, eggs cooked to preference, freshly brewed coffee, and natural juices when the market allows. We serve in the patio or indoor dining depending on the temperature. If you have allergies or a vegetarian diet, tell us 48 hours ahead so we can adapt ingredients within what is locally available.",
+        "Internet connectivity in Cuba relies on NAUTA cards and national network congestion. We explain how to buy cards and where signal is strongest; some patio corners often receive a more stable signal than thick colonial interior walls. We do not promise symmetric fibre; we do promise honest expectations and tips for short video calls.",
+        "We help arrange shared or private taxis to Cienfuegos, El Nicho, or Havana, always with transparent prices agreed before you board. We also recommend bicycle rentals for short trips if you are comfortable with cobblestones and heat. For Playa Ancón we compare taxi versus local bus options by time and budget.",
+        "We store luggage, lend printed maps, and mark museums, viewpoints, and working ATMs. If you enjoy night photography on colonial streets, we suggest safe routes and busier times for walking with a tripod.",
+        "We provide filtered or boiled water to refill your reusable bottle, reducing single-use plastic. There are state shops and farmers’ markets nearby; we explain how to read prices in CUP and how to combine cash with international cards where accepted.",
+        "If you celebrate an anniversary or special occasion, we coordinate local flowers, a small cake, or a paladar reservation in advance. We do not charge a commission for the gesture—only organise with trusted suppliers.",
+        "Safety is an open conversation: Trinidad is relatively calm by day, but we advise against flashing valuables and recommend cross-body bags in very touristy areas. The house has quality locks on exterior doors and a safe recommendation.",
+        "For families we keep simple playful extras: board games, illustrated books on Cuban fauna, and suggestions for local pottery workshops. We want children to understand the town’s history without getting bored."
+      ]
+    },
+    "about": {
+      "seoTitle": "About us | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Our story and why Trinidad",
+      "blocks": [
+        "Casa Trinidad Viva was born from the decision to share our home with curious travellers, not just to add another overnight stay in a postcard town. Trinidad chose us as much as we chose it: the contrast between valley silence and spontaneous plaza music, the nearby sea and green mountains, makes every week different depending on festivals, rains, or weekend markets.",
+        "Before opening formally as a casa particular, we travelled through Europe and Latin America learning what makes a stay memorable: firm beds, predictable showers, honest breakfasts, and hosts who listen. We apply that compass here, where logistics can be unpredictable and everyday creativity makes the difference.",
+        "We believe in tourism that spreads benefits: we recommend local artisans, independent musicians, and community conservation projects. When a guest buys pottery at the neighbour’s workshop or tips the band directly, the town’s circular economy grows stronger.",
+        "Our small family team rotates reception, cooking, and maintenance; we do not outsource opaque cleaning. That is how we control quality and tone. If something fails—a dripping tap, a noisy fan—we repair it quickly because good sleep is the core of the service.",
+        "Trinidad is sensitive to climate change and peak visitor flows. That is why we educate about water use, rational air-conditioning when available, and respect for historic façades (do not touch fresh lime render, do not litter narrow alleys).",
+        "We work with licensed guides when the itinerary requires it, but we also enjoy a free morning walk with guests through the real market, not only the tourist window. That mix defines our personality: formality when needed, warmth always.",
+        "If you stay more than three nights, we sketch an alternating plan of culture, nature, and rest so you do not burn out. We prefer you leave energised with good memories than ticking ten museums in 48 hours without enjoying any of them."
+      ]
+    },
+    "guide": {
+      "seoTitle": "Travel guide | Trinidad, Cuba — Casa Trinidad Viva",
+      "h1": "Practical guide to visiting Trinidad",
+      "blocks": [
+        "Trinidad blends mountain and coast tropical weather: December through April tends to be drier and cooler at night; May through November brings short but intense showers. Pack a light rain shell, closed non-slip shoes for wet cobblestones, and high SPF protection. A scarf or wide-brim hat beats three tubes of cream after a sunburn.",
+        "Arriving by Víazul bus from Havana or Varadero is affordable but long; book seats early in high season. With a private taxi negotiate a fixed price for the full ride, including tolls if any. From Cienfuegos the hop is short and scenic—ideal if you rent a car with offline GPS downloaded.",
+        "Walking is the best way to discover hidden viewpoints, but hills are hard on knees: use a folding stick if needed and plan shade breaks. Tourist electric carts can save time with small children or extreme heat.",
+        "Exchange rates fluctuate; carry cash in euros or Canadian dollars plus cards. Ask us for same-day guidance and shorter ATM queues. Avoid street money changers: you risk fake bills or unfair rates.",
+        "Food ranges from casa menus of the day to gourmet paladares. Always confirm price before ordering lobster or prawns in high season. Coffee at homes is often stronger than international chains—dilute with hot milk if you prefer it milder.",
+        "For Playa Ancón, combine a taxi out with a return by bike taxi or local bus if you want to save. Carry twice the water you think you need and a salty snack: reflected sand sun drains you fast. Showering after returning, before a siesta, helps avoid heat spikes.",
+        "Five quick ideas: (1) climb the Municipal History Museum tower near sunset for warm light; (2) book Casa de la Música with arrival margin; (3) visit Valle de los Ingenios early for misty photos; (4) try local sugarcane honey with farm cheese; (5) respect dress codes in active churches.",
+        "If you travel solo, join small-group tours to Topes de Collantes to share guide and transport costs. As a couple, a private taxi gives flexibility for photo stops. Always ask whether the vehicle has working air conditioning in summer.",
+        "Local etiquette values a warm greeting, patience in queues, and modest tips for direct services (porters, table musicians). Do not film elderly vendors in markets without permission—some prefer privacy.",
+        "Before departure, check windows and plugs: tropical humidity sometimes swells doors. If you forget a charger, we keep a labelled lost-and-found for months. We want your last impression to be as careful as the first."
+      ]
+    },
+    "contact": {
+      "seoTitle": "Contact and bookings | Casa Trinidad Viva — Trinidad, Cuba",
+      "h1": "Contact and bookings",
+      "lead": "Write to us with approximate dates, number of guests, and any special needs (diet, mobility, late arrival). We reply as soon as possible with availability and next steps. You can also book via WhatsApp using the floating button."
+    },
+    "privacy": {
+      "seoTitle": "Privacy policy | Casa Trinidad Viva",
+      "h1": "Privacy policy",
+      "blocks": [
+        "At Casa Trinidad Viva we respect your privacy and process personal data according to lawfulness, fairness, and transparency. This policy explains what information we collect through this website, for what purpose, and for how long.",
+        "Contact form data: when you submit your name, email address, and message, we use that information solely to handle your accommodation request, reply to you, and, if applicable, confirm a booking. The legal basis is the performance of pre-contractual or contractual measures at your request.",
+        "Technical data: the hosting server may log IP address, date and time of the request, and browser type for security, diagnostics, and abuse prevention (spam or attacks). We keep these logs for the minimum necessary time unless a different legal obligation applies.",
+        "Cookies and similar technologies: we may use strictly necessary cookies for site operation (for example, administrative session cookies if you access the panel). If we later enable analytics or third-party advertising cookies (such as Google AdSense), we will request prior consent where required by applicable law and update this policy with details on each cookie and retention period.",
+        "Google AdSense: if Google ads are enabled on this site, Google may use cookies or mobile identifiers to personalise ads you see. See how Google uses information in Google’s policies and adjust your ad preferences in your Google account.",
+        "Recipients: we do not sell your data. We only share information with providers that help us operate the site or email (for example, hosting or SMTP services) under agreements appropriate to the purpose.",
+        "Retention: contact messages are kept as long as needed to manage the booking and subsequent accounting or legal obligations. You may request access, rectification, erasure, or objection where applicable by writing to the contact email published on this site.",
+        "Children: this site is not intentionally directed at children under 16. If we learn that we collected a child’s data without valid parental consent, we will delete it.",
+        "Changes: we may update this policy to reflect legal or site changes. The last review date appears at the end of the page. Continued use after substantial changes means you acknowledge them.",
+        "Last updated: April 2026."
+      ]
+    },
+    "terms": {
+      "seoTitle": "Terms and conditions | Casa Trinidad Viva",
+      "h1": "Website terms and conditions of use",
+      "blocks": [
+        "Accessing and using this website makes you a user and implies acceptance of these terms. If you disagree, please do not use the site.",
+        "Information about services, prices, and availability is indicative unless expressly confirmed in writing (email or agreed message). Photos show the general condition of facilities; minor decorative details may vary without lowering the advertised category.",
+        "Bookings require mutual confirmation: dates, number of guests, rate, and cancellation policy must be clearly stated in correspondence. Failure to pay as agreed or late cancellation may incur charges according to the policy communicated case by case.",
+        "The user agrees to provide truthful data in the contact form and not to use the site for unlawful purposes, spam, or impersonation.",
+        "External links: the site may link to third parties (maps, social networks, providers). We are not responsible for their content or privacy practices.",
+        "Intellectual property: proprietary text, logos, and photos are protected. Commercial reproduction is not allowed without written permission. You may freely share links to the site.",
+        "Limitation of liability: we make reasonable efforts to keep the site available and error-free but do not guarantee uninterrupted operation. We are not liable for indirect damages from use or inability to use the site except in cases of wilful misconduct or gross negligence.",
+        "Applicable law and jurisdiction: unless mandatory rules say otherwise, disputes will be submitted to the competent courts according to the accommodation owner’s domicile, without prejudice to consumer rights for EU residents where applicable.",
+        "Last updated: April 2026."
+      ]
+    },
+    "cookies": {
+      "seoTitle": "Cookie policy | Casa Trinidad Viva",
+      "h1": "Cookie policy",
+      "blocks": [
+        "Cookies are small files stored on your device when you visit a website. They help remember preferences, keep secure sessions, or, in some cases, show relevant advertising.",
+        "Necessary cookies: we use technical cookies essential for basic site operation (for example, session management in the admin area). Under European rules these do not require consent.",
+        "Third-party and advertising cookies: if ads are shown via Google AdSense or other providers, they may install cookies or use identifiers to measure impressions, cap frequency, or personalise content. You can manage or revoke consent via a cookie banner when available or through your browser settings.",
+        "Duration: session cookies are removed when you close the browser; persistent cookies have an expiry set by the provider. See your browser documentation to block or delete cookies.",
+        "Read more about privacy and data processing in our Privacy policy. Last updated: April 2026."
+      ]
+    }
   },
   "whatsapp": {
     "floatLabel": "Message us on WhatsApp"

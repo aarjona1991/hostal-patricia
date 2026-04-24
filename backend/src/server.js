@@ -119,6 +119,195 @@ const isProduction = process.env.NODE_ENV === "production";
   tx();
 }
 
+/**
+ * Filas `rooms` guardadas antes de existir `pageItems` no se actualizan solas al arrancar (solo se inserta
+ * la clave si falta). Fusionamos los defaults del seed cuando `pageItems` no es un array (p. ej. ausente),
+ * sin tocar `pageItems: []` (página solo con texto estático a propósito).
+ */
+function ensureRoomsPageDefaults(db) {
+  const row = getSection(db, "rooms");
+  if (!row?.data || typeof row.data !== "object") return;
+  const data = row.data;
+  if (Array.isArray(data.pageItems)) return;
+
+  const def = DEFAULT_SECTIONS.rooms;
+  if (!def || typeof def !== "object") return;
+
+  const next = {
+    ...data,
+    pageItems: Array.isArray(def.pageItems) ? JSON.parse(JSON.stringify(def.pageItems)) : [],
+  };
+  if (!(typeof data.pageH1 === "string" && data.pageH1.trim()) && typeof def.pageH1 === "string") {
+    next.pageH1 = def.pageH1;
+  }
+  if (!(typeof data.pageSeoTitle === "string" && data.pageSeoTitle.trim()) && typeof def.pageSeoTitle === "string") {
+    next.pageSeoTitle = def.pageSeoTitle;
+  }
+  if (!(typeof data.pageLead === "string" && data.pageLead.trim()) && typeof def.pageLead === "string") {
+    next.pageLead = def.pageLead;
+  }
+  const enDef = def.i18n?.en;
+  if (enDef && typeof enDef === "object") {
+    const baseI18n = typeof data.i18n === "object" && data.i18n ? { ...data.i18n } : {};
+    const prevEn = typeof baseI18n.en === "object" && baseI18n.en ? { ...baseI18n.en } : {};
+    const enPatch = { ...prevEn };
+    if (!Array.isArray(prevEn.pageItems)) {
+      enPatch.pageItems = Array.isArray(enDef.pageItems)
+        ? JSON.parse(JSON.stringify(enDef.pageItems))
+        : [];
+    }
+    if (!(String(prevEn.pageH1 || "").trim()) && typeof enDef.pageH1 === "string") {
+      enPatch.pageH1 = enDef.pageH1;
+    }
+    if (!(String(prevEn.pageSeoTitle || "").trim()) && typeof enDef.pageSeoTitle === "string") {
+      enPatch.pageSeoTitle = enDef.pageSeoTitle;
+    }
+    if (!(String(prevEn.pageLead || "").trim()) && typeof enDef.pageLead === "string") {
+      enPatch.pageLead = enDef.pageLead;
+    }
+    next.i18n = { ...baseI18n, en: enPatch };
+  }
+
+  upsertSection(db, "rooms", next);
+  console.log("[sections] rooms: pageItems y metadatos de /habitaciones fusionados desde seed (BD previa)");
+}
+
+ensureRoomsPageDefaults(db);
+
+/** Añade `pageLead` del seed solo si la clave aún no existe en JSON (BD antigua); si existe vacía, no machacar. */
+function ensureRoomsPageLead(db) {
+  const row = getSection(db, "rooms");
+  if (!row?.data || typeof row.data !== "object") return;
+  const data = row.data;
+  if ("pageLead" in data) return;
+
+  const def = DEFAULT_SECTIONS.rooms;
+  if (!def || typeof def.pageLead !== "string" || !def.pageLead.trim()) return;
+
+  const next = { ...data, pageLead: def.pageLead };
+  const enDef = def.i18n?.en;
+  if (enDef && typeof enDef.pageLead === "string" && enDef.pageLead.trim()) {
+    const baseI18n = typeof data.i18n === "object" && data.i18n ? { ...data.i18n } : {};
+    const prevEn = typeof baseI18n.en === "object" && baseI18n.en ? { ...baseI18n.en } : {};
+    if (!("pageLead" in prevEn)) {
+      next.i18n = { ...baseI18n, en: { ...prevEn, pageLead: enDef.pageLead } };
+    }
+  }
+  upsertSection(db, "rooms", next);
+  console.log("[sections] rooms: pageLead por defecto añadido bajo el H1 de /habitaciones");
+}
+
+ensureRoomsPageLead(db);
+
+/** Campos de la página /servicios (`pageH1`, `pageSeoTitle`, `pageBlocks`, …) en `split` si la fila es anterior al CMS de esa página. */
+function ensureSplitServicesPageFields(db) {
+  const row = getSection(db, "split");
+  if (!row?.data || typeof row.data !== "object") return;
+  const def = DEFAULT_SECTIONS.split;
+  if (!def || typeof def !== "object") return;
+  const data = row.data;
+
+  const next = { ...data };
+  let changed = false;
+  const pageStringKeys = ["pageH1", "pageLead", "pageSeoTitle"];
+  for (const k of pageStringKeys) {
+    if (!(k in data) && def[k] != null) {
+      next[k] = def[k];
+      changed = true;
+    }
+  }
+  if (!("pageBlocks" in data) && Array.isArray(def.pageBlocks)) {
+    next.pageBlocks = JSON.parse(JSON.stringify(def.pageBlocks));
+    changed = true;
+  }
+
+  const enDef = def.i18n?.en;
+  if (enDef && typeof enDef === "object") {
+    const baseI18n = typeof data.i18n === "object" && data.i18n ? { ...data.i18n } : {};
+    if (!baseI18n.en || typeof baseI18n.en !== "object") {
+      next.i18n = { ...baseI18n, en: JSON.parse(JSON.stringify(enDef)) };
+      changed = true;
+    } else {
+      const prevEn = { ...baseI18n.en };
+      const enNext = { ...prevEn };
+      let enChanged = false;
+      for (const k of pageStringKeys) {
+        if (!(k in prevEn) && enDef[k] != null) {
+          enNext[k] = enDef[k];
+          enChanged = true;
+        }
+      }
+      if (!("pageBlocks" in prevEn) && Array.isArray(enDef.pageBlocks)) {
+        enNext.pageBlocks = JSON.parse(JSON.stringify(enDef.pageBlocks));
+        enChanged = true;
+      }
+      if (enChanged) {
+        next.i18n = { ...baseI18n, en: enNext };
+        changed = true;
+      }
+    }
+  }
+
+  if (!changed) return;
+  upsertSection(db, "split", next);
+  console.log("[sections] split: campos de página /servicios fusionados desde seed (BD previa)");
+}
+
+ensureSplitServicesPageFields(db);
+
+/** Añade media (`cover`, `photos`) en páginas CMS existentes (BD previa) sin machacar si ya existe. */
+function ensurePageMediaDefaults(db, key) {
+  const row = getSection(db, key);
+  if (!row?.data || typeof row.data !== "object") return;
+  const data = row.data;
+  const def = DEFAULT_SECTIONS[key];
+  if (!def || typeof def !== "object") return;
+
+  const next = { ...data };
+  let changed = false;
+
+  if (!("cover" in data) && def.cover && typeof def.cover === "object") {
+    next.cover = JSON.parse(JSON.stringify(def.cover));
+    changed = true;
+  }
+  if (!("photos" in data) && Array.isArray(def.photos)) {
+    next.photos = JSON.parse(JSON.stringify(def.photos));
+    changed = true;
+  }
+
+  const enDef = def.i18n?.en;
+  if (enDef && typeof enDef === "object") {
+    const baseI18n = typeof data.i18n === "object" && data.i18n ? { ...data.i18n } : {};
+    const prevEn = typeof baseI18n.en === "object" && baseI18n.en ? { ...baseI18n.en } : null;
+    if (!prevEn) {
+      next.i18n = { ...baseI18n, en: JSON.parse(JSON.stringify(enDef)) };
+      changed = true;
+    } else {
+      const enNext = { ...prevEn };
+      let enChanged = false;
+      if (!("cover" in prevEn) && enDef.cover && typeof enDef.cover === "object") {
+        enNext.cover = JSON.parse(JSON.stringify(enDef.cover));
+        enChanged = true;
+      }
+      if (!("photos" in prevEn) && Array.isArray(enDef.photos)) {
+        enNext.photos = JSON.parse(JSON.stringify(enDef.photos));
+        enChanged = true;
+      }
+      if (enChanged) {
+        next.i18n = { ...baseI18n, en: enNext };
+        changed = true;
+      }
+    }
+  }
+
+  if (!changed) return;
+  upsertSection(db, key, next);
+  console.log("[sections] %s: media (cover/photos) fusionada desde seed (BD previa)", key);
+}
+
+ensurePageMediaDefaults(db, "travelGuide");
+ensurePageMediaDefaults(db, "aboutPage");
+
 // Galería (solo desarrollo): si la BD ya tenía `gallery` con menos fotos, añadimos al final las del
 // DEFAULT cuya imgUrl aún no exista. En producción no se ejecuta: evita que cada deploy reinyecte dummies.
 if (!isProduction) {
