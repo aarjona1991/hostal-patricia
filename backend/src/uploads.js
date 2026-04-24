@@ -7,6 +7,12 @@ import { resolveUploadDir } from "./dataPaths.js";
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const ALLOWED_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
+const MIME_TO_EXT = new Map([
+  ["image/jpeg", ".jpg"],
+  ["image/png", ".png"],
+  ["image/webp", ".webp"],
+  ["image/gif", ".gif"],
+]);
 
 export function getUploadDir(repoRoot) {
   return resolveUploadDir(repoRoot);
@@ -25,7 +31,8 @@ export function mountFileUploads(app, { repoRoot, requireAuth }) {
     destination: (_req, _file, cb) => cb(null, uploadDir),
     filename: (_req, file, cb) => {
       const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 12);
-      const extFinal = ALLOWED_EXT.has(ext) ? ext : ".jpg";
+      const extFromMime = MIME_TO_EXT.get(file.mimetype);
+      const extFinal = ALLOWED_EXT.has(ext) ? ext : extFromMime && ALLOWED_EXT.has(extFromMime) ? extFromMime : ".jpg";
       cb(null, `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extFinal}`);
     },
   });
@@ -34,7 +41,10 @@ export function mountFileUploads(app, { repoRoot, requireAuth }) {
     storage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-      if (ALLOWED_MIME.has(file.mimetype)) cb(null, true);
+      // Algunos entornos suben con mimetype genérico (p. ej. application/octet-stream).
+      // Aceptamos también por extensión del nombre original.
+      const ext = path.extname(file.originalname || "").toLowerCase().slice(0, 12);
+      if (ALLOWED_MIME.has(file.mimetype) || ALLOWED_EXT.has(ext)) cb(null, true);
       else cb(new Error("INVALID_IMAGE_TYPE"));
     },
   });

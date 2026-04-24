@@ -18,6 +18,16 @@ function preventDetailsToggle(e) {
   e.stopPropagation();
 }
 
+function actionBtn(handler, { enabled = true } = {}) {
+  return (e) => {
+    // Evita que el <summary> del <details> capture el gesto y haga toggle.
+    e.preventDefault();
+    e.stopPropagation();
+    if (!enabled) return;
+    handler?.();
+  };
+}
+
 function StringListEditor({ label, items = [], onChange, addLabel = "Añadir", readOnlyStructure = false }) {
   const list = Array.isArray(items) ? items : [];
   return (
@@ -142,19 +152,19 @@ function ExperienceCardsEditor({ cards = [], onChange, localeMode = "es", onEnCa
           <summary className="adm-subpanel-head">
             <span>Tarjeta {i + 1}</span>
             {isEs ? (
-              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
-                <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
+              <div className="adm-row-actions">
+                <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={actionBtn(() => onChange(moveItem(list, i, -1)), { enabled: i !== 0 })}>
                   ↑
                 </button>
                 <button
                   type="button"
                   className="adm-icon-btn"
                   disabled={i === list.length - 1}
-                  onClick={() => onChange(moveItem(list, i, 1))}
+                  onClick={actionBtn(() => onChange(moveItem(list, i, 1)), { enabled: i !== list.length - 1 })}
                 >
                   ↓
                 </button>
-                <button type="button" className="adm-icon-btn" onClick={() => onChange(list.filter((_, j) => j !== i))}>
+                <button type="button" className="adm-icon-btn" onClick={actionBtn(() => onChange(list.filter((_, j) => j !== i)))}>
                   ×
                 </button>
               </div>
@@ -257,19 +267,19 @@ function GalleryPhotosEditor({ photos = [], onChange, localeMode = "es", onEnPho
           <summary className="adm-subpanel-head">
             <span>Foto {i + 1}</span>
             {isEs ? (
-              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
-                <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
+              <div className="adm-row-actions">
+                <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={actionBtn(() => onChange(moveItem(list, i, -1)), { enabled: i !== 0 })}>
                   ↑
                 </button>
                 <button
                   type="button"
                   className="adm-icon-btn"
                   disabled={i === list.length - 1}
-                  onClick={() => onChange(moveItem(list, i, 1))}
+                  onClick={actionBtn(() => onChange(moveItem(list, i, 1)), { enabled: i !== list.length - 1 })}
                 >
                   ↓
                 </button>
-                <button type="button" className="adm-icon-btn" onClick={() => onChange(list.filter((_, j) => j !== i))}>
+                <button type="button" className="adm-icon-btn" onClick={actionBtn(() => onChange(list.filter((_, j) => j !== i)))}>
                   ×
                 </button>
               </div>
@@ -351,6 +361,7 @@ function GalleryPhotosEditor({ photos = [], onChange, localeMode = "es", onEnPho
 function RoomCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatch }) {
   const list = Array.isArray(cards) ? cards : [];
   const isEs = localeMode === "es";
+  const structureLocked = !isEs;
   return (
     <div className="adm-field">
       <label>Tarjetas (habitaciones)</label>
@@ -358,24 +369,35 @@ function RoomCardsEditor({ cards = [], onChange, localeMode = "es", onEnCardPatc
         <details key={i} className="adm-subpanel">
           <summary className="adm-subpanel-head">
             <span>Habitación {i + 1}</span>
-            {isEs ? (
-              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
-                <button type="button" className="adm-icon-btn" disabled={i === 0} onClick={() => onChange(moveItem(list, i, -1))}>
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  className="adm-icon-btn"
-                  disabled={i === list.length - 1}
-                  onClick={() => onChange(moveItem(list, i, 1))}
-                >
-                  ↓
-                </button>
-                <button type="button" className="adm-icon-btn" onClick={() => onChange(list.filter((_, j) => j !== i))}>
-                  ×
-                </button>
-              </div>
-            ) : null}
+            <div className="adm-row-actions">
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title={structureLocked ? "Para reordenar, cambia a Español" : "Subir"}
+                disabled={structureLocked || i === 0}
+                onClick={actionBtn(() => onChange(moveItem(list, i, -1)), { enabled: !structureLocked && i !== 0 })}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title={structureLocked ? "Para reordenar, cambia a Español" : "Bajar"}
+                disabled={structureLocked || i === list.length - 1}
+                onClick={actionBtn(() => onChange(moveItem(list, i, 1)), { enabled: !structureLocked && i !== list.length - 1 })}
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title={structureLocked ? "Para eliminar, cambia a Español" : "Eliminar"}
+                disabled={structureLocked}
+                onClick={actionBtn(() => onChange(list.filter((_, j) => j !== i)), { enabled: !structureLocked })}
+              >
+                ×
+              </button>
+            </div>
           </summary>
           <div className="adm-subpanel-body">
           {isEs ? (
@@ -537,24 +559,35 @@ function RoomPageItemsEditor({ draft, setDraft, patch, patchEnItem, localeMode, 
         <details key={itemIdx} className="adm-subpanel" style={{ marginTop: "1rem" }}>
           <summary className="adm-subpanel-head">
             <span>Habitación (página detalle) {itemIdx + 1}</span>
-            {isEs ? (
-              <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
-                <button type="button" className="adm-icon-btn" disabled={itemIdx === 0} onClick={() => patch({ pageItems: moveItem(list, itemIdx, -1) })}>
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  className="adm-icon-btn"
-                  disabled={itemIdx === list.length - 1}
-                  onClick={() => patch({ pageItems: moveItem(list, itemIdx, 1) })}
-                >
-                  ↓
-                </button>
-                <button type="button" className="adm-icon-btn" onClick={() => patch({ pageItems: list.filter((_, j) => j !== itemIdx) })}>
-                  ×
-                </button>
-              </div>
-            ) : null}
+            <div className="adm-row-actions">
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title={!isEs ? "Para reordenar, cambia a Español" : "Subir"}
+                disabled={!isEs || itemIdx === 0}
+                onClick={actionBtn(() => patch({ pageItems: moveItem(list, itemIdx, -1) }), { enabled: isEs && itemIdx !== 0 })}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title={!isEs ? "Para reordenar, cambia a Español" : "Bajar"}
+                disabled={!isEs || itemIdx === list.length - 1}
+                onClick={actionBtn(() => patch({ pageItems: moveItem(list, itemIdx, 1) }), { enabled: isEs && itemIdx !== list.length - 1 })}
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                className="adm-icon-btn"
+                title={!isEs ? "Para eliminar, cambia a Español" : "Eliminar"}
+                disabled={!isEs}
+                onClick={actionBtn(() => patch({ pageItems: list.filter((_, j) => j !== itemIdx) }), { enabled: isEs })}
+              >
+                ×
+              </button>
+            </div>
           </summary>
           <div className="adm-subpanel-body">
           <div className="adm-field">
@@ -597,48 +630,50 @@ function RoomPageItemsEditor({ draft, setDraft, patch, patchEnItem, localeMode, 
               <details key={j} className="adm-subpanel" style={{ marginTop: "0.65rem" }}>
                 <summary className="adm-subpanel-head">
                   <span>Foto {j + 1}</span>
-                  {isEs ? (
-                    <div className="adm-row-actions" onClickCapture={preventDetailsToggle} onMouseDownCapture={preventDetailsToggle}>
-                      <button
-                        type="button"
-                        className="adm-icon-btn"
-                        disabled={j === 0}
-                        onClick={() => {
-                          const n = [...list];
-                          const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
-                          n[itemIdx] = { ...n[itemIdx], images: moveItem(imgs, j, -1) };
-                          patch({ pageItems: n });
-                        }}
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        className="adm-icon-btn"
-                        disabled={j === (it.images || []).length - 1}
-                        onClick={() => {
-                          const n = [...list];
-                          const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
-                          n[itemIdx] = { ...n[itemIdx], images: moveItem(imgs, j, 1) };
-                          patch({ pageItems: n });
-                        }}
-                      >
-                        ↓
-                      </button>
-                      <button
-                        type="button"
-                        className="adm-icon-btn"
-                        onClick={() => {
-                          const n = [...list];
-                          const imgs = (Array.isArray(n[itemIdx].images) ? n[itemIdx].images : []).filter((_, k) => k !== j);
-                          n[itemIdx] = { ...n[itemIdx], images: imgs };
-                          patch({ pageItems: n });
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ) : null}
+                  <div className="adm-row-actions">
+                    <button
+                      type="button"
+                      className="adm-icon-btn"
+                      title={!isEs ? "Para reordenar, cambia a Español" : "Subir"}
+                      disabled={!isEs || j === 0}
+                      onClick={actionBtn(() => {
+                        const n = [...list];
+                        const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                        n[itemIdx] = { ...n[itemIdx], images: moveItem(imgs, j, -1) };
+                        patch({ pageItems: n });
+                      }, { enabled: isEs && j !== 0 })}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      className="adm-icon-btn"
+                      title={!isEs ? "Para reordenar, cambia a Español" : "Bajar"}
+                      disabled={!isEs || j === (it.images || []).length - 1}
+                      onClick={actionBtn(() => {
+                        const n = [...list];
+                        const imgs = [...(Array.isArray(n[itemIdx].images) ? n[itemIdx].images : [])];
+                        n[itemIdx] = { ...n[itemIdx], images: moveItem(imgs, j, 1) };
+                        patch({ pageItems: n });
+                      }, { enabled: isEs && j !== (it.images || []).length - 1 })}
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      className="adm-icon-btn"
+                      title={!isEs ? "Para eliminar, cambia a Español" : "Eliminar"}
+                      disabled={!isEs}
+                      onClick={actionBtn(() => {
+                        const n = [...list];
+                        const imgs = (Array.isArray(n[itemIdx].images) ? n[itemIdx].images : []).filter((_, k) => k !== j);
+                        n[itemIdx] = { ...n[itemIdx], images: imgs };
+                        patch({ pageItems: n });
+                      }, { enabled: isEs })}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </summary>
                 <div className="adm-subpanel-body">
                 {isEs ? (
