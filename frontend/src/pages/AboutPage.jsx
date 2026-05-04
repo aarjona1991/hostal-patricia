@@ -4,12 +4,14 @@ import InnerPageLayout from "../layouts/InnerPageLayout.jsx";
 import { ProseArticle } from "../components/ProseArticle.jsx";
 import { PhotoLightbox } from "../components/PhotoLightbox.jsx";
 import { usePublicView } from "../lib/PublicViewContext.jsx";
+import { buildPublicAdPlacement } from "../lib/adsDisplay.js";
 
 function AboutPageInner() {
   const { t, i18n } = useTranslation();
   const viewData = usePublicView();
   const about = viewData?.aboutPage && typeof viewData.aboutPage === "object" ? viewData.aboutPage : {};
   const ads = viewData?.ads && typeof viewData.ads === "object" ? viewData.ads : null;
+  const adPlacement = useMemo(() => buildPublicAdPlacement(ads || {}), [ads]);
   const blocks = Array.isArray(about.pageBlocks)
     ? about.pageBlocks.map((b) => String(b || "").trim()).filter(Boolean)
     : [];
@@ -115,11 +117,7 @@ function AboutPageInner() {
             adCounter: t("gallery.adCounter"),
             adContinueHint: t("gallery.adContinueHint"),
           }}
-          adSense={
-            ads && ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim()
-              ? { adClient: ads.adClient, adSlot: ads.adSlot, label: (ads.label || "").trim() }
-              : null
-          }
+          adPlacement={adPlacement}
         />
       ) : null}
     </div>

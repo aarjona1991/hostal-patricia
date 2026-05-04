@@ -4,12 +4,14 @@ import InnerPageLayout from "../layouts/InnerPageLayout.jsx";
 import { ProseArticle } from "../components/ProseArticle.jsx";
 import { PhotoLightbox } from "../components/PhotoLightbox.jsx";
 import { usePublicView } from "../lib/PublicViewContext.jsx";
+import { buildPublicAdPlacement } from "../lib/adsDisplay.js";
 
 function TravelGuidePageInner() {
   const { t, i18n } = useTranslation();
   const viewData = usePublicView();
   const guide = viewData?.travelGuide && typeof viewData.travelGuide === "object" ? viewData.travelGuide : {};
   const ads = viewData?.ads && typeof viewData.ads === "object" ? viewData.ads : null;
+  const adPlacement = useMemo(() => buildPublicAdPlacement(ads || {}), [ads]);
   const blocks = Array.isArray(guide.pageBlocks)
     ? guide.pageBlocks.map((b) => String(b || "").trim()).filter(Boolean)
     : [];
@@ -115,11 +117,7 @@ function TravelGuidePageInner() {
             adCounter: t("gallery.adCounter"),
             adContinueHint: t("gallery.adContinueHint"),
           }}
-          adSense={
-            ads && ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim()
-              ? { adClient: ads.adClient, adSlot: ads.adSlot, label: (ads.label || "").trim() }
-              : null
-          }
+          adPlacement={adPlacement}
         />
       ) : null}
     </div>

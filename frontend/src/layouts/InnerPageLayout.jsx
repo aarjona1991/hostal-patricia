@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SiteHeader } from "../components/SiteHeader.jsx";
 import { SiteFooter } from "../components/SiteFooter.jsx";
-import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
+import PublicAdSlot from "../components/PublicAdSlot.jsx";
+import { buildPublicAdPlacement, placementStableKey } from "../lib/adsDisplay.js";
 import { usePublicSections } from "../lib/usePublicSections.js";
 import { localizeSectionsMap } from "../lib/sectionI18n.js";
 import { PublicViewContext } from "../lib/PublicViewContext.jsx";
@@ -45,6 +46,7 @@ export default function InnerPageLayout({ lang, seoTitleKey, children }) {
   const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
   const hero = safeGet(viewData, "hero", {});
   const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
+  const adPlacement = useMemo(() => buildPublicAdPlacement(ads), [ads]);
 
   return (
     <>
@@ -61,16 +63,12 @@ export default function InnerPageLayout({ lang, seoTitleKey, children }) {
       <PublicViewContext.Provider value={viewData}>
         <div className="main-inner">{children}</div>
       </PublicViewContext.Provider>
-      {ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim() ? (
+      {adPlacement ? (
         <aside className="section section-ads" aria-label={ads.label || t("section.adsDefault")}>
           <div className="container section-ads-inner">
             <p className="section-ads-eyebrow">{ads.label || t("section.adsDefault")}</p>
             <div className="section-ads-slot">
-              <GoogleAdSlot
-                key={`${String(ads.adClient || "").trim()}-${String(ads.adSlot || "").trim()}`}
-                adClient={ads.adClient}
-                adSlot={ads.adSlot}
-              />
+              <PublicAdSlot key={placementStableKey(adPlacement)} placement={adPlacement} />
             </div>
           </div>
         </aside>

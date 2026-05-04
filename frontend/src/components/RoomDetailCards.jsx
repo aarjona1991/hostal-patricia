@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useTranslation } from "react-i18next";
 import { PhotoLightbox } from "./PhotoLightbox.jsx";
+import { buildPublicAdPlacement } from "../lib/adsDisplay.js";
 
 function normalizePhotos(raw) {
   const list = Array.isArray(raw) ? raw : [];
@@ -24,14 +25,7 @@ function RoomDetailCard({ item, ads }) {
   const photos = useMemo(() => normalizePhotos(item?.images), [item?.images]);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const adSense =
-    ads?.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim()
-      ? {
-          adClient: ads.adClient,
-          adSlot: ads.adSlot,
-          label: (ads.label || "").trim(),
-        }
-      : null;
+  const adPlacement = buildPublicAdPlacement(ads && typeof ads === "object" ? ads : {});
 
   const splideOpts = useMemo(() => {
     const n = photos.length;
@@ -104,7 +98,7 @@ function RoomDetailCard({ item, ads }) {
             adCounter: t("gallery.adCounter"),
             adContinueHint: t("gallery.adContinueHint"),
           }}
-          adSense={adSense}
+          adPlacement={adPlacement}
         />
       ) : null}
     </article>

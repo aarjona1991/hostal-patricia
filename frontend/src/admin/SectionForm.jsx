@@ -13,11 +13,6 @@ function moveItem(arr, index, delta) {
   return copy;
 }
 
-function preventDetailsToggle(e) {
-  e.preventDefault();
-  e.stopPropagation();
-}
-
 function actionBtn(handler, { enabled = true } = {}) {
   return (e) => {
     // Evita que el <summary> del <details> capture el gesto y haga toggle.
@@ -1134,7 +1129,17 @@ export function emptySectionDraft(key) {
     };
   }
   if (key === "ads") {
-    return { enabled: false, label: "Publicidad", adClient: "", adSlot: "" };
+    return {
+      enabled: false,
+      label: "Publicidad",
+      adProvider: "adsense",
+      adClient: "",
+      adSlot: "",
+      adsterraKey: "",
+      adsterraInvokeUrl: "",
+      adsterraWidth: 300,
+      adsterraHeight: 250,
+    };
   }
   if (key === "gallery") {
     return { eyebrow: "", title: "", lead: "", photos: [] };
@@ -1725,7 +1730,11 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
         </>
       );
 
-    case "ads":
+    case "ads": {
+      const adProv = String(draft.adProvider || "adsense")
+        .trim()
+        .toLowerCase();
+      const useAdsterra = adProv === "adsterra";
       return (
         <>
           {localeHint}
@@ -1740,13 +1749,26 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
               <label htmlFor="ads-enabled">Mostrar bloque de anuncios en la web</label>
             </div>
           ) : (
-            <p className="adm-text-muted">Activación e IDs de AdSense (definidos en Español).</p>
+            <p className="adm-text-muted">Activación y credenciales del proveedor (definidas en Español).</p>
           )}
           <div className="adm-field">
             <label>Etiqueta visible (p. ej. «Publicidad»)</label>
             <input type="text" className="adm-input" value={rf("label") || ""} onChange={(e) => patch({ label: e.target.value })} />
           </div>
           {isEs ? (
+            <div className="adm-field">
+              <label>Proveedor</label>
+              <select
+                className="adm-input"
+                value={useAdsterra ? "adsterra" : "adsense"}
+                onChange={(e) => patch({ adProvider: e.target.value })}
+              >
+                <option value="adsense">Google AdSense</option>
+                <option value="adsterra">AdsTerra</option>
+              </select>
+            </div>
+          ) : null}
+          {isEs && !useAdsterra ? (
             <>
               <div className="adm-field">
                 <label>ID de cliente AdSense (ca-pub-…)</label>
@@ -1771,7 +1793,55 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
               </div>
             </>
           ) : null}
-          {isEs ? (
+          {isEs && useAdsterra ? (
+            <>
+              <div className="adm-field">
+                <label>Clave del anuncio (key, del snippet AdsTerra)</label>
+                <input
+                  type="text"
+                  className="adm-input"
+                  placeholder="Pega el valor de key en atOptions"
+                  value={draft.adsterraKey || ""}
+                  onChange={(e) => patch({ adsterraKey: e.target.value })}
+                />
+              </div>
+              <div className="adm-field">
+                <label>URL del script invoke.js</label>
+                <input
+                  type="url"
+                  className="adm-input"
+                  placeholder="https://…/invoke.js"
+                  value={draft.adsterraInvokeUrl || ""}
+                  onChange={(e) => patch({ adsterraInvokeUrl: e.target.value })}
+                />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label>Ancho (px)</label>
+                  <input
+                    type="number"
+                    className="adm-input"
+                    min={1}
+                    step={1}
+                    value={draft.adsterraWidth != null ? draft.adsterraWidth : 300}
+                    onChange={(e) => patch({ adsterraWidth: e.target.value === "" ? 300 : Number(e.target.value) })}
+                  />
+                </div>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label>Alto (px)</label>
+                  <input
+                    type="number"
+                    className="adm-input"
+                    min={1}
+                    step={1}
+                    value={draft.adsterraHeight != null ? draft.adsterraHeight : 250}
+                    onChange={(e) => patch({ adsterraHeight: e.target.value === "" ? 250 : Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+            </>
+          ) : null}
+          {isEs && !useAdsterra ? (
             <p className="adm-text-muted" style={{ marginTop: 8 }}>
               El bloque va justo después de reservas/contacto y antes del pie. En AdSense, el snippet que te dan solo incluye la etiqueta{" "}
               <code style={{ fontSize: "0.85em" }}>{"<script async … adsbygoogle.js?client=ca-pub-…>"}</code>: esa carga la hace la web
@@ -1779,8 +1849,16 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
               (responsive) y pega aquí también el <strong>ID del anuncio</strong> (<code style={{ fontSize: "0.85em" }}>data-ad-slot</code>).
             </p>
           ) : null}
+          {isEs && useAdsterra ? (
+            <p className="adm-text-muted" style={{ marginTop: 8 }}>
+              En el panel de AdsTerra, crea una unidad <strong>banner/display</strong> y copia del código generado el valor{" "}
+              <code style={{ fontSize: "0.85em" }}>key</code> dentro de <code style={{ fontSize: "0.85em" }}>atOptions</code> y la URL completa del{" "}
+              <code style={{ fontSize: "0.85em" }}>invoke.js</code>. Ancho y alto deben coincidir con la unidad si AdsTerra los fija en el snippet.
+            </p>
+          ) : null}
         </>
       );
+    }
 
     case "travelGuide": {
       const baseBlocks = Array.isArray(draft.pageBlocks) ? draft.pageBlocks : [];

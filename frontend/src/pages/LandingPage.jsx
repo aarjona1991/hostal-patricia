@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
-import GoogleAdSlot from "../components/GoogleAdSlot.jsx";
+import PublicAdSlot from "../components/PublicAdSlot.jsx";
+import { buildPublicAdPlacement, placementStableKey } from "../lib/adsDisplay.js";
 import { SiteHeader } from "../components/SiteHeader.jsx";
 import { SiteFooter } from "../components/SiteFooter.jsx";
 import { ContactFormBlock } from "../components/ContactFormBlock.jsx";
@@ -231,6 +232,13 @@ export default function LandingPage({ lang = "es" }) {
     };
   }, [testimonialItems.length]);
 
+  /** Debe ir antes de cualquier return (Rules of Hooks). */
+  const adPlacement = useMemo(() => {
+    if (!viewData) return null;
+    const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
+    return buildPublicAdPlacement(ads);
+  }, [viewData]);
+
   if (err) return <div style={{ padding: 24 }}>{t("errorLoad")} {String(err.message || err)}</div>;
   if (!data || !viewData) return <div style={{ padding: 24 }}>{t("loading")}</div>;
 
@@ -242,7 +250,6 @@ export default function LandingPage({ lang = "es" }) {
   const mapSection = viewData.map && typeof viewData.map === "object" ? viewData.map : null;
   const testimonials = safeGet(viewData, "testimonials", { items: [] });
   const cta = safeGet(viewData, "cta", {});
-  const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
   const site = safeGet(viewData, "site", {});
   const navL = site?.navLabels && typeof site.navLabels === "object" ? site.navLabels : {};
   const gallery = safeGet(viewData, "gallery", { photos: [] });
@@ -518,15 +525,7 @@ export default function LandingPage({ lang = "es" }) {
               adCounter: t("gallery.adCounter"),
               adContinueHint: t("gallery.adContinueHint"),
             }}
-            adSense={
-              ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim()
-                ? {
-                    adClient: ads.adClient,
-                    adSlot: ads.adSlot,
-                    label: (ads.label || "").trim(),
-                  }
-                : null
-            }
+            adPlacement={adPlacement}
           />
         ) : null}
 
@@ -655,16 +654,12 @@ export default function LandingPage({ lang = "es" }) {
           </div>
         </section>
 
-        {ads.enabled && String(ads.adClient || "").trim() && String(ads.adSlot || "").trim() ? (
-          <aside className="section section-ads" aria-label={ads.label || t("section.adsDefault")}>
+        {adPlacement ? (
+          <aside className="section section-ads" aria-label={adPlacement.label || t("section.adsDefault")}>
             <div className="container section-ads-inner">
-              <p className="section-ads-eyebrow">{ads.label || t("section.adsDefault")}</p>
+              <p className="section-ads-eyebrow">{adPlacement.label || t("section.adsDefault")}</p>
               <div className="section-ads-slot">
-                <GoogleAdSlot
-                  key={`${String(ads.adClient || "").trim()}-${String(ads.adSlot || "").trim()}`}
-                  adClient={ads.adClient}
-                  adSlot={ads.adSlot}
-                />
+                <PublicAdSlot key={placementStableKey(adPlacement)} placement={adPlacement} />
               </div>
             </div>
           </aside>
