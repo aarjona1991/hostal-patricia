@@ -55,3 +55,43 @@ export function placementStableKey(p) {
   }
   return `adsense:${p.adClient}:${p.adSlot}`;
 }
+
+/**
+ * Anuncio en lightboxes de galería.
+ * - AdSense: misma unidad que el bloque principal (comportamiento anterior).
+ * - AdsTerra: hace falta una **segunda** unidad (`adsterraKeyGallery` + URL); si falta, no hay anuncio en la galería
+ *   (la principal sigue solo debajo del formulario). Si la clave coincide con la principal, se ignora.
+ *
+ * @param {Record<string, unknown> | null | undefined} ads
+ */
+export function buildLightboxAdPlacement(ads) {
+  if (!ads || typeof ads !== "object" || ads.enabled === false) return null;
+
+  const label = typeof ads.label === "string" ? ads.label.trim() : "";
+  const prov = String(ads.adProvider || "adsense")
+    .trim()
+    .toLowerCase();
+
+  if (prov === "adsense") {
+    return buildPublicAdPlacement(ads);
+  }
+
+  if (prov !== "adsterra") return null;
+
+  const mainKey = String(ads.adsterraKey || "").trim();
+  const gk = String(ads.adsterraKeyGallery || "").trim();
+  const gu = normalizeHttpUrl(String(ads.adsterraInvokeUrlGallery || "").trim());
+  if (!gk || !gu) return null;
+  if (gk === mainKey) return null;
+
+  const w = Number(ads.adsterraWidthGallery);
+  const h = Number(ads.adsterraHeightGallery);
+  return {
+    provider: "adsterra",
+    adsterraKey: gk,
+    adsterraInvokeUrl: gu,
+    adsterraWidth: Number.isFinite(w) && w > 0 ? w : 300,
+    adsterraHeight: Number.isFinite(h) && h > 0 ? h : 250,
+    label,
+  };
+}

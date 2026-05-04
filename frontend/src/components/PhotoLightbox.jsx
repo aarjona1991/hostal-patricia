@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PublicAdSlot from "./PublicAdSlot.jsx";
-import { decAdsterraOverlaySuppression, incAdsterraOverlaySuppression } from "../lib/adsterraOverlaySuppress.js";
 
 /** Tras cada bloque de N fotos, una pantalla de anuncio antes de seguir (solo si hay bloque publicitario configurado). */
 const PHOTOS_PER_AD_BREAK = 8;
@@ -24,13 +23,6 @@ export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, ad
   useEffect(() => {
     setInAdBreak(false);
   }, [index]);
-
-  /** Misma unidad AdsTerra que el pie: un solo `#container-{key}` en el documento. */
-  useEffect(() => {
-    if (adPlacement?.provider !== "adsterra") return undefined;
-    incAdsterraOverlaySuppression();
-    return () => decAdsterraOverlaySuppression();
-  }, [adPlacement]);
 
   const goPrev = useCallback(() => {
     if (inAdBreak) {

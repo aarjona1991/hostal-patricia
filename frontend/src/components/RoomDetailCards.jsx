@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useTranslation } from "react-i18next";
 import { PhotoLightbox } from "./PhotoLightbox.jsx";
-import { buildPublicAdPlacement } from "../lib/adsDisplay.js";
+import { buildLightboxAdPlacement } from "../lib/adsDisplay.js";
 
 function normalizePhotos(raw) {
   const list = Array.isArray(raw) ? raw : [];
@@ -25,7 +25,7 @@ function RoomDetailCard({ item, ads }) {
   const photos = useMemo(() => normalizePhotos(item?.images), [item?.images]);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const adPlacement = buildPublicAdPlacement(ads && typeof ads === "object" ? ads : {});
+  const adPlacement = buildLightboxAdPlacement(ads && typeof ads === "object" ? ads : {});
 
   const splideOpts = useMemo(() => {
     const n = photos.length;

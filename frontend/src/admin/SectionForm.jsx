@@ -1139,6 +1139,10 @@ export function emptySectionDraft(key) {
       adsterraInvokeUrl: "",
       adsterraWidth: 300,
       adsterraHeight: 250,
+      adsterraKeyGallery: "",
+      adsterraInvokeUrlGallery: "",
+      adsterraWidthGallery: 300,
+      adsterraHeightGallery: 250,
     };
   }
   if (key === "gallery") {
@@ -1735,6 +1739,9 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
         .trim()
         .toLowerCase();
       const useAdsterra = adProv === "adsterra";
+      const mainKeyTrim = String(draft.adsterraKey || "").trim();
+      const galleryKeyTrim = String(draft.adsterraKeyGallery || "").trim();
+      const gallerySameAsMain = useAdsterra && galleryKeyTrim.length > 0 && galleryKeyTrim === mainKeyTrim;
       return (
         <>
           {localeHint}
@@ -1795,8 +1802,11 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
           ) : null}
           {isEs && useAdsterra ? (
             <>
+              <p className="adm-text-muted" style={{ marginTop: 0, marginBottom: "0.75rem", fontWeight: 600 }}>
+                Unidad principal · debajo del formulario de contacto (y bloque antes del pie en páginas interiores)
+              </p>
               <div className="adm-field">
-                <label>Clave del anuncio (key, del snippet AdsTerra)</label>
+                <label>Clave del anuncio (key)</label>
                 <input
                   type="text"
                   className="adm-input"
@@ -1839,6 +1849,67 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
                   />
                 </div>
               </div>
+
+              <div
+                className="adm-field"
+                style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(148,163,184,0.35)" }}
+              >
+                <p style={{ margin: "0 0 0.5rem", fontWeight: 600 }}>Segunda unidad · solo lightbox de fotos (opcional)</p>
+                <p className="adm-text-muted" style={{ marginTop: 0 }}>
+                  Para mostrar anuncios también al navegar fotos en grande, crea en AdsTerra <strong>otra unidad</strong> con{" "}
+                  <strong>clave distinta</strong> y pégala aquí. Si solo tienes una unidad, deja estos campos vacíos: el anuncio solo
+                  aparecerá bajo el contacto y <strong>no</strong> en la galería.
+                </p>
+              </div>
+              <div className="adm-field">
+                <label>Clave (galería / lightbox)</label>
+                <input
+                  type="text"
+                  className="adm-input"
+                  placeholder="Vacío = sin anuncio en lightbox"
+                  value={draft.adsterraKeyGallery || ""}
+                  onChange={(e) => patch({ adsterraKeyGallery: e.target.value })}
+                />
+              </div>
+              <div className="adm-field">
+                <label>URL invoke.js (galería)</label>
+                <input
+                  type="url"
+                  className="adm-input"
+                  placeholder="https://…/invoke.js"
+                  value={draft.adsterraInvokeUrlGallery || ""}
+                  onChange={(e) => patch({ adsterraInvokeUrlGallery: e.target.value })}
+                />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label>Ancho galería (px)</label>
+                  <input
+                    type="number"
+                    className="adm-input"
+                    min={1}
+                    step={1}
+                    value={draft.adsterraWidthGallery != null ? draft.adsterraWidthGallery : 300}
+                    onChange={(e) => patch({ adsterraWidthGallery: e.target.value === "" ? 300 : Number(e.target.value) })}
+                  />
+                </div>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label>Alto galería (px)</label>
+                  <input
+                    type="number"
+                    className="adm-input"
+                    min={1}
+                    step={1}
+                    value={draft.adsterraHeightGallery != null ? draft.adsterraHeightGallery : 250}
+                    onChange={(e) => patch({ adsterraHeightGallery: e.target.value === "" ? 250 : Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+              {gallerySameAsMain ? (
+                <p className="adm-upload-err" style={{ marginTop: 8 }}>
+                  La clave de galería no puede ser igual a la principal; si solo tienes una unidad, vacía los campos de galería.
+                </p>
+              ) : null}
             </>
           ) : null}
           {isEs && !useAdsterra ? (
@@ -1851,9 +1922,8 @@ export function SectionForm({ sectionKey, draft, setDraft, contentLang = CONTENT
           ) : null}
           {isEs && useAdsterra ? (
             <p className="adm-text-muted" style={{ marginTop: 8 }}>
-              En el panel de AdsTerra, crea una unidad <strong>banner/display</strong> y copia del código generado el valor{" "}
-              <code style={{ fontSize: "0.85em" }}>key</code> dentro de <code style={{ fontSize: "0.85em" }}>atOptions</code> y la URL completa del{" "}
-              <code style={{ fontSize: "0.85em" }}>invoke.js</code>. Ancho y alto deben coincidir con la unidad si AdsTerra los fija en el snippet.
+              Cada unidad en AdsTerra tiene su propio <code style={{ fontSize: "0.85em" }}>key</code> y su <code style={{ fontSize: "0.85em" }}>invoke.js</code>.
+              Ancho y alto deben coincidir con el formato de cada unidad.
             </p>
           ) : null}
         </>
