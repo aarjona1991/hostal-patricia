@@ -485,7 +485,11 @@ export const DEFAULT_SECTIONS = {
     adsterraKey: "",
     adsterraInvokeUrl: "",
     adsterraWidth: 300,
-    adsterraHeight: 250
+    adsterraHeight: 250,
+    adsterraKeyGallery: "",
+    adsterraInvokeUrlGallery: "",
+    adsterraWidthGallery: 300,
+    adsterraHeightGallery: 250
   },
   site: {
     brandName: "Casa Trinidad Viva",

@@ -3,8 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import PublicAdSlot from "../components/PublicAdSlot.jsx";
-import { buildPublicAdPlacement, placementStableKey } from "../lib/adsDisplay.js";
-import { useAdsterraOverlayCoversFooter } from "../lib/adsterraOverlaySuppress.js";
+import { buildLightboxAdPlacement, buildPublicAdPlacement, placementStableKey } from "../lib/adsDisplay.js";
 import { SiteHeader } from "../components/SiteHeader.jsx";
 import { SiteFooter } from "../components/SiteFooter.jsx";
 import { ContactFormBlock } from "../components/ContactFormBlock.jsx";
@@ -239,7 +238,11 @@ export default function LandingPage({ lang = "es" }) {
     const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
     return buildPublicAdPlacement(ads);
   }, [viewData]);
-  const adsterraOverlayCoversFooter = useAdsterraOverlayCoversFooter();
+  const lightboxAdPlacement = useMemo(() => {
+    if (!viewData) return null;
+    const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
+    return buildLightboxAdPlacement(ads);
+  }, [viewData]);
 
   if (err) return <div style={{ padding: 24 }}>{t("errorLoad")} {String(err.message || err)}</div>;
   if (!data || !viewData) return <div style={{ padding: 24 }}>{t("loading")}</div>;
@@ -527,7 +530,7 @@ export default function LandingPage({ lang = "es" }) {
               adCounter: t("gallery.adCounter"),
               adContinueHint: t("gallery.adContinueHint"),
             }}
-            adPlacement={adPlacement}
+            adPlacement={lightboxAdPlacement}
           />
         ) : null}
 
@@ -656,7 +659,7 @@ export default function LandingPage({ lang = "es" }) {
           </div>
         </section>
 
-        {adPlacement && !(adPlacement.provider === "adsterra" && adsterraOverlayCoversFooter) ? (
+        {adPlacement ? (
           <aside className="section section-ads" aria-label={adPlacement.label || t("section.adsDefault")}>
             <div className="container section-ads-inner">
               <p className="section-ads-eyebrow">{adPlacement.label || t("section.adsDefault")}</p>

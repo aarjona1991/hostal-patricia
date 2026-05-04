@@ -4,7 +4,6 @@ import { SiteHeader } from "../components/SiteHeader.jsx";
 import { SiteFooter } from "../components/SiteFooter.jsx";
 import PublicAdSlot from "../components/PublicAdSlot.jsx";
 import { buildPublicAdPlacement, placementStableKey } from "../lib/adsDisplay.js";
-import { useAdsterraOverlayCoversFooter } from "../lib/adsterraOverlaySuppress.js";
 import { usePublicSections } from "../lib/usePublicSections.js";
 import { localizeSectionsMap } from "../lib/sectionI18n.js";
 import { PublicViewContext } from "../lib/PublicViewContext.jsx";
@@ -48,7 +47,6 @@ export default function InnerPageLayout({ lang, seoTitleKey, children }) {
   const hero = safeGet(viewData, "hero", {});
   const ads = viewData.ads && typeof viewData.ads === "object" ? viewData.ads : {};
   const adPlacement = useMemo(() => buildPublicAdPlacement(ads), [ads]);
-  const adsterraOverlayCoversFooter = useAdsterraOverlayCoversFooter();
 
   return (
     <>
@@ -65,7 +63,7 @@ export default function InnerPageLayout({ lang, seoTitleKey, children }) {
       <PublicViewContext.Provider value={viewData}>
         <div className="main-inner">{children}</div>
       </PublicViewContext.Provider>
-      {adPlacement && !(adPlacement.provider === "adsterra" && adsterraOverlayCoversFooter) ? (
+      {adPlacement ? (
         <aside className="section section-ads" aria-label={ads.label || t("section.adsDefault")}>
           <div className="container section-ads-inner">
             <p className="section-ads-eyebrow">{ads.label || t("section.adsDefault")}</p>
