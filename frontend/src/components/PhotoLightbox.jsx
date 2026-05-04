@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import GoogleAdSlot from "./GoogleAdSlot.jsx";
+import PublicAdSlot from "./PublicAdSlot.jsx";
 
-/** Tras cada bloque de N fotos, una pantalla de anuncio antes de seguir (solo si hay AdSense). */
+/** Tras cada bloque de N fotos, una pantalla de anuncio antes de seguir (solo si hay bloque publicitario configurado). */
 const PHOTOS_PER_AD_BREAK = 8;
 
 /**
  * Lightbox fullscreen para una lista de fotos con navegación y teclado.
- * @param {{ items: { imgUrl: string; alt?: string; caption?: string }[]; index: number; onClose: () => void; onIndexChange: (i: number) => void; labels: { close: string; prev: string; next: string; dialogLabel: string; adEyebrow: string }; adSense?: { adClient: string; adSlot: string; label?: string } | null }} props
+ * @param {{ adPlacement: { provider: string; adClient?: string; adSlot?: string; adsterraKey?: string; adsterraInvokeUrl?: string; adsterraWidth?: number; adsterraHeight?: number; label?: string } | null }} props
  */
-export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, adSense = null }) {
+export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, adPlacement = null }) {
   const closeBtnRef = useRef(null);
   const prevFocusRef = useRef(null);
   const [inAdBreak, setInAdBreak] = useState(false);
@@ -18,10 +18,7 @@ export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, ad
   const safeIndex = n ? Math.min(Math.max(0, index), n - 1) : 0;
   const current = items[safeIndex];
 
-  const adsActive =
-    Boolean(adSense) &&
-    String(adSense.adClient || "").trim() &&
-    String(adSense.adSlot || "").trim();
+  const adsActive = Boolean(adPlacement);
 
   useEffect(() => {
     setInAdBreak(false);
@@ -88,7 +85,7 @@ export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, ad
 
   if (!current?.imgUrl) return null;
 
-  const adEyebrow = (adSense?.label || "").trim() || labels.adEyebrow;
+  const adEyebrow = (adPlacement?.label || "").trim() || labels.adEyebrow;
   const adSlotKey = `lb-ad-${safeIndex + 1}`;
 
   return createPortal(
@@ -107,7 +104,7 @@ export function PhotoLightbox({ items, index, onClose, onIndexChange, labels, ad
             <div className="photo-lightbox__ad">
               <p className="photo-lightbox__ad-eyebrow">{adEyebrow}</p>
               <div className="photo-lightbox__ad-slot">
-                <GoogleAdSlot key={adSlotKey} adClient={adSense.adClient} adSlot={adSense.adSlot} />
+                <PublicAdSlot key={adSlotKey} placement={adPlacement} />
               </div>
               <p className="photo-lightbox__ad-hint">{labels.adContinueHint}</p>
             </div>

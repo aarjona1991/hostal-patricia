@@ -1681,6 +1681,13 @@ a:hover {
   max-width: 100%;
 }
 
+.photo-lightbox__ad-slot .adsterra-slot {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
 .photo-lightbox__ad-hint {
   margin: 0.85rem 0 0;
   font-size: 0.8125rem;
@@ -2536,6 +2543,13 @@ a:hover {
 .section-ads-slot .adsbygoogle {
   width: 100% !important;
   max-width: 100%;
+}
+
+.section-ads-slot .adsterra-slot {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 /* Footer */

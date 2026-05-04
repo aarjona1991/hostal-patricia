@@ -475,12 +475,17 @@ export const DEFAULT_SECTIONS = {
     imgUrl: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=900&q=80",
     alt: "Personas disfrutando la playa al atardecer"
   },
-  /** Bloque AdSense entre contacto y pie; desactivado hasta configurar IDs reales. */
+  /** Bloque de anuncios entre contacto y pie (AdSense o AdsTerra); desactivado hasta configurar. */
   ads: {
     enabled: false,
     label: "Publicidad",
+    adProvider: "adsense",
     adClient: "",
-    adSlot: ""
+    adSlot: "",
+    adsterraKey: "",
+    adsterraInvokeUrl: "",
+    adsterraWidth: 300,
+    adsterraHeight: 250
   },
   site: {
     brandName: "Casa Trinidad Viva",

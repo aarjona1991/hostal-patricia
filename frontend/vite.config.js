@@ -33,7 +33,9 @@ function resolveBase(mode) {
 }
 
 export default defineConfig(({ mode }) => ({
-  base: resolveBase(mode),
+  // En `vite` (modo development), forzar `/` aunque `.env` tenga `VITE_BASE` de deploy con subruta;
+  // si no, `import.meta.env.BASE_URL` rompe rutas en http://localhost:5173/
+  base: mode === "development" ? "/" : resolveBase(mode),
   plugins: [react()],
   server: {
     port: 5173,
